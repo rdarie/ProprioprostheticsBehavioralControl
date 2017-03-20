@@ -1,0 +1,125 @@
+begin
+  remote = *
+  button = KEY_POWER
+  prog = pylirc
+  config = quit
+end
+
+begin
+  remote = *
+  button = KEY_A
+  prog = pylirc
+  config = testtest
+end
+
+begin
+  remote = *
+  button = KEY_B
+  prog = pylirc
+  config = double
+  config = up
+end
+
+begin
+  remote = *
+  button = KEY_C
+  prog = pylirc
+  config = bla
+end
+
+begin
+  remote = *
+  button = KEY_ENTER
+  prog = pylirc
+  config = blocking
+end
+
+begin
+  remote = *
+  button = 5
+  prog = pylirc
+  config = nonblocking
+end
+
+begin
+  remote = *
+  button = 1
+  prog = pytwo
+  config = one
+end
+
+begin
+  remote = *
+  button = 2
+  prog = pytwo
+  config = two
+end
+
+begin
+  remote = *
+  button = 3
+  prog = pytwo
+  config = quit
+end
+begin
+  remote = *
+  button = KEY_POWER
+  prog = training
+  config = quit
+end
+
+begin
+  remote = *
+  button = KEY_A
+  prog = training
+  config = a
+end
+
+begin
+  remote = *
+  button = KEY_B
+  prog = training
+  config = b
+end
+
+begin
+  remote = *
+  button = KEY_C
+  prog = training
+  config = c
+end
+
+begin
+  remote = *
+  button = KEY_ENTER
+  prog = training
+  config = enter
+end
+
+begin
+  remote = *
+  button = KEY_UP
+  prog = training
+  config = up
+end
+
+begin
+  remote = *
+  button = KEY_DOWN
+  prog = training
+  config = down
+end
+
+begin
+  remote = *
+  button = KEY_LEFT
+  prog = training
+  config = left
+end
+
+begin
+  remote = *
+  button = KEY_RIGHT
+  prog = training
+  config = right
+end

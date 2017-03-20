@@ -1,0 +1,16 @@
+{
+  "uploadOnSave": true,
+  "useAtomicWrites": false,
+  "deleteLocal": false,
+  "hostname": "10.38.34.76",
+  "port": "22",
+  "target": "/home/pi/research/servomotor_control/",
+  "ignore": [
+    ".remote-sync.json",
+    ".git/**"
+  ],
+  "username": "pi",
+  "password": "raspberry",
+  "watch": [],
+  "transport": "scp"
+}
