@@ -8,12 +8,8 @@ class raspPiInterface(object):
         self.step_size = 10000
         self.serial = serial
 
-<<<<<<< HEAD:sparkfunRemote.py
-        self.goWaveObj = sa.WaveObject.from_wave_file(goWavePath)
-=======
         self.goWave = sa.WaveObject.from_wave_file(goWavePath)
         self.goodWave = sa.WaveObject.from_wave_file(goodWavePath)
->>>>>>> origin/master:raspPiInterface.py
 
         self.debugging = debugging
 
@@ -60,18 +56,11 @@ class raspPiInterface(object):
         if self.debugging:
             print("Lengthened step size to: %d steps" % self.step_size)
 
-<<<<<<< HEAD:sparkfunRemote.py
-    def play_go(self):
-
-         playObj = self.goWaveObj.play()
-         #playObj.wait_done()
-=======
     # TODO: consolidate these into one play_tone function
     def play_good(self):
 
          play_obj = self.goodWave.play()
          play_obj.wait_done()
->>>>>>> origin/master:raspPiInterface.py
 
          if self.debugging:
              print("Played the GOOD tone")
