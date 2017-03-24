@@ -2,7 +2,7 @@
 
 import lirc, serial, time, pdb, sys, glob
 from collections import defaultdict
-from sparkfunRemote import sparkfunRemoteInterface as SRI
+from raspPiInterface import raspPiInterface as RPI
 from helperFunctions import serial_ports
 
 availablePorts = serial_ports()
@@ -27,15 +27,16 @@ except:
         timeout=1
         )
 
-ri = SRI(ser,goWavePath = "go_cue.wav", debugging = True)
+ri = RPI(ser, goWavePath = "go_cue.wav",
+    goodWavePath = "good_cue.wav", debugging = True)
 
 interpret_command = {
     "right" : ri.forward,
     "left" : ri.backward,
     "enter" : ri.go_home,
     "a" : ri.set_home,
-    "b" : ri.short,
-    "c" : ri.long,
+    "b" : ri.play_go,
+    "c" : ri.play_good,
     "up" : ri.play_tone,
     "quit" : ri.stop_all
 }

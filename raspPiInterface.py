@@ -1,13 +1,14 @@
 import simpleaudio as sa
 
-class sparkfunRemoteInterface(object):
-    def __init__(self, serial,goWavePath, debugging = False):
+class raspPiInterface(object):
+    def __init__(self, serial, goWavePath, goodWavePath, debugging = False):
         self.current_position = 0
 
         self.step_size = 10000
         self.serial = serial
 
-        self.wave_obj = sa.WaveObject.from_wave_file(goWavePath)
+        self.goWave = sa.WaveObject.from_wave_file(goWavePath)
+        self.goodWave = sa.WaveObject.from_wave_file(goodWavePath)
 
         self.debugging = debugging
 
@@ -54,13 +55,22 @@ class sparkfunRemoteInterface(object):
         if self.debugging:
             print("set step size to long, %d steps" % self.step_size)
 
-    def play_tone(self):
+    # TODO: consolidate these into one play_tone function
+    def play_good(self):
 
-         play_obj = self.wave_obj.play()
+         play_obj = self.goodWave.play()
          play_obj.wait_done()
 
          if self.debugging:
-             print("Played a tone")
+             print("Played the GOOD tone")
+
+     def play_go(self):
+
+          play_obj = self.goWave.play()
+          play_obj.wait_done()
+
+          if self.debugging:
+              print("Played the GO tone")
 
     def default(self):
         print("Default ")
