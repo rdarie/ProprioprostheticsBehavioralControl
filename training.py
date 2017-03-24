@@ -1,12 +1,11 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-import lirc, serial, time, pdb, sys, glob
+import lirc, serial
 from collections import defaultdict
 from sparkfunRemote import sparkfunRemoteInterface as SRI
 from helperFunctions import serial_ports
 
 availablePorts = serial_ports()
-#pdb.set_trace()
 
 try:
     ser = serial.Serial(
@@ -19,7 +18,7 @@ try:
         )
 except:
     ser = serial.Serial(
-        port='/dev/ttyS0',
+        port=availablePorts[-1],
         baudrate = 9600,
         parity=serial.PARITY_NONE,
         stopbits=serial.STOPBITS_ONE,
@@ -27,6 +26,7 @@ except:
         timeout=1
         )
 
+print(ser.port)
 ri = SRI(ser,goWavePath = "go_cue.wav", debugging = True)
 
 interpret_command = {
@@ -34,9 +34,9 @@ interpret_command = {
     "left" : ri.backward,
     "enter" : ri.go_home,
     "a" : ri.set_home,
-    "b" : ri.short,
-    "c" : ri.long,
-    "up" : ri.play_tone,
+    "b" : ri.play_go,
+    "up" : ri.shorten,
+    "down" : ri.lengthen,
     "quit" : ri.stop_all
 }
 

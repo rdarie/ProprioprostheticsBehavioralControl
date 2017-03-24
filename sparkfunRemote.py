@@ -1,4 +1,5 @@
 import simpleaudio as sa
+import pdb
 
 class sparkfunRemoteInterface(object):
     def __init__(self, serial,goWavePath, debugging = False):
@@ -7,7 +8,7 @@ class sparkfunRemoteInterface(object):
         self.step_size = 10000
         self.serial = serial
 
-        self.wave_obj = sa.WaveObject.from_wave_file(goWavePath)
+        self.goWaveObj = sa.WaveObject.from_wave_file(goWavePath)
 
         self.debugging = debugging
 
@@ -20,10 +21,10 @@ class sparkfunRemoteInterface(object):
         if self.debugging:
             print("going clockwise")
 
-        serial_message = "DI"+str(self.step_size)
+        serial_message = "DI"+str(self.step_size)+"\r"
 
-        self.serial.write(serial_message+"\r")
-        self.serial.write("FL\r")
+        self.serial.write(serial_message.encode())
+        self.serial.write("FL\r".encode())
 
         self.current_position += self.step_size
 
@@ -34,30 +35,30 @@ class sparkfunRemoteInterface(object):
         if self.debugging:
             print("going counter-clockwise")
 
-        serial_message = "DI"+str(-self.step_size)
+        serial_message = "DI"+str(-self.step_size)+"\r"
 
-        self.serial.write(serial_message+"\r")
-        self.serial.write("FL\r")
+        self.serial.write(serial_message.encode())
+        self.serial.write("FL\r".encode())
 
         self.current_position -= self.step_size
 
         if self.debugging:
             print("Currently at %d steps" % self.current_position)
 
-    def short(self):
-        self.step_size = 1000
+    def shorten(self):
+        self.step_size -= 100
         if self.debugging:
-            print("set step size to short, %d steps" % self.step_size)
+            print("Shortened step size to: %d steps" % self.step_size)
 
-    def long(self):
-        self.step_size = 3000
+    def lengthen(self):
+        self.step_size += 100
         if self.debugging:
-            print("set step size to long, %d steps" % self.step_size)
+            print("Lengthened step size to: %d steps" % self.step_size)
 
-    def play_tone(self):
+    def play_go(self):
 
-         play_obj = self.wave_obj.play()
-         play_obj.wait_done()
+         playObj = self.goWaveObj.play()
+         #playObj.wait_done()
 
          if self.debugging:
              print("Played a tone")
@@ -70,6 +71,9 @@ class sparkfunRemoteInterface(object):
             hold_step_size = self.step_size
             self.step_size = abs(self.current_position)
 
+            if self.debugging:
+                print("Going home! ")
+
             if self.current_position > 0:
                 self.backward()
             else:
@@ -79,9 +83,8 @@ class sparkfunRemoteInterface(object):
 
     def stop_all(self):
         serial_message = "SK\r"
-        self.serial.write(serial_message)
+        self.serial.write(serial_message.encode())
         if self.debugging:
-            print("wrote %s to the driver" % serial_message)
             print("Stopped all and exiting!")
 
 # Configure the serial port connection the the Si3540 motor driver
