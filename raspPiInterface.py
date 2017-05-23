@@ -58,11 +58,12 @@ class raspPiInterface(object):
 
     # TODO: consolidate these into one play_tone function
     def play_good(self):
-        play_obj = self.goodWave.play()
-        play_obj.wait_done()
 
-        if self.debugging:
-            print("Played the GOOD tone")
+         play_obj = self.goodWave.play()
+         play_obj.wait_done()
+
+         if self.debugging:
+             print("Played the GOOD tone")
 
     def play_go(self):
 
