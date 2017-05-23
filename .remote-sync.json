@@ -2,9 +2,9 @@
   "uploadOnSave": true,
   "useAtomicWrites": false,
   "deleteLocal": false,
-  "hostname": "10.38.34.76",
+  "hostname": "raduberrypi",
   "port": "22",
-  "target": "/home/pi/research/servomotor_control/",
+  "target": "/home/pi/research/gpio/",
   "ignore": [
     ".remote-sync.json",
     ".git/**"
