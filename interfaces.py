@@ -47,9 +47,11 @@ class sparkfunRemoteInterface(object):
                 # Loop as long as there are more on the queue
                 while(ir_message):
                     # Run through commands
-                    for (code) in ir_message:
+                    for code in ir_message:
+                        #pdb.set_trace()
                         #run the function returned by interpret_command
                         funcToRun = self.mapping.get(code, self.default)
+                        ir_message.remove(code)
                         funcToRun()
                         if code == "quit":
                             break
