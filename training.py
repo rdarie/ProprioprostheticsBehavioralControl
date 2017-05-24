@@ -53,10 +53,8 @@ if(lirc.init("training", "conf", blocking = blocking)):
     while(code != "quit"):
         # Read next code
         ir_message = lirc.nextcode()
-        #print("We've got mail!")
 
         # Loop as long as there are more on the queue
-        # (dont want to wait a second if the user pressed many buttons...)
         while(ir_message):
             # Run through commands
             for (code) in ir_message:
