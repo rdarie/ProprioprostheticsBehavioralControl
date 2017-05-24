@@ -26,31 +26,31 @@ except:
         timeout=1
         )
 
-ri = RPI(ser, goWavePath = "go_cue.wav",
-    goodWavePath = "good_cue.wav", debugging = True)
+ri = RPI(ser, goWavePath = "go_tone.wav",
+    goodWavePath = "good_tone.wav",
+    badWavePath = 'bad_tone.wav', debugging = True)
 
 interpret_command = {
     "right" : ri.forward,
     "left" : ri.backward,
     "enter" : ri.go_home,
-    "a" : ri.set_home,
-    "b" : ri.play_go,
-    "c" : ri.play_good,
-    "up" : ri.play_tone,
+    "a" : ri.play_go,
+    "b" : ri.play_good,
+    "c" : ri.play_bad,
+    "up" : ri.set_home,
     "quit" : ri.stop_all
 }
 
 interpret_command = defaultdict(lambda: ri.default, interpret_command)
 
 #configure and initialize IR remote communication
-blocking = 1
+blocking = False
 
 code = "start"
 
-if(lirc.init("training", "./conf", blocking)):
+if(lirc.init("training", "conf", blocking = blocking)):
 
     while(code != "quit"):
-        #pdb.set_trace()
         # Read next code
         ir_message = lirc.nextcode()
         #print("We've got mail!")

@@ -2,7 +2,7 @@ import simpleaudio as sa
 import pdb
 
 class raspPiInterface(object):
-    def __init__(self, serial, goWavePath, goodWavePath, debugging = False):
+    def __init__(self, serial, goWavePath, goodWavePath, badWavePath, debugging = False):
         self.current_position = 0
 
         self.step_size = 10000
@@ -10,6 +10,7 @@ class raspPiInterface(object):
 
         self.goWave = sa.WaveObject.from_wave_file(goWavePath)
         self.goodWave = sa.WaveObject.from_wave_file(goodWavePath)
+        self.badWave = sa.WaveObject.from_wave_file(badWavePath)
 
         self.debugging = debugging
 
@@ -73,6 +74,14 @@ class raspPiInterface(object):
         if self.debugging:
             print("Played the GO tone")
 
+    def play_bad(self):
+
+        play_obj = self.badWave.play()
+        play_obj.wait_done()
+
+        if self.debugging:
+            print("Played the BAD tone")
+
     def default(self):
         print("Default ")
 
@@ -82,7 +91,7 @@ class raspPiInterface(object):
             self.step_size = abs(self.current_position)
 
             if self.debugging:
-                print("Going home! ")
+                print("Going home!")
 
             if self.current_position > 0:
                 self.backward()

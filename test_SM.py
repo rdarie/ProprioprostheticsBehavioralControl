@@ -13,15 +13,17 @@ import pdb
 import random
 
 # Setup IO Pins
-butPin = GPIO_Input(pins = [22, 17], labels = ['red', 'blue'],
-                    triggers = [GPIO.FALLING, GPIO.FALLING], levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
+butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
+                    triggers = [GPIO.FALLING, GPIO.FALLING],
+                    levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
 
+"""
 juicePin = GPIO_Output(pins=[27], labels=['Reward'],
                         instructions=[('pulse', 0.5)])
 
 ledPin = GPIO_Output(pins=[23, 24], labels=['red', 'blue'],
                         instructions=[('pulse', 1)])
-
+"""
 # Build an arbiter and a state machine
 arbiter = Arbiter()
 SM = State_Machine()
@@ -39,8 +41,8 @@ SM.postRewardTime = []
 SM.add_mode('sink', (['main_thread'], SM.inbox))
 SM.add_mode('source', (['distributor'], True))
 
-# SM.request_next_touch = arbiter.connect([(butPin, 'read_next', True), SM],['polled'])
-# arbiter.connect([(SM, 'source', True), juicePin])
+SM.request_next_touch = arbiter.connect([(butPin, 'read_next', True), SM],['polled'])
+#arbiter.connect([(SM, 'source', True), juicePin])
 
 def setup(self, cargo=None):
     print('Setting up now')
@@ -83,7 +85,7 @@ SM.set_init('setup')
 
 arbiter.run(SM)
 
-if __name__ == __main__:
+if __name__ == '__main__':
     try:
         while True:
             pass

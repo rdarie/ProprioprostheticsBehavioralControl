@@ -61,6 +61,7 @@ begin
   prog = pytwo
   config = quit
 end
+
 begin
   remote = *
   button = KEY_POWER
