@@ -1,107 +1,205 @@
 import sys, random, time, pdb
+from helperFunctions import overRideAdder
 
-def fixation_constructor(nextState = ['set_correct',  'fixation']):
-    def fixation(self):
+enableLog = True
+firstVisit = True
+
+class gameState(object):
+    def __init__(self, nextState, parent, stateName, logFile = None):
+        self.nextState = nextState
+        self.logFile = logFile
+        self.parent = parent
+        self.__name__ = stateName
+
+    def operation(self, parent):
+        pass
+
+    def __call__(self, *args):
+        global enableLog
+        if self.logFile:
+            if enableLog:
+                timeNow = time.time()
+                self.logFile.write("\n%s\t%4.4f" % ( self.__name__, timeNow))
+
+        if self.parent.remoteOverride is None:
+            #print("in Python: Override is none! I am %s" % self.__name__)
+            ret = self.operation(self.parent)
+        else:
+            #print("in Python: Override is NOT none! I am %s" % self.__name__)
+            ret = self.parent.remoteOverride
+            enableLog = True
+            self.parent.remoteOverride = None
+        #print("returning %s" % ret)
+        return ret
+
+class fixation(gameState):
+
+    def operation(self, parent):
+        global enableLog, firstVisit
+        enableLog = False
+
         timeNow = time.time()
+
+
         sys.stdout.write("At fixation. Time left: %4.4f \r"
-         % (self.nextEnableTime - timeNow))
+         % (parent.nextEnableTime - timeNow))
         sys.stdout.flush()
+
         time.sleep(0.5)
 
-        if self.nextEnableTime < timeNow:
-            self.startEnable = True
+        if parent.nextEnableTime < timeNow:
+            parent.startEnable = True
 
-        if self.startEnable:
-            return nextState[0]
+        if parent.startEnable:
+            enableLog = True
+            firstVisit = True
+            return self.nextState[0]
         else:
-            return nextState[1]
-    return fixation
+            return self.nextState[1]
 
-def turnPedal_constructor(nextState = ['set_correct']):
-    def turnPedal(self):
-        return nextState[0]
-    return turnPedal
+class turnPedal(gameState):
 
-def clear_input_queue_constructor(nextState = ['wait_for_any_button']):
-    def clear_input_queue(self):
+    def operation(self, parent):
+        return self.nextState[0]
+
+class clear_input_queue(gameState):
+
+    def operation(self, parent):
         # clear the button inputs queue
         # TODO: Make this thread safe
-        if self.inputPin.last_data is not None:
-            self.inputPin.last_data = None
-        return nextState[0]
-    return clear_input_queue
+        if parent.inputPin.last_data is not None:
+            parent.inputPin.last_data = None
+        return self.nextState[0]
 
-def trial_start_constructor(nextState = ['clear_input_queue']):
-    def trial_start(self):
-        self.speaker.play_tone('Go')
+class trial_start(gameState):
+
+    def operation(self, parent):
+        parent.speaker.play_tone('Go')
         print('Trial Started!')
-        return nextState[0]
-    return trial_start
+        return self.nextState[0]
 
-def set_correct_constructor(nextState = ['trial_start']):
-    def set_correct(self):
-        self.correctButton = 'red' if random.randint(0,1) == 0 else 'blue'
+class set_correct(gameState):
+
+    def operation(self, parent):
+        parent.correctButton = 'red' if random.randint(0,1) == 0 else 'blue'
         print('  ')
-        print('Correct button set to: %s' % self.correctButton)
+        print('Correct button set to: %s' % parent.correctButton)
 
-        return nextState[0]
-    return set_correct
+        return self.nextState[0]
 
-def wait_for_any_button_constructor(nextState = ['good']):
-    def wait_for_any_button(self):
+class wait_for_any_button(gameState):
+
+    def operation(self, parent):
+        global enableLog
+        enableLog = False
         # Read from inbox
-        event_label = self.request_last_touch()
-        self.startEnable = False
+        event_label = parent.request_last_touch()
+        parent.startEnable = False
 
         if event_label:
+            if self.logFile:
+                self.logFile.write("\ncorrect_button\t%s\t" % event_label)
             print("\n%s button pressed!" % event_label)
-            return nextState[0]
+            enableLog = True
+            return self.nextState[0]
         else:
             time.sleep(0.1)
+
             sys.stdout.write("Waiting for button...\r")
             sys.stdout.flush()
-            return 'wait_for_any_button'
-    return wait_for_any_button
 
-def wait_for_correct_button_constructor(nextState = ['good', 'bad']):
-    def wait_for_correct_button(self):
+            return 'wait_for_any_button'
+
+class wait_for_any_button_timed(gameState):
+
+    def operation(self, parent):
+        global enableLog, firstVisit
+        enableLog = False
+        #disable logging for subsequent visits to this state, until we leave it
+
         # Read from inbox
-        event_label = self.request_last_touch()
-        self.startEnable = False
+        event_label = parent.request_last_touch()
+        parent.startEnable = False
+
+        timeNow = time.time()
+        if not firstVisit:
+            if parent.nextButtonTimeout < timeNow:
+                parent.buttonTimedOut = True
 
         if event_label:
+            if self.logFile:
+                self.logFile.write("\ncorrect_button\t%4.4f\t%s" % (timeNow, event_label))
             print("\n%s button pressed!" % event_label)
-            nextFun = nextState[0] if self.correctButton == event_label else nextState[1]
+
+            enableLog = True
+            parent.buttonTimedOut = False
+            # re enable logging for future visits
+
+            return self.nextState[0]
+        if parent.buttonTimedOut:
+            if self.logFile:
+                self.logFile.write("\nbutton timed out!\t %4.4f\t" % timeNow)
+
+            enableLog = True
+            parent.buttonTimedOut = False
+            # re enable logging for future visits
+            return self.nextState[1]
+        else:
+
+            time.sleep(0.1)
+
+            if firstVisit:
+                firstVisit = False
+                parent.nextButtonTimeout = timeNow + parent.trialLimit
+
+            sys.stdout.write("Waiting for button... Time left: %4.4f \r" %
+                (parent.nextButtonTimeout - timeNow))
+            sys.stdout.flush()
+
+            return 'wait_for_any_button_timed'
+
+
+class wait_for_correct_button(gameState):
+
+    def operation(self, parent):
+        # Read from inbox
+        event_label = parent.request_last_touch()
+        parent.startEnable = False
+
+        if event_label:
+            if self.logFile:
+                self.logFile.write("\nbutton_pressed\t%s\t" % event_label)
+            print("\n%s button pressed!" % event_label)
+            nextFun = self.nextState[0] if parent.correctButton == event_label else self.nextState[1]
             return nextFun
         else:
             time.sleep(0.01)
             sys.stdout.write("Waiting for button...\r")
             sys.stdout.flush()
             return 'wait_for_correct_button'
-    return wait_for_correct_button
 
-def good_constructor(nextState = ['post_trial']):
-    def good(self):
+class good(gameState):
+
+    def operation(self, parent):
         print('Good job!')
-        self.speaker.play_tone('Good')
-        return nextState[0]
-    return good
+        parent.speaker.play_tone('Good')
+        return self.nextState[0]
 
-def bad_constructor(nextState = ['post_trial']):
-    def bad(self):
+class bad(gameState):
+
+    def operation(self, parent):
         print('Wrong! Try again!')
-        self.speaker.play_tone('Bad')
-        return nextState[0]
-    return bad
+        parent.speaker.play_tone('Bad')
+        return self.nextState[0]
 
-def post_trial_constructor(nextState = ['fixation']):
-    def post_trial(self):
-        self.nextEnableTime = time.time() + self.trialLength
-        return nextState[0]
-    return post_trial
+class post_trial(gameState):
 
-def end_constructor(nextState = [False]):
-    def end(self):
+    def operation(self, parent):
+        parent.nextEnableTime = time.time() + parent.trialLength
+        return self.nextState[0]
+
+class end(gameState):
+
+    def operation(self, parent):
         print('Ending now')
-        return nextState[0]
-    return end
+        return self.nextState[0]

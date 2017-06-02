@@ -1,5 +1,10 @@
-import pygame, pdb, lirc, serial
+import pygame, pdb, lirc, serial, os
 from helperFunctions import serial_ports
+
+global wavePath
+gitPath = os.path.dirname(os.path.realpath(__file__))
+with open(gitPath + '/' + '.waveLocation', 'r') as wf:
+    wavePath = wf.read().replace('\n', '')
 
 class speakerInterface(object):
     def __init__(self, soundPaths, volume = 1,
@@ -13,6 +18,9 @@ class speakerInterface(object):
         self.sounds = {key : pygame.mixer.Sound(value)
             for key, value in soundPaths.items()}
 
+        for key, value in self.sounds.items():
+            value.set_volume(volume)
+
         self.debugging = debugging
 
     def play_tone(self, key):
@@ -24,9 +32,9 @@ class speakerInterface(object):
 
     def tone_player(self, key):
     #returns a function that takes no arguments and plays the tone specified by key
-        def dummyMethod():
+        def tone_playerDummyMethod():
             self.play_tone(key)
-        return dummyMethod
+        return tone_playerDummyMethod
 
 class sparkfunRemoteInterface(object):
     def __init__(self, mapping, default):
@@ -38,7 +46,7 @@ class sparkfunRemoteInterface(object):
         blocking = False
         code = "start"
 
-        if(lirc.init("training", "conf", blocking = blocking)):
+        if(lirc.init("training", wavePath + "conf", blocking = blocking)):
 
             while(code != "quit"):
                 # Read next code
@@ -55,6 +63,7 @@ class sparkfunRemoteInterface(object):
                         funcToRun()
                         if code == "quit":
                             break
+                        #TODO: make this not break the state machine execution
                     ir_message = lirc.nextcode()
 
 class motorInterface(object):

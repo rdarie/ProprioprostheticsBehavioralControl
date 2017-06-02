@@ -28,3 +28,9 @@ def serial_ports():
         except (OSError, serial.SerialException):
             pass
     return result
+
+def overRideAdder(SM, override):
+    def addOverRide():
+        SM.remoteOverride = override
+        print("Adding Override: %s" % SM.remoteOverride)
+    return addOverRide

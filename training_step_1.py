@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 '''
 Training Step 1
 ========
@@ -11,40 +12,64 @@ but pressing them doesn't hurt.
 
 Go back to start.
 '''
-
+import sys
+sys.path.append('/home/pi/research/project-thalamus/')
 from MonkeyGames.Effectors.Controllers.state_machine import State_Machine
 from MonkeyGames.arbiter import Arbiter
+from MonkeyGames.Effectors.Processors.event_timestamper import Event_Timestamper
 from MonkeyGames.Effectors.Endpoints.rpi_gpio import GPIO_Input, GPIO_Output
+from MonkeyGames.Effectors.Endpoints.file_printer import File_Printer
 
 import RPi.GPIO as GPIO
-import pdb
+import pdb, time, pygame
 
 from game_states import *
 import interfaces as ifaces
-from helperFunctions import serial_ports
+from helperFunctions import serial_ports, overRideAdder
 
-import argparse
+import argparse, os
+
+# Power indicator
+GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
+GPIO.output(5,True) ## Turn on GPIO pin 24
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--trialLength', default = '10')
+parser.add_argument('--trialLength', default = '7')
+parser.add_argument('--trialLimit', default = '3')
 args = parser.parse_args()
 argTrialLength = args.trialLength
+argTrialLimit = args.trialLimit
+
+global wavePath
+gitPath = os.path.dirname(os.path.realpath(__file__))
+with open(gitPath + '/' + '.waveLocation', 'r') as wf:
+    wavePath = wf.read().replace('\n', '')
 
 soundPaths = {
-'Go' : "go_tone.wav",
-'Good' : "good_tone.wav"
+'Go' : wavePath + "/go_tone.wav",
+'Good' : wavePath + "/good_tone.wav",
+'Bad' : wavePath + "/bad_tone.wav"
 }
 
+playWelcomeTone = True
+if playWelcomeTone:
+    pygame.mixer.init()
+    welcomeChime = pygame.mixer.Sound(wavePath + "/violin_C5.wav")
+    welcomeChime.set_volume(0.1)
+    welcomeChime.play()
+
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
-    volume = 0.001, debugging = True, enableSound = False)
+    volume = 1, debugging = True, enableSound = True)
 
 """
 State Machine
 """
 # Setup IO Pins
 butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
-                    triggers = [GPIO.FALLING, GPIO.FALLING], levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
+    triggers = [GPIO.FALLING, GPIO.FALLING],
+    levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
 
+timestamper = Event_Timestamper()
 #juicePin = GPIO_Output(pins=[27], labels=['Reward'],
 #                        instructions=[('pulse', 0.5)])
 
@@ -56,6 +81,13 @@ SM = State_Machine()
 SM.startEnable = False
 SM.trialLength = float(argTrialLength)
 SM.nextEnableTime = 0
+
+SM.remoteOverride = None
+
+SM.buttonTimedOut = False
+SM.trialLimit = float(argTrialLimit)
+SM.nextButtonTimeout = 0
+
 SM.speaker = speaker
 SM.inputPin = butPin
 
@@ -66,17 +98,21 @@ SM.add_mode('source', (['distributor'], True))
 SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
     ['polled'])
 
-SM.add_state(fixation_constructor(nextState = ['trial_start',  'fixation']))
-SM.add_state(trial_start_constructor(nextState = ['clear_input_queue']))
-SM.add_state(clear_input_queue_constructor(nextState = ['wait_for_any_button']))
-SM.add_state(wait_for_any_button_constructor(nextState = ['good']))
-SM.add_state(good_constructor(nextState = ['post_trial']))
-SM.add_state(post_trial_constructor(nextState = ['fixation']))
-SM.add_state(end_constructor())
+logFileName = wavePath + '/logs/Log_Murdoc_' + time.strftime("%d_%m_%Y_%H_%M_%S") + '.txt'
+thisLog = File_Printer(filePath = logFileName, append = True)
+
+SM.add_state(fixation(['trial_start',  'fixation'], SM, 'fixation', thisLog))
+SM.add_state(trial_start(['clear_input_queue'], SM, 'trial_start', logFile = thisLog))
+SM.add_state(clear_input_queue(['wait_for_any_button_timed'], SM, 'clear_input_queue', logFile = thisLog))
+SM.add_state(wait_for_any_button_timed(['good', 'post_trial'], SM, 'wait_for_any_button_timed', logFile = thisLog))
+SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog))
+SM.add_state(post_trial(['fixation'], SM, 'post_trial', logFile = thisLog))
+SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
 SM.set_init('fixation')
 
 try:
+    arbiter.connect([butPin, timestamper, thisLog])
     arbiter.run(SM)
     remoteControlMap = {
         "right" : lambda: None,
@@ -86,11 +122,18 @@ try:
         "b" : speaker.tone_player('Good'),
         "c" : speaker.tone_player('Bad'),
         "up" : lambda: None,
-        "quit" : lambda: None
+        "quit" : overRideAdder(SM, 'end')
     }
 
-    remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap, default = lambda: None)
+    remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
+        default = lambda: None)
     remoteListener.run()
+    print('Ending Execution of Training_step_1.py')
+    GPIO.output(5,False) ## Turn off GPIO pin 5
+    GPIO.cleanup() # cleanup all GPIO
+    #while True:
+    #    sleep(1)
 
 except KeyboardInterrupt: # If CTRL+C is pressed, exit cleanly:
+    GPIO.output(5,False) ## Turn off GPIO pin 24
     GPIO.cleanup() # cleanup all GPIO

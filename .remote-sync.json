@@ -2,7 +2,7 @@
   "uploadOnSave": true,
   "useAtomicWrites": false,
   "deleteLocal": false,
-  "hostname": "raduberrypi",
+  "hostname": "10.38.12.157",
   "port": "22",
   "target": "/home/pi/research/gpio/",
   "ignore": [
