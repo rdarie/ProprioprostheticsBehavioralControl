@@ -36,9 +36,17 @@ GPIO.output(5,True) ## Turn on GPIO pin 24
 parser = argparse.ArgumentParser()
 parser.add_argument('--trialLength', default = '7')
 parser.add_argument('--trialLimit', default = '3')
+parser.add_argument('--enableSound', default = 'True')
+parser.add_argument('--playWelcomeTone', default = 'True')
+parser.add_argument('--volume', default = '0.01')
+
 args = parser.parse_args()
+
 argTrialLength = args.trialLength
 argTrialLimit = args.trialLimit
+argEnableSound = True if args.enableSound == 'True' else False
+argPlayWelcomeTone = args.playWelcomeTone
+argVolume = float(args.volume)
 
 global wavePath
 gitPath = os.path.dirname(os.path.realpath(__file__))
@@ -51,15 +59,15 @@ soundPaths = {
 'Bad' : wavePath + "/bad_tone.wav"
 }
 
-playWelcomeTone = True
+playWelcomeTone = True if args.playWelcomeTone == 'True' else False
 if playWelcomeTone:
     pygame.mixer.init()
     welcomeChime = pygame.mixer.Sound(wavePath + "/violin_C5.wav")
-    welcomeChime.set_volume(0.1)
+    welcomeChime.set_volume(argVolume)
     welcomeChime.play()
 
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
-    volume = 1, debugging = True, enableSound = True)
+    volume = argVolume, debugging = True, enableSound = argEnableSound)
 
 """
 State Machine
