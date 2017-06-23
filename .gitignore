@@ -51,3 +51,7 @@ Temporary Items
 
 # Repo specific files
 .waveLocation
+go_tone.wav
+good_tone.wav
+bad_tone.wav
+logs/
