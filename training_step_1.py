@@ -143,5 +143,5 @@ try:
     #    sleep(1)
 
 except KeyboardInterrupt: # If CTRL+C is pressed, exit cleanly:
-    GPIO.output(5,False) ## Turn off GPIO pin 24
+    GPIO.output(5,False) ## Turn off GPIO pin for LED
     GPIO.cleanup() # cleanup all GPIO

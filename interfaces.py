@@ -46,7 +46,7 @@ class sparkfunRemoteInterface(object):
         blocking = False
         code = "start"
 
-        if(lirc.init("training", wavePath + "conf", blocking = blocking)):
+        if(lirc.init("training", wavePath + "/conf", blocking = blocking)):
 
             while(code != "quit"):
                 # Read next code
