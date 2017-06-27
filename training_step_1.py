@@ -120,6 +120,7 @@ SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
 SM.set_init('fixation')
 arbiter.connect([(SM, 'source', True), juicePin])
+arbiter.connect([juicePin, timestamper, thisLog])
 
 def triggerJuice():
     SM.outbox.put('Reward')
