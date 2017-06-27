@@ -30,8 +30,8 @@ from helperFunctions import serial_ports, overRideAdder
 import argparse, os
 
 # Power indicator
-GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
-GPIO.output(5,True) ## Turn on GPIO pin 24
+#GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
+#GPIO.output(5,True) ## Turn on GPIO pin 24
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trialLength', default = '7')
@@ -78,8 +78,8 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
     levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
 
 timestamper = Event_Timestamper()
-#juicePin = GPIO_Output(pins=[27], labels=['Reward'],
-#                        instructions=[('pulse', 0.5)])
+juicePin = GPIO_Output(pins=[5], labels=['Reward'],
+                        instructions=[('pulse', 0.5)])
 
 # Build an arbiter and a state machine
 arbiter = Arbiter()
@@ -119,6 +119,9 @@ SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
 SM.set_init('fixation')
 
+def triggerJuice():
+    juicePin.inbox.put('Reward')
+
 try:
     arbiter.connect([butPin, timestamper, thisLog])
     arbiter.run(SM)
@@ -129,7 +132,7 @@ try:
         "a" : speaker.tone_player('Go'),
         "b" : speaker.tone_player('Good'),
         "c" : speaker.tone_player('Bad'),
-        "up" : lambda: None,
+        "up" : triggerJuice,
         "quit" : overRideAdder(SM, 'end')
     }
 
