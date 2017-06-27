@@ -126,7 +126,7 @@ def triggerJuice():
 
 try:
     arbiter.connect([butPin, timestamper, thisLog])
-    arbiter.connect([juicePin, timestamper, thisLog])
+    arbiter.connect([(SM, 'source', True), timestamper, thisLog])
     arbiter.run(SM)
     remoteControlMap = {
         "right" : lambda: None,
