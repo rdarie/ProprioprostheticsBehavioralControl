@@ -78,8 +78,9 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
     levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
 
 timestamper = Event_Timestamper()
+
 juicePin = GPIO_Output(pins=[5], labels=['Reward'],
-                        instructions=[('pulse', 0.5)])
+                        instructions=[('pulse', 1)])
 
 # Build an arbiter and a state machine
 arbiter = Arbiter()
@@ -118,9 +119,10 @@ SM.add_state(post_trial(['fixation'], SM, 'post_trial', logFile = thisLog))
 SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
 SM.set_init('fixation')
+arbiter.connect([(SM, 'source', True), juicePin])
 
 def triggerJuice():
-    juicePin.inbox.put('Reward')
+    SM.outbox.put('Reward')
 
 try:
     arbiter.connect([butPin, timestamper, thisLog])
