@@ -119,14 +119,14 @@ SM.add_state(post_trial(['fixation'], SM, 'post_trial', logFile = thisLog))
 SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
 SM.set_init('fixation')
-arbiter.connect([(SM, 'source', True), juicePin])
-arbiter.connect([juicePin, timestamper, thisLog])
 
+arbiter.connect([(SM, 'source', True), juicePin])
 def triggerJuice():
     SM.outbox.put('Reward')
 
 try:
     arbiter.connect([butPin, timestamper, thisLog])
+    #arbiter.connect([juicePin, timestamper, thisLog])
     arbiter.run(SM)
     remoteControlMap = {
         "right" : lambda: None,
