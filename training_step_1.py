@@ -110,7 +110,8 @@ SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
 sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
 logFileName = wavePath + '/logs/Log_Murdoc_' + sessionTime + '.txt'
 values = [
-    [time.strftime("%m/%d/%Y"), 'Button Pressing', '', '', '']
+    [time.strftime("%m/%d/%Y"), 'Button Pressing Step 1', '', '',
+        'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime]
     ]
 
 spreadsheetID = '1BWjBqbtoVr9j6dU_7eHp-bQMJApNn8Wkl_N1jv20faE'
