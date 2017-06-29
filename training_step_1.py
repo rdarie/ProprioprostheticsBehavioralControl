@@ -107,7 +107,14 @@ SM.add_mode('source', (['distributor'], True))
 SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
     ['polled'])
 
-logFileName = wavePath + '/logs/Log_Murdoc_' + time.strftime("%d_%m_%Y_%H_%M_%S") + '.txt'
+sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
+logFileName = wavePath + '/logs/Log_Murdoc_' + sessionTime + '.txt'
+values = [
+    [time.strftime("%m/%d/%Y"), 'Button Pressing', '', '', '']
+    ]
+
+spreadsheetId = '1BWjBqbtoVr9j6dU_7eHp-bQMJApNn8Wkl_N1jv20faE'
+update_training_log(spreadsheetID, values)
 thisLog = File_Printer(filePath = logFileName, append = True)
 
 SM.add_state(fixation(['trial_start',  'fixation'], SM, 'fixation', thisLog))
