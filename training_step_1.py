@@ -30,15 +30,15 @@ from helperFunctions import serial_ports, overRideAdder
 import argparse, os
 
 # Power indicator
-#GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
-#GPIO.output(5,True) ## Turn on GPIO pin 24
+GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
+GPIO.output(5,True) ## Turn on GPIO pin 24
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trialLength', default = '7')
 parser.add_argument('--trialLimit', default = '3')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
-parser.add_argument('--volume', default = '0.01')
+parser.add_argument('--volume', default = '1')
 
 args = parser.parse_args()
 
@@ -79,7 +79,7 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
 
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[5], labels=['Reward'],
+juicePin = GPIO_Output(pins=[25], labels=['Reward'], levels = [GPIO.HIGH],
                         instructions=[('pulse', 1)])
 
 # Build an arbiter and a state machine
@@ -122,6 +122,7 @@ SM.set_init('fixation')
 
 arbiter.connect([(SM, 'source', True), juicePin])
 def triggerJuice():
+    speaker.tone_player('Good')()
     SM.outbox.put('Reward')
 
 try:
