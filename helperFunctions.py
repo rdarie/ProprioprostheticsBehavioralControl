@@ -54,7 +54,7 @@ def get_gsheets_credentials():
     #    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
     #except ImportError:
     #    flags = None
-    #flags = None
+    flags = None
     """Gets valid user credentials from storage.
 
     If nothing has been stored, or if the stored credentials are invalid,
