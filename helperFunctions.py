@@ -91,7 +91,7 @@ def get_gsheets_credentials():
     return credentials
 
 
-def update_training_log(spreadsheetID, values):
+def update_training_log(spreadsheetId, values):
     """Shows basic usage of the Sheets API.
 
     Creates a Sheets API service object and prints the names and majors of
