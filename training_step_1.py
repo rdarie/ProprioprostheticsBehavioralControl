@@ -113,7 +113,7 @@ values = [
     [time.strftime("%m/%d/%Y"), 'Button Pressing', '', '', '']
     ]
 
-spreadsheetId = '1BWjBqbtoVr9j6dU_7eHp-bQMJApNn8Wkl_N1jv20faE'
+spreadsheetID = '1BWjBqbtoVr9j6dU_7eHp-bQMJApNn8Wkl_N1jv20faE'
 update_training_log(spreadsheetID, values)
 thisLog = File_Printer(filePath = logFileName, append = True)
 
