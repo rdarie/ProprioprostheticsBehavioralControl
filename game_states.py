@@ -182,6 +182,7 @@ class good(gameState):
 
     def operation(self, parent):
         print('Good job!')
+        parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]
 

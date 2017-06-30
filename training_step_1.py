@@ -99,6 +99,7 @@ SM.nextButtonTimeout = 0
 
 SM.speaker = speaker
 SM.inputPin = butPin
+SM.juicePin = juicePin
 
 # Add a mode to the state machine
 SM.add_mode('sink', (['main_thread'], SM.inbox))
@@ -110,7 +111,7 @@ SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
 sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
 logFileName = wavePath + '/logs/Log_Murdoc_' + sessionTime + '.txt'
 values = [
-    [time.strftime("%m/%d/%Y"), 'Button Pressing Step 1', '', '',
+    [sessionTime, 'Button Pressing Step 1', '', '',
         'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime]
     ]
 
@@ -129,6 +130,7 @@ SM.add_state(end([False], SM, 'end', logFile = thisLog))
 SM.set_init('fixation')
 
 arbiter.connect([(SM, 'source', True), juicePin])
+
 def triggerJuice():
     speaker.tone_player('Good')()
     SM.outbox.put('Reward')
