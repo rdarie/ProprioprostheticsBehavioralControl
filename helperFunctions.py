@@ -113,3 +113,4 @@ def update_training_log(spreadsheetId, values):
     result = service.spreadsheets().values().append(
     spreadsheetId=spreadsheetId, range=range_name,
     valueInputOption=valueInputOption, body=body).execute()
+    return result
