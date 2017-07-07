@@ -1,4 +1,4 @@
-import sys, random, time, pdb
+import sys, random, time, pdb, shutil
 from helperFunctions import overRideAdder
 
 enableLog = True
@@ -88,7 +88,6 @@ class set_correct(gameState):
         return self.nextState[0]
 
 class wait_for_any_button(gameState):
-
     def operation(self, parent):
         global enableLog
         enableLog = False
@@ -111,7 +110,6 @@ class wait_for_any_button(gameState):
             return 'wait_for_any_button'
 
 class wait_for_any_button_timed(gameState):
-
     def operation(self, parent):
         global enableLog, firstVisit
         enableLog = False
@@ -160,7 +158,6 @@ class wait_for_any_button_timed(gameState):
 
 
 class wait_for_correct_button(gameState):
-
     def operation(self, parent):
         # Read from inbox
         event_label = parent.request_last_touch()
@@ -202,5 +199,10 @@ class post_trial(gameState):
 class end(gameState):
 
     def operation(self, parent):
+
+        src = parent.logFileName
+        dst = parent.serverFolder + '/' + parent.logFileName.split('/')[-1]
+        shutil.move(src,dst)
+
         print('Ending now')
         return self.nextState[0]

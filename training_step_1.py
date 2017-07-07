@@ -110,6 +110,10 @@ SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
 
 sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
 logFileName = wavePath + '/logs/Log_Murdoc_' + sessionTime + '.txt'
+
+SM.serverFolder = 
+SM.logFileName = logFileName
+
 values = [
     [sessionTime, 'Button Pressing Step 1', '', '',
         'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime]
