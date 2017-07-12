@@ -120,7 +120,8 @@ values = [
     ]
 
 spreadsheetID = '1BWjBqbtoVr9j6dU_7eHp-bQMJApNn8Wkl_N1jv20faE'
-update_training_log(spreadsheetID, values)
+logEntryLocation = update_training_log(spreadsheetID, values)
+print(logEntryLocation)
 thisLog = File_Printer(filePath = logFileName, append = True)
 
 SM.add_state(fixation(['trial_start',  'fixation'], SM, 'fixation', thisLog))
@@ -157,6 +158,9 @@ try:
     remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
         default = lambda: None)
     remoteListener.run()
+
+    welcomeChime.play()
+
     print('Ending Execution of Training_step_1.py')
     src = SM.logFileName
     dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
@@ -164,7 +168,7 @@ try:
     scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
 
     subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' + SM.logFileName.split('/')[-1]
-        + '\"' + ' --folder \"' + dst + '\"', shell=True)
+        + '\"' + ' --folder \"' + SM.serverFolder + '\"', shell = True)
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
@@ -174,3 +178,5 @@ try:
 except KeyboardInterrupt: # If CTRL+C is pressed, exit cleanly:
     GPIO.output(5,False) ## Turn off GPIO pin for LED
     GPIO.cleanup() # cleanup all GPIO
+
+
