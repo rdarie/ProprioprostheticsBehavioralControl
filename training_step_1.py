@@ -19,7 +19,7 @@ from MonkeyGames.arbiter import Arbiter
 from MonkeyGames.Effectors.Processors.event_timestamper import Event_Timestamper
 from MonkeyGames.Effectors.Endpoints.rpi_gpio import GPIO_Input, GPIO_Output
 from MonkeyGames.Effectors.Endpoints.file_printer import File_Printer
-from Data-Analysis.helper_functions import runScriptAllFiles
+
 import RPi.GPIO as GPIO
 import pdb, time, pygame
 
@@ -27,7 +27,7 @@ from game_states import *
 import interfaces as ifaces
 from helperFunctions import *
 
-import argparse, os, shutil
+import argparse, os, shutil, subprocess
 
 # Power indicator
 GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
@@ -162,7 +162,9 @@ try:
     dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
     shutil.move(src,dst)
     scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
-    runScriptAllFiles(scriptPath, dst)
+
+    subprocess.check_output('python ' + scriptPath + ' --file '  + '\"' + SM.logFileName
+        + '\"' + ' --folder \"' + dst + '\"', shell=True)
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
