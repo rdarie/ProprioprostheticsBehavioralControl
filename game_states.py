@@ -200,5 +200,5 @@ class end(gameState):
 
     def operation(self, parent):
 
-        print('Ending now')
+        print('@game_states.py, end')
         return self.nextState[0]
