@@ -140,44 +140,36 @@ def triggerJuice():
     speaker.tone_player('Good')()
     SM.outbox.put('Reward')
 
-try:
-    arbiter.connect([butPin, timestamper, thisLog])
-    arbiter.connect([(SM, 'source', True), timestamper, thisLog])
-    arbiter.run(SM)
-    remoteControlMap = {
-        "right" : lambda: None,
-        "left" : lambda: None,
-        "enter" : lambda: None,
-        "a" : speaker.tone_player('Go'),
-        "b" : speaker.tone_player('Good'),
-        "c" : speaker.tone_player('Bad'),
-        "up" : triggerJuice,
-        "quit" : overRideAdder(SM, 'end')
-    }
+arbiter.connect([butPin, timestamper, thisLog])
+arbiter.connect([(SM, 'source', True), timestamper, thisLog])
+arbiter.run(SM)
+remoteControlMap = {
+    "right" : lambda: None,
+    "left" : lambda: None,
+    "enter" : lambda: None,
+    "a" : speaker.tone_player('Go'),
+    "b" : speaker.tone_player('Good'),
+    "c" : speaker.tone_player('Bad'),
+    "up" : triggerJuice,
+    "quit" : overRideAdder(SM, 'end')
+}
 
-    remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
-        default = lambda: None)
-    remoteListener.run()
+remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
+    default = lambda: None)
+remoteListener.run()
 
-    welcomeChime.play()
-    src = SM.logFileName
-    dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
+welcomeChime.play()
+src = SM.logFileName
+dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
 
-    scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
-    subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' +
-        SM.logFileName.split('/')[-1] + '\"' + ' --folder \"' +
-        dst + '\"', shell=True)
+scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
+subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' +
+    SM.logFileName.split('/')[-1] + '\"' + ' --folder \"' +
+    dst + '\"', shell=True)
 
-    shutil.move(src,dst)
+shutil.move(src,dst)
 
-    print('Ending Execution of Training_step_1.py')
+print('Ending Execution of Training_step_1.py')
 
-    GPIO.output(5,False) ## Turn off GPIO pin 5
-    GPIO.cleanup() # cleanup all GPIO
-    #while True:
-    #    sleep(1)
-
-except KeyboardInterrupt: # If CTRL+C is pressed, exit cleanly:
-    print('Failed to update logs! Please correct manually.')
-    GPIO.output(5,False) ## Turn off GPIO pin for LED
-    GPIO.cleanup() # cleanup all GPIO
+GPIO.output(5,False) ## Turn off GPIO pin 5
+GPIO.cleanup() # cleanup all GPIO
