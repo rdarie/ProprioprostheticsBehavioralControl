@@ -28,7 +28,7 @@ import interfaces as ifaces
 from helperFunctions import *
 
 import argparse, os, shutil, subprocess
-
+subprocess.check_output('sudo mount -a', shell = True)
 # Power indicator
 GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
 GPIO.output(5,True) ## Turn on GPIO pin 24
@@ -165,6 +165,7 @@ dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
 
 shutil.move(src,dst)
 
+print(os.path.isdir(SM.serverFolder))
 scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
 subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' +
     SM.logFileName.split('/')[-1] + '\"' + ' --folder \"' +
