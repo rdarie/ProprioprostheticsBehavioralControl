@@ -159,6 +159,7 @@ remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
 remoteListener.run()
 
 welcomeChime.play()
+
 src = SM.logFileName
 dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
 
