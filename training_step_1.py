@@ -162,13 +162,6 @@ try:
     welcomeChime.play()
 
     print('Ending Execution of Training_step_1.py')
-    src = SM.logFileName
-    dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
-    shutil.move(src,dst)
-    scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
-
-    subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' + SM.logFileName.split('/')[-1]
-        + '\"' + ' --folder \"' + SM.serverFolder + '\"', shell = True)
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
@@ -178,5 +171,3 @@ try:
 except KeyboardInterrupt: # If CTRL+C is pressed, exit cleanly:
     GPIO.output(5,False) ## Turn off GPIO pin for LED
     GPIO.cleanup() # cleanup all GPIO
-
-

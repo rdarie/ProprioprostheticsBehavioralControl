@@ -201,11 +201,12 @@ class end(gameState):
     def operation(self, parent):
 
         print('@game_states.py, end')
-        src = SM.logFileName
-        dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
+        src = parent.logFileName
+        dst = parent.serverFolder + '/' + parent.logFileName.split('/')[-1]
         shutil.move(src,dst)
         scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
 
-        subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' + SM.logFileName.split('/')[-1]
-            + '\"' + ' --folder \"' + dst + '\"', shell=True)
+        subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' +
+            parent.logFileName.split('/')[-1] + '\"' + ' --folder \"' +
+            dst + '\"', shell=True)
         return self.nextState[0]
