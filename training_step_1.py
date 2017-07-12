@@ -162,12 +162,12 @@ welcomeChime.play()
 src = SM.logFileName
 dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
 
+shutil.move(src,dst)
 scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
 subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' +
     SM.logFileName.split('/')[-1] + '\"' + ' --folder \"' +
     dst + '\"', shell=True)
 
-shutil.move(src,dst)
 
 print('Ending Execution of Training_step_1.py')
 
