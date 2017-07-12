@@ -162,12 +162,13 @@ try:
     welcomeChime.play()
     src = SM.logFileName
     dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
-    shutil.move(src,dst)
-    scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
 
+    scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
     subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' +
         SM.logFileName.split('/')[-1] + '\"' + ' --folder \"' +
         dst + '\"', shell=True)
+
+    shutil.move(src,dst)
 
     print('Ending Execution of Training_step_1.py')
 
@@ -177,5 +178,6 @@ try:
     #    sleep(1)
 
 except KeyboardInterrupt: # If CTRL+C is pressed, exit cleanly:
+    print('Failed to update logs! Please correct manually.')
     GPIO.output(5,False) ## Turn off GPIO pin for LED
     GPIO.cleanup() # cleanup all GPIO
