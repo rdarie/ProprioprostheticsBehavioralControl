@@ -200,9 +200,5 @@ class end(gameState):
 
     def operation(self, parent):
 
-        src = parent.logFileName
-        dst = parent.serverFolder + '/' + parent.logFileName.split('/')[-1]
-        shutil.move(src,dst)
-
         print('Ending now')
         return self.nextState[0]

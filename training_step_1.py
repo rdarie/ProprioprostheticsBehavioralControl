@@ -27,7 +27,7 @@ from game_states import *
 import interfaces as ifaces
 from helperFunctions import *
 
-import argparse, os
+import argparse, os, shutil
 
 # Power indicator
 GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
@@ -111,8 +111,8 @@ SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
 sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
 logFileName = wavePath + '/logs/Log_Murdoc_' + sessionTime + '.txt'
 
-#SM.serverFolder = 
-#SM.logFileName = logFileName
+SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
+SM.logFileName = logFileName
 
 values = [
     [sessionTime, 'Button Pressing Step 1', '', '',
@@ -158,6 +158,9 @@ try:
         default = lambda: None)
     remoteListener.run()
     print('Ending Execution of Training_step_1.py')
+    src = SM.logFileName
+    dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
+    shutil.move(src,dst)
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
     #while True:
