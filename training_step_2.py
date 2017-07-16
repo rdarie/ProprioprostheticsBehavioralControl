@@ -141,7 +141,7 @@ SM.add_state(end([False], SM, 'end', logFile = thisLog))
 SM.set_init('fixation')
 
 arbiter.connect([(SM, 'source', True), juicePin])
-arbiter.connect([(SM, 'source', True), butLED])
+#arbiter.connect([(SM, 'source', True), butLED])
 
 def triggerJuice():
     speaker.tone_player('Good')()
