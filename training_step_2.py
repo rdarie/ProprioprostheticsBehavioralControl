@@ -115,6 +115,7 @@ logFileName = wavePath + '/logs/Log_Murdoc_' + sessionTime + '.txt'
 SM.logFileName = logFileName
 
 logToWeb = True if args.logToWeb == 'True' else False
+
 if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
@@ -166,6 +167,7 @@ remoteListener.run()
 welcomeChime.play()
 
 if logToWeb:
+    subprocess.check_output('sudo mount -a', shell = True)
     src = SM.logFileName
     dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
 
