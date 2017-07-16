@@ -53,8 +53,6 @@ class fixation(gameState):
         if parent.startEnable:
             enableLog = True
             firstVisit = True
-            parent.outbox.put('redLED')
-            parent.outbox.put('blueLED')
             return self.nextState[0]
         else:
             return self.nextState[1]
@@ -200,6 +198,8 @@ class post_trial(gameState):
 
     def operation(self, parent):
         parent.nextEnableTime = time.time() + parent.trialLength
+        parent.outbox.put('redLED')
+        parent.outbox.put('blueLED')
         return self.nextState[0]
 
 class end(gameState):
