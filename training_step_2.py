@@ -127,7 +127,7 @@ if logToWeb:
     spreadsheetID = '1BWjBqbtoVr9j6dU_7eHp-bQMJApNn8Wkl_N1jv20faE'
     logEntryLocation = update_training_log(spreadsheetID, values)
 
-print(logEntryLocation)
+    print(logEntryLocation)
 thisLog = File_Printer(filePath = logFileName, append = True)
 
 SM.add_state(fixation(['trial_start',  'fixation'], SM, 'fixation', thisLog))
