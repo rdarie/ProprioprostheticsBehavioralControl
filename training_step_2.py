@@ -101,7 +101,6 @@ SM.speaker = speaker
 SM.inputPin = butPin
 
 SM.juicePin = juicePin
-SM.butLED = butLED
 
 # Add a mode to the state machine
 SM.add_mode('sink', (['main_thread'], SM.inbox))

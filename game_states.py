@@ -53,6 +53,8 @@ class fixation(gameState):
         if parent.startEnable:
             enableLog = True
             firstVisit = True
+            parent.outbox.put('redLED')
+            parent.outbox.put('blueLED')
             return self.nextState[0]
         else:
             return self.nextState[1]
@@ -126,6 +128,7 @@ class wait_for_any_button_timed(gameState):
                 parent.buttonTimedOut = True
         else:
             parent.outbox.put('redLED')
+            parent.outbox.put('blueLED')
 
         if event_label:
             if self.logFile:
