@@ -148,9 +148,9 @@ arbiter.connect([butPin, timestamper, thisLog])
 arbiter.connect([(SM, 'source', True), timestamper, thisLog])
 arbiter.run(SM)
 remoteControlMap = {
-    "right" : lambda: None,
-    "left" : lambda: None,
-    "enter" : lambda: None,
+    "right" : motor.forward,
+    "left" :  motor.backward,
+    "enter" : motor.go_home,
     "a" : speaker.tone_player('Go'),
     "b" : speaker.tone_player('Good'),
     "c" : speaker.tone_player('Bad'),
