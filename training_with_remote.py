@@ -5,15 +5,33 @@ This is a test platform for using the state machine controller. Feel free to
 change anything in this document and test it out.
 '''
 from MonkeyGames.Effectors.Controllers.state_machine import State_Machine
+sys.path.append('/home/pi/research/project-thalamus/')
 from MonkeyGames.arbiter import Arbiter
 from MonkeyGames.Effectors.Endpoints.rpi_gpio import GPIO_Input, GPIO_Output
+from MonkeyGames.Effectors.Endpoints.file_printer import File_Printer
+from MonkeyGames.Effectors.Processors.event_timestamper import Event_Timestamper
 
 import RPi.GPIO as GPIO
-import pdb
+import pdb, time, pygame
 
 from game_states import *
 import interfaces as ifaces
 from helperFunctions import serial_ports
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--enableSound', default = 'True')
+parser.add_argument('--logToWeb', default = 'True')
+parser.add_argument('--volume', default = '0.01')
+
+args = parser.parse_args()
+
+argEnableSound = True if args.enableSound == 'True' else False
+argVolume = float(args.volume)
+
+global wavePath
+gitPath = os.path.dirname(os.path.realpath(__file__))
+with open(gitPath + '/' + '.waveLocation', 'r') as wf:
+    wavePath = wf.read().replace('\n', '')
 
 soundPaths = {
 'Go' : "go_tone.wav",
@@ -22,7 +40,8 @@ soundPaths = {
 }
 
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
-    volume = 0.001, debugging = True, enableSound = False)
+    volume = argVolume, debugging = True, enableSound = argEnableSound)
+
 motor = ifaces.motorInterface(debugging = True)
 
 """
@@ -30,54 +49,15 @@ State Machine
 """
 # Setup IO Pins
 butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
-                    triggers = [GPIO.FALLING, GPIO.FALLING], levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
+                    triggers = [GPIO.FALLING, GPIO.FALLING],
+                    levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
 
-#juicePin = GPIO_Output(pins=[27], labels=['Reward'],
-#                        instructions=[('pulse', 0.5)])
+timestamper = Event_Timestamper()
 
-ledPin = GPIO_Output(pins=[5,6], labels=['red', 'blue'],
-                        instructions=[('pulse', 1)])
-
-# Build an arbiter and a state machine
-arbiter = Arbiter()
-SM = State_Machine()
-
-# Add attributes to the state machine
-SM.correctButton = 'red'
-SM.startEnable = False
-SM.trialLength = 2
-SM.nextEnableTime = 0
-SM.speaker = speaker
-SM.motor = motor
-SM.inputPin = butPin
-SM.targetAngle = []
-SM.timeout = []
-SM.slackTime = []
-SM.postIncorrectTime = []
-SM.postRewardTime = []
-
-# Add a mode to the state machine
-SM.add_mode('sink', (['main_thread'], SM.inbox))
-SM.add_mode('source', (['distributor'], True))
-
-SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
-    ['polled'])
-# arbiter.connect([(SM, 'source', True), juicePin])
-
-SM.add_state(fixation_constructor(nextState = ['set_correct',  'fixation']))
-SM.add_state(set_correct_constructor(nextState = ['trial_start']))
-SM.add_state(trial_start_constructor(nextState = ['clear_input_queue']))
-SM.add_state(clear_input_queue_constructor(nextState = ['wait_for_correct_button']))
-SM.add_state(wait_for_correct_button_constructor(nextState = ['good', 'bad']))
-SM.add_state(good_constructor(nextState = ['post_trial']))
-SM.add_state(bad_constructor(nextState = ['post_trial']))
-SM.add_state(post_trial_constructor(nextState = ['fixation']))
-SM.add_state(end_constructor())
-
-SM.set_init('set_correct')
+juicePin = GPIO_Output(pins=[12,13,25], labels=['redLED', 'blueLED','Reward'],
+levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH], instructions=[('pulse', 1), 'flip', 'flip'])
 
 try:
-    arbiter.run(SM)
     remoteControlMap = {
         "right" : motor.forward,
         "left" : motor.backward,
