@@ -111,6 +111,7 @@ class wait_for_any_button(gameState):
 
 class wait_for_any_button_timed(gameState):
     def operation(self, parent):
+        # Turn LED's On
         global enableLog, firstVisit
         enableLog = False
         #disable logging for subsequent visits to this state, until we leave it
@@ -123,6 +124,8 @@ class wait_for_any_button_timed(gameState):
         if not firstVisit:
             if parent.nextButtonTimeout < timeNow:
                 parent.buttonTimedOut = True
+        else:
+            parent.outbox.put(['redLED'])
 
         if event_label:
             if self.logFile:
@@ -142,7 +145,7 @@ class wait_for_any_button_timed(gameState):
             parent.buttonTimedOut = False
             # re enable logging for future visits
             return self.nextState[1]
-        else:
+        else: # if not parent.buttonTimedOut
 
             time.sleep(0.1)
 

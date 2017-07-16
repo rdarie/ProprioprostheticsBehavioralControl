@@ -100,7 +100,9 @@ SM.nextButtonTimeout = 0
 
 SM.speaker = speaker
 SM.inputPin = butPin
+
 SM.juicePin = juicePin
+SM.butLED = butLED
 
 # Add a mode to the state machine
 SM.add_mode('sink', (['main_thread'], SM.inbox))
@@ -136,6 +138,7 @@ SM.add_state(end([False], SM, 'end', logFile = thisLog))
 SM.set_init('fixation')
 
 arbiter.connect([(SM, 'source', True), juicePin])
+arbiter.connect([(SM, 'source', True), butLED])
 
 def triggerJuice():
     speaker.tone_player('Good')()
