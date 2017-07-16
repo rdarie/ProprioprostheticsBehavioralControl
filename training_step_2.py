@@ -67,6 +67,7 @@ if playWelcomeTone:
     welcomeChime.set_volume(argVolume)
     welcomeChime.play()
 
+motor = ifaces.motorInterface(debugging = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = True, enableSound = argEnableSound)
 
