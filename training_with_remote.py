@@ -4,7 +4,7 @@ Test SM
 This is a test platform for using the state machine controller. Feel free to
 change anything in this document and test it out.
 '''
-import sys
+import sys, os
 sys.path.append('/home/pi/research/project-thalamus/')
 from MonkeyGames.Effectors.Controllers.state_machine import State_Machine
 from MonkeyGames.arbiter import Arbiter
