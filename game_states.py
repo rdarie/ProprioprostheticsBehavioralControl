@@ -148,7 +148,7 @@ class wait_for_any_button_timed(gameState):
 
             if firstVisit:
                 firstVisit = False
-                parent.nextButtonTimeout = timeNow + parent.trialLimit
+                parent.nextButtonTimeout = timeNow + parent.trialTimeout
 
             sys.stdout.write("Waiting for button... Time left: %4.4f \r" %
                 (parent.nextButtonTimeout - timeNow))
