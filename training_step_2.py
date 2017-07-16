@@ -77,12 +77,10 @@ State Machine
 butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
     triggers = [GPIO.FALLING, GPIO.FALLING],
     levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
-butLED = GPIO_Output(pins = [12,13], labels = ['redLED', 'blueLED'],
-    levels = [GPIO.HIGH, GPIO.HIGH], instructions = [('flip'),('flip')])
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[25], labels=['Reward'], levels = [GPIO.HIGH],
-                        instructions=[('pulse', 1)])
+juicePin = GPIO_Output(pins=[12,13,25], labels=['redLED', 'blueLED','Reward'],
+    levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH], instructions=[('pulse', 1), 'flip', 'flip'])
 
 # Build an arbiter and a state machine
 arbiter = Arbiter()
