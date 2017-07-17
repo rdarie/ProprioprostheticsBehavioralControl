@@ -38,7 +38,7 @@ parser.add_argument('--trialLength', default = '3')
 parser.add_argument('--trialTimeout', default = '7')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
-parser.add_argument('--logToWeb', default = 'True')
+parser.add_argument('--logToWeb', default = 'False')
 parser.add_argument('--volume', default = '0.01')
 
 args = parser.parse_args()
