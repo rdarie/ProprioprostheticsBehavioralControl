@@ -80,9 +80,9 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
     levels = [GPIO.LOW, GPIO.LOW], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[12,13,25], labels=['redLED', 'blueLED', 'Reward'],
-    levels = [GPIO.LOW, GPIO.LOW, GPIO.HIGH],
-    instructions=['flip', 'flip', ('pulse', 1)])
+juicePin = GPIO_Output(pins=[6,16,25], labels=['redLED', 'blueLED', 'Reward'],
+    levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
+    instructions=['flip', 'flip', ('pulse', .5)])
 
 # Build an arbiter and a state machine
 arbiter = Arbiter()
