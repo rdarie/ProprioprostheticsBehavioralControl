@@ -34,8 +34,8 @@ GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
 GPIO.output(5,True) ## Turn on GPIO pin 24
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--trialLength', default = '7')
-parser.add_argument('--trialTimeout', default = '3')
+parser.add_argument('--trialLength', default = '3')
+parser.add_argument('--trialTimeout', default = '7')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--logToWeb', default = 'True')
@@ -80,8 +80,9 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
     levels = [GPIO.LOW, GPIO.LOW], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[12,13,25], labels=['redLED', 'blueLED','Reward'],
-    levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH], instructions=[('pulse', 1), 'flip', 'flip'])
+juicePin = GPIO_Output(pins=[12,13,25], labels=['redLED', 'blueLED', 'Reward'],
+    levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
+    instructions=['flip', 'flip', ('pulse', 1)])
 
 # Build an arbiter and a state machine
 arbiter = Arbiter()
