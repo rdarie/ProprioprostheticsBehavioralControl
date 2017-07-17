@@ -77,7 +77,7 @@ State Machine
 # Setup IO Pins
 butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
     triggers = [GPIO.FALLING, GPIO.FALLING],
-    levels = [GPIO.LOW, GPIO.LOW], bouncetime = 500)
+    levels = [GPIO.LOW, GPIO.LOW], bouncetime = 200)
 timestamper = Event_Timestamper()
 
 juicePin = GPIO_Output(pins=[12,13,25], labels=['redLED', 'blueLED','Reward'],
