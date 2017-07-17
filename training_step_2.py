@@ -81,7 +81,7 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
 timestamper = Event_Timestamper()
 
 juicePin = GPIO_Output(pins=[12,13,25], labels=['redLED', 'blueLED', 'Reward'],
-    levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
+    levels = [GPIO.LOW, GPIO.LOW, GPIO.HIGH],
     instructions=['flip', 'flip', ('pulse', 1)])
 
 # Build an arbiter and a state machine
