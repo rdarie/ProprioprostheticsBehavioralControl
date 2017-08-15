@@ -36,16 +36,47 @@ class fixation(gameState):
 
     def operation(self, parent):
         global enableLog, firstVisit
+        #disable logging for subsequent visits to this state, until we leave it
         enableLog = False
 
         timeNow = time.time()
-
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (parent.nextEnableTime - timeNow))
         sys.stdout.flush()
 
         time.sleep(0.5)
+
+        if parent.nextEnableTime < timeNow:
+            parent.startEnable = True
+
+        if parent.startEnable:
+            enableLog = True
+            firstVisit = True
+            return self.nextState[0]
+        else:
+            return self.nextState[1]
+
+class strict_fixation(gameState):
+    # IF button presses happen here, give bad feedback
+    def operation(self, parent):
+        global enableLog, firstVisit
+        #disable logging for subsequent visits to this state, until we leave it
+        enableLog = False
+
+        timeNow = time.time()
+
+        sys.stdout.write("At fixation. Time left: %4.4f \r"
+         % (parent.nextEnableTime - timeNow))
+        sys.stdout.flush()
+
+        time.sleep(0.25)
+        # Read from inbox
+        event_label = parent.request_last_touch()
+        if event_label:
+            parent.speaker.play_tone('Bad')
+            time.sleep(0.75)
+            parent.nextEnableTime = parent.nextEnableTime + 0.75
 
         if parent.nextEnableTime < timeNow:
             parent.startEnable = True
