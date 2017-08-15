@@ -68,7 +68,7 @@ if playWelcomeTone:
     welcomeChime.play()
 
 whiteNoise = pygame.mixer.Sound(wavePath + "/whitenoisegaussian.wav")
-whiteNoise.set_volume(argVolume/3)
+whiteNoise.set_volume(argVolume/2)
 whiteNoise.play(-1)
 
 motor = ifaces.motorInterface(debugging = True)
