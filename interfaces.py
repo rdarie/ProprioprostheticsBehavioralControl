@@ -98,6 +98,18 @@ class motorInterface(object):
         self.serialPortName = serialPortName
         self.serial = ser
 
+        self.current = 3.5
+        serial_message = "CC" + str(self.current) + "\r"
+        self.serial.write(serial_message.encode())
+        self.idle_current = 3
+        serial_message = "CC" + str(self.idle_current) + "\r"
+        self.serial.write(serial_message.encode())
+        self.velocity = 0.1 #move speed in rev/sec. Range is .025 - 50
+        serial_message = "VE" + str(self.velocity) + "\r"
+        self.serial.write(serial_message.encode())
+
+        # Initialize motor
+
         self.debugging = debugging
 
     def set_home(self):
