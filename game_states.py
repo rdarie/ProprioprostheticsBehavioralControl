@@ -75,8 +75,10 @@ class strict_fixation(gameState):
         event_label = parent.request_last_touch()
         if event_label:
             parent.speaker.play_tone('Bad')
-            time.sleep(0.75)
-            parent.nextEnableTime = parent.nextEnableTime + 0.75
+            time.sleep(2)
+            parent.nextEnableTime = parent.nextEnableTime + 2
+            if parent.inputPin.last_data is not None:
+                parent.inputPin.last_data = None
 
         if parent.nextEnableTime < timeNow:
             parent.startEnable = True

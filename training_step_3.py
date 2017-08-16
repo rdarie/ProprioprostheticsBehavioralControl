@@ -34,8 +34,8 @@ GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
 GPIO.output(5,True) ## Turn on GPIO pin 24
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--trialLength', default = '3')
-parser.add_argument('--trialTimeout', default = '7')
+parser.add_argument('--trialLength', default = '10')
+parser.add_argument('--trialTimeout', default = '5')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--logToWeb', default = 'False')
@@ -134,13 +134,14 @@ if logToWeb:
     print(logEntryLocation)
 thisLog = File_Printer(filePath = logFileName, append = True)
 
-SM.add_state(fixation(['trial_start',  'fixation'], SM, 'fixation', thisLog))
+SM.add_state(strict_fixation(['trial_start',  'fixation'], SM, 'fixation', thisLog))
 SM.add_state(trial_start(['clear_input_queue'], SM, 'trial_start', logFile = thisLog))
 SM.add_state(clear_input_queue(['wait_for_any_button_timed'], SM, 'clear_input_queue', logFile = thisLog))
-SM.add_state(wait_for_any_button_timed(['good', 'bad'], SM, 'wait_for_any_button_timed', logFile = thisLog))
-SM.add_state(bad['post_trial'], SM, 'bad', logFile = thisLog))
+SM.add_state(wait_for_any_button_timed(['good', 'post_trial'], SM, 'wait_for_any_button_timed', logFile = thisLog))
+#SM.add_state(bad['post_trial'], SM, 'bad', logFile = thisLog))
 SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog))
-SM.add_state(post_trial(['fixation'], SM, 'post_trial', logFile = thisLog))
+SM.add_state(post_trial(['clear_input_queue_2'], SM, 'post_trial', logFile = thisLog))
+SM.add_state(clear_input_queue(['fixation'], SM, 'clear_input_queue_2', logFile = thisLog))
 SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
 SM.set_init('fixation')
