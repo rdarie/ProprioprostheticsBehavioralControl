@@ -255,6 +255,6 @@ class do_nothing(gameState):
     
     def operation(self, parent):
         
-        parent.enableLog = False
+        #parent.enableLog = False
         time.sleep(1)
         return self.nextState[0]

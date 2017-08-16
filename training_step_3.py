@@ -153,14 +153,16 @@ if logToWeb:
     print(logEntryLocation)
 
 # connect state machine states
-SM.add_state(strict_fixation(['trial_start',  'fixation'], SM, 'fixation', thisLog))
+SM.add_state(strict_fixation(['turnPedalRandom_1',  'fixation'], SM, 'fixation', thisLog))
+SM.add_state(turnPedalRandom(['wait'], SM, 'turnPedalRandom_1', logFile = thisLog))
+SM.add_state(do_nothing(['trial_start'], SM, 'wait', logFile = thisLog))
 SM.add_state(trial_start(['clear_input_queue'], SM, 'trial_start', logFile = thisLog))
 SM.add_state(clear_input_queue(['wait_for_any_button_timed'], SM, 'clear_input_queue', logFile = thisLog))
 SM.add_state(wait_for_any_button_timed(['good', 'post_trial'], SM, 'wait_for_any_button_timed', logFile = thisLog))
 SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog))
 SM.add_state(post_trial(['clear_input_queue_2'], SM, 'post_trial', logFile = thisLog))
-SM.add_state(clear_input_queue(['turnPedalRandom_1'], SM, 'clear_input_queue_2', logFile = thisLog))
-SM.add_state(turnPedalRandom(['fixation'], SM, 'turnPedalRandom_1', logFile = thisLog))
+SM.add_state(clear_input_queue(['fixation'], SM, 'clear_input_queue_2', logFile = thisLog))
+
 SM.add_state(trial_start(['clear_input_queue'], SM, 'trial_start', logFile = thisLog))
 SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
