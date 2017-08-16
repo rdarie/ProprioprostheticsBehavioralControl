@@ -1,12 +1,12 @@
 import sys, random, time, pdb, shutil
 from helperFunctions import overRideAdder
-
-enableLog = True
-firstVisit = True
+from random import uniform
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
         self.nextState = nextState
+        parent.enableLog = True
+        parent.firstVisit = True
         self.logFile = logFile
         self.parent = parent
         self.__name__ = stateName
@@ -15,9 +15,9 @@ class gameState(object):
         pass
 
     def __call__(self, *args):
-        global enableLog
+
         if self.logFile:
-            if enableLog:
+            if parent.enableLog:
                 timeNow = time.time()
                 self.logFile.write("\n%s\t%4.4f" % ( self.__name__, timeNow))
 
@@ -27,7 +27,7 @@ class gameState(object):
         else:
             #print("in Python: Override is NOT none! I am %s" % self.__name__)
             ret = self.parent.remoteOverride
-            enableLog = True
+            parent.enableLog = True
             self.parent.remoteOverride = None
         #print("returning %s" % ret)
         return ret
@@ -35,9 +35,9 @@ class gameState(object):
 class fixation(gameState):
 
     def operation(self, parent):
-        global enableLog, firstVisit
+
         #disable logging for subsequent visits to this state, until we leave it
-        enableLog = False
+        parent.enableLog = False
 
         timeNow = time.time()
 
@@ -51,8 +51,8 @@ class fixation(gameState):
             parent.startEnable = True
 
         if parent.startEnable:
-            enableLog = True
-            firstVisit = True
+            parent.enableLog = True
+            parent.firstVisit = True
             return self.nextState[0]
         else:
             return self.nextState[1]
@@ -60,9 +60,9 @@ class fixation(gameState):
 class strict_fixation(gameState):
     # IF button presses happen here, give bad feedback
     def operation(self, parent):
-        global enableLog, firstVisit
+
         #disable logging for subsequent visits to this state, until we leave it
-        enableLog = False
+        parent.enableLog = False
 
         timeNow = time.time()
 
@@ -84,15 +84,23 @@ class strict_fixation(gameState):
             parent.startEnable = True
 
         if parent.startEnable:
-            enableLog = True
-            firstVisit = True
+            parent.enableLog = True
+            parent.firstVisit = True
             return self.nextState[0]
         else:
             return self.nextState[1]
 
-class turnPedal(gameState):
+class turnPedalRandom(gameState):
 
     def operation(self, parent):
+        parent.motor.step_size = uniform(1e4, 3e4)
+
+        direction = randint(0, 1)
+        if direction:
+            motor.forward()
+        else:
+            motor.backward()
+
         return self.nextState[0]
 
 class clear_input_queue(gameState):
@@ -122,8 +130,8 @@ class set_correct(gameState):
 
 class wait_for_any_button(gameState):
     def operation(self, parent):
-        global enableLog
-        enableLog = False
+
+        parent.enableLog = False
         # Read from inbox
         event_label = parent.request_last_touch()
         parent.startEnable = False
@@ -132,7 +140,7 @@ class wait_for_any_button(gameState):
             if self.logFile:
                 self.logFile.write("\ncorrect_button\t%s\t" % event_label)
             print("\n%s button pressed!" % event_label)
-            enableLog = True
+            parent.enableLog = True
             return self.nextState[0]
         else:
             time.sleep(0.1)
@@ -145,8 +153,8 @@ class wait_for_any_button(gameState):
 class wait_for_any_button_timed(gameState):
     def operation(self, parent):
         # Turn LED's On
-        global enableLog, firstVisit
-        enableLog = False
+
+        parent.enableLog = False
         #disable logging for subsequent visits to this state, until we leave it
 
         # Read from inbox
@@ -154,7 +162,7 @@ class wait_for_any_button_timed(gameState):
         parent.startEnable = False
 
         timeNow = time.time()
-        if not firstVisit:
+        if not parent.firstVisit:
             if parent.nextButtonTimeout < timeNow:
                 parent.buttonTimedOut = True
         else:
@@ -166,16 +174,17 @@ class wait_for_any_button_timed(gameState):
                 self.logFile.write("\ncorrect_button\t%4.4f\t%s" % (timeNow, event_label))
             print("\n%s button pressed!" % event_label)
 
-            enableLog = True
+            parent.enableLog = True
             parent.buttonTimedOut = False
             # re enable logging for future visits
 
             return self.nextState[0]
+
         if parent.buttonTimedOut:
             if self.logFile:
                 self.logFile.write("\nbutton timed out!\t %4.4f\t" % timeNow)
 
-            enableLog = True
+            parent.enableLog = True
             parent.buttonTimedOut = False
             # re enable logging for future visits
             return self.nextState[1]
@@ -183,8 +192,8 @@ class wait_for_any_button_timed(gameState):
 
             time.sleep(0.1)
 
-            if firstVisit:
-                firstVisit = False
+            if parent.firstVisit:
+                parent.firstVisit = False
                 parent.nextButtonTimeout = timeNow + parent.trialTimeout
 
             sys.stdout.write("Waiting for button... Time left: %4.4f \r" %

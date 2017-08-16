@@ -157,7 +157,8 @@ SM.add_state(clear_input_queue(['wait_for_any_button_timed'], SM, 'clear_input_q
 SM.add_state(wait_for_any_button_timed(['good', 'post_trial'], SM, 'wait_for_any_button_timed', logFile = thisLog))
 SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog))
 SM.add_state(post_trial(['clear_input_queue_2'], SM, 'post_trial', logFile = thisLog))
-SM.add_state(clear_input_queue(['fixation'], SM, 'clear_input_queue_2', logFile = thisLog))
+SM.add_state(clear_input_queue(['turnPedalRandom_1'], SM, 'clear_input_queue_2', logFile = thisLog))
+SM.add_state(turnPedalRandom_1(['fixation'], SM, 'turnPedalRandom_1', , logFile = thisLog))
 SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
 SM.set_init('fixation')
