@@ -5,6 +5,8 @@ This is a test platform for using the state machine controller. Feel free to
 change anything in this document and test it out.
 '''
 
+import os
+from MonkeyGames.Effectors.Controllers.state_machine import State_Machine
 from MonkeyGames.arbiter import Arbiter
 from MonkeyGames.Effectors.Endpoints.rpi_gpio import GPIO_Input, GPIO_Output
 from MonkeyGames.Effectors.Endpoints.file_printer import File_Printer
@@ -20,7 +22,7 @@ from helperFunctions import serial_ports
 parser = argparse.ArgumentParser()
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
-parser.add_argument('--playWhiteNoise', default = 'True')
+parser.add_argument('--playWhiteNoise', default = 'False')
 parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
 parser.add_argument('--volume', default = '0.01')
@@ -59,7 +61,6 @@ motor = ifaces.motorInterface(debugging = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = True, enableSound = argEnableSound)
 
-
 # Setup IO Pins
 butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
     triggers = [GPIO.FALLING, GPIO.FALLING],
@@ -70,20 +71,46 @@ juicePin = GPIO_Output(pins=[6,16,25], labels=['redLED', 'blueLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', ('pulse', .5)])
 
+arbiter = Arbiter()
+# Dummy state machine
+SM = State_Machine()
+
+# Add attributes to the state machine
+
+# Add a mode to the state machine
+SM.add_mode('sink', (['main_thread'], SM.inbox))
+SM.add_mode('source', (['distributor'], True))
+
+SM.speaker = speaker
+SM.motor = motor
+SM.inputPin = butPin
+
+SM.enableLog = True
+SM.firstVisit = True
+SM.remoteOverride = None
+
+# connect reward
+arbiter.connect([(SM, 'source', True), juicePin])
+
+# juicer override
+def triggerJuice():
+    speaker.tone_player('Good')()
+    SM.outbox.put('Reward')
+
 def exitGracefully():
     welcomeChime.play()
 
     if logToWeb:
         subprocess.check_output('sudo mount -a', shell = True)
-        src = SM.logFileName
-        dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
+        src = logFileName
+        dst = serverFolder + '/' + SM.logFileName.split('/')[-1]
 
         shutil.move(src,dst)
 
         scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
         subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' +
-            SM.logFileName.split('/')[-1] + '\"' + ' --folder \"' +
-            SM.serverFolder + '\"', shell=True)
+            logFileName.split('/')[-1] + '\"' + ' --folder \"' +
+            serverFolder + '\"', shell=True)
 
     print('Ending Execution of training_with_remote.py')
 
@@ -101,7 +128,7 @@ try:
     #set up web logging
     logToWeb = True if args.logToWeb == 'True' else False
     if logToWeb:
-        SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
+        serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
         values = [
             [sessionTime, 'Remote Control Session', '', '',
                 'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime]
@@ -113,7 +140,12 @@ try:
         print(logEntryLocation)
 
     # separately log all button presses
+    
     arbiter.connect([butPin, timestamper, thisLog])
+    SM.add_state(do_nothing(['do_nothing'], SM, 'do_nothing', logFile = thisLog))
+    SM.set_init('do_nothing')
+    arbiter.run(SM)
+
 
     remoteControlMap = {
         "right" : motor.forward,
@@ -122,8 +154,7 @@ try:
         "a" : speaker.tone_player('Go'),
         "b" : speaker.tone_player('Good'),
         "c" : speaker.tone_player('Bad'),
-        "up" : triggerJuice,
-        "quit" : overRideAdder(SM, 'end')
+        "up" : triggerJuice
     }
 
     remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,

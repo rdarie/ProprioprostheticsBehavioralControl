@@ -1,12 +1,12 @@
 import sys, random, time, pdb, shutil
 from helperFunctions import overRideAdder
-from random import uniform
+from random import uniform, randint
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
         self.nextState = nextState
-        parent.enableLog = True
-        parent.firstVisit = True
+        #self.parent.enableLog = True
+        #self.parent.firstVisit = True
         self.logFile = logFile
         self.parent = parent
         self.__name__ = stateName
@@ -17,7 +17,7 @@ class gameState(object):
     def __call__(self, *args):
 
         if self.logFile:
-            if parent.enableLog:
+            if self.parent.enableLog:
                 timeNow = time.time()
                 self.logFile.write("\n%s\t%4.4f" % ( self.__name__, timeNow))
 
@@ -97,9 +97,9 @@ class turnPedalRandom(gameState):
 
         direction = randint(0, 1)
         if direction:
-            motor.forward()
+            parent.motor.forward()
         else:
-            motor.backward()
+            parent.motor.backward()
 
         return self.nextState[0]
 
@@ -249,4 +249,12 @@ class end(gameState):
     def operation(self, parent):
 
         print('@game_states.py, end')
+        return self.nextState[0]
+
+class do_nothing(gameState):
+    
+    def operation(self, parent):
+        
+        parent.enableLog = False
+        time.sleep(1)
         return self.nextState[0]
