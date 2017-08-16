@@ -94,8 +94,11 @@ class turnPedalRandom(gameState):
 
     def operation(self, parent):
 
-        parent.speaker.play_tone('Go')
-        parent.speaker.play_tone('Go')
+        #parent.speaker.play_tone('Go')
+        #time.sleep(0.5)
+        #parent.speaker.play_tone('Go')
+        #time.sleep(5)
+        
         parent.motor.step_size = uniform(2e4, 4e4)
 
         direction = randint(0, 1)
@@ -103,9 +106,10 @@ class turnPedalRandom(gameState):
             parent.motor.forward()
         else:
             parent.motor.backward()
-
-        time.sleep(1)
+        
+        time.sleep(1.5)
         parent.motor.go_home()
+        time.sleep(1.5)
         return self.nextState[0]
 
 class clear_input_queue(gameState):
