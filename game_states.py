@@ -93,7 +93,10 @@ class strict_fixation(gameState):
 class turnPedalRandom(gameState):
 
     def operation(self, parent):
-        parent.motor.step_size = uniform(1e4, 3e4)
+
+        parent.speaker.play_tone('Go')
+        parent.speaker.play_tone('Go')
+        parent.motor.step_size = uniform(2e4, 4e4)
 
         direction = randint(0, 1)
         if direction:
@@ -101,6 +104,8 @@ class turnPedalRandom(gameState):
         else:
             parent.motor.backward()
 
+        time.sleep(1)
+        parent.motor.go_home()
         return self.nextState[0]
 
 class clear_input_queue(gameState):
@@ -252,9 +257,9 @@ class end(gameState):
         return self.nextState[0]
 
 class do_nothing(gameState):
-    
+
     def operation(self, parent):
-        
+
         #parent.enableLog = False
         time.sleep(1)
         return self.nextState[0]
