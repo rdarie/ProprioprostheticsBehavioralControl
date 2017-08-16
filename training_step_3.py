@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 '''
-Training Step 1
+Training Step 3
 ========
 The "Go" tone goes off.
+Buttons light up.
 
-Unlimited time, press any button.
-Receive reward and "Good" tone.
+Within trialTimeout seconds, press any button.
+Receive reward and "Good" tone on press, otherwise nothing happens.
 
-Wait XX seconds. During this time, buttons are inactive,
-but pressing them doesn't hurt.
+Go to fixation.
+Wait TrialLength seconds. During this time, if buttons are pressed,
+the "Bad" tone is played, the script pauses for two seconds and the Wait
+is increased by 2 seconds.
 
 Go back to start.
 '''
-import sys
-sys.path.append('/home/pi/research/project-thalamus/')
+
 from MonkeyGames.Effectors.Controllers.state_machine import State_Machine
 from MonkeyGames.arbiter import Arbiter
 from MonkeyGames.Effectors.Processors.event_timestamper import Event_Timestamper
@@ -33,11 +35,16 @@ import argparse, os, shutil, subprocess
 GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
 GPIO.output(5,True) ## Turn on GPIO pin 24
 
+# What time is it?
+sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--trialLength', default = '10')
 parser.add_argument('--trialTimeout', default = '5')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
+parser.add_argument('--playWhiteNoise', default = 'True')
+parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
 parser.add_argument('--volume', default = '0.01')
 
@@ -67,9 +74,11 @@ if playWelcomeTone:
     welcomeChime.set_volume(argVolume)
     welcomeChime.play()
 
-whiteNoise = pygame.mixer.Sound(wavePath + "/whitenoisegaussian.wav")
-whiteNoise.set_volume(argVolume/2)
-whiteNoise.play(-1)
+playWhiteNoise = True if args.playWhiteNoise == 'True' else False
+if playWhiteNoise:
+    whiteNoise = pygame.mixer.Sound(wavePath + "/whitenoisegaussian.wav")
+    whiteNoise.set_volume(argVolume/2)
+    whiteNoise.play(-1)
 
 motor = ifaces.motorInterface(debugging = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
@@ -79,7 +88,7 @@ speaker = ifaces.speakerInterface(soundPaths = soundPaths,
 State Machine
 """
 # Setup IO Pins
-butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'blue'],
+butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
     triggers = [GPIO.FALLING, GPIO.FALLING],
     levels = [GPIO.LOW, GPIO.LOW], bouncetime = 200)
 timestamper = Event_Timestamper()
@@ -104,6 +113,7 @@ SM.trialTimeout = float(argTrialTimeout)
 SM.nextButtonTimeout = 0
 
 SM.speaker = speaker
+SM.motor = motor
 SM.inputPin = butPin
 
 SM.juicePin = juicePin
@@ -112,15 +122,22 @@ SM.juicePin = juicePin
 SM.add_mode('sink', (['main_thread'], SM.inbox))
 SM.add_mode('source', (['distributor'], True))
 
+# send button presses to the state machine inbox
 SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
     ['polled'])
 
-sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
-logFileName = wavePath + '/logs/Log_Murdoc_' + sessionTime + '.txt'
+# set up event logging
+logLocally = True if args.logLocally == 'True' else False
+if logLocally:
+    logFileName = wavePath + '/logs/Log_Murdoc_' + sessionTime + '.txt'
+else:
+    logFileName = wavePath + '/debugLog.txt'
+
 SM.logFileName = logFileName
+thisLog = File_Printer(filePath = logFileName, append = True)
 
+#set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
-
 if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
@@ -132,13 +149,12 @@ if logToWeb:
     logEntryLocation = update_training_log(spreadsheetID, values)
 
     print(logEntryLocation)
-thisLog = File_Printer(filePath = logFileName, append = True)
 
+# connect state machine states
 SM.add_state(strict_fixation(['trial_start',  'fixation'], SM, 'fixation', thisLog))
 SM.add_state(trial_start(['clear_input_queue'], SM, 'trial_start', logFile = thisLog))
 SM.add_state(clear_input_queue(['wait_for_any_button_timed'], SM, 'clear_input_queue', logFile = thisLog))
 SM.add_state(wait_for_any_button_timed(['good', 'post_trial'], SM, 'wait_for_any_button_timed', logFile = thisLog))
-#SM.add_state(bad['post_trial'], SM, 'bad', logFile = thisLog))
 SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog))
 SM.add_state(post_trial(['clear_input_queue_2'], SM, 'post_trial', logFile = thisLog))
 SM.add_state(clear_input_queue(['fixation'], SM, 'clear_input_queue_2', logFile = thisLog))
@@ -146,16 +162,21 @@ SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
 SM.set_init('fixation')
 
+# connect reward
 arbiter.connect([(SM, 'source', True), juicePin])
-#arbiter.connect([(SM, 'source', True), butLED])
 
+# juicer override
 def triggerJuice():
     speaker.tone_player('Good')()
     SM.outbox.put('Reward')
 
+# separately log all button presses
 arbiter.connect([butPin, timestamper, thisLog])
+# also log all state machine events
 arbiter.connect([(SM, 'source', True), timestamper, thisLog])
+
 arbiter.run(SM)
+
 remoteControlMap = {
     "right" : motor.forward,
     "left" :  motor.backward,
