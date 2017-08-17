@@ -102,7 +102,7 @@ class turnPedalRandom(gameState):
         #time.sleep(0.5)
         #parent.speaker.play_tone('Go')
         #time.sleep(5)
-        
+
         parent.motor.step_size = uniform(2e4, 4e4)
 
         direction = randint(0, 1)
@@ -110,7 +110,7 @@ class turnPedalRandom(gameState):
             parent.motor.forward()
         else:
             parent.motor.backward()
-        
+
         time.sleep(1.5)
         parent.motor.go_home()
         time.sleep(1.5)
@@ -171,7 +171,7 @@ class wait_for_any_button_timed(gameState):
         event_label = parent.request_last_touch()
 
         timeNow = time.time()
-        if not parent.firstVisit:
+        if not self.firstVisit:
             if parent.nextButtonTimeout < timeNow:
                 parent.buttonTimedOut = True
         else:

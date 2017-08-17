@@ -107,8 +107,6 @@ SM.trialLength = float(argTrialLength)
 SM.nextEnableTime = 0
 
 SM.remoteOverride = None
-SM.enableLog = True
-SM.firstVisit = True
 
 SM.buttonTimedOut = False
 SM.trialTimeout = float(argTrialTimeout)
