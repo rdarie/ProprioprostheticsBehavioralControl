@@ -153,7 +153,7 @@ class wait_for_any_button(gameState):
 
             #leaving wait_for_button, turn logging on for next return to fixation
             self.enableLog = True
-            self.fistVisit = True
+            self.firstVisit = True
             return self.nextState[0]
         else:
             time.sleep(0.1)
@@ -162,7 +162,7 @@ class wait_for_any_button(gameState):
             sys.stdout.flush()
 
             self.enableLog = False
-            self.fistVisit = False
+            self.firstVisit = False
             return 'wait_for_any_button'
 
 class wait_for_any_button_timed(gameState):
@@ -190,7 +190,7 @@ class wait_for_any_button_timed(gameState):
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
-            self.fistVisit = True
+            self.firstVisit = True
             parent.buttonTimedOut = False
             return self.nextState[0] # usually the good state
 
@@ -200,7 +200,7 @@ class wait_for_any_button_timed(gameState):
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
-            self.fistVisit = True
+            self.firstVisit = True
             parent.buttonTimedOut = False
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
