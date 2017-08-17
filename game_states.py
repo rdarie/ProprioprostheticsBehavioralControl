@@ -5,8 +5,8 @@ from random import uniform, randint
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
         self.nextState = nextState
-        #self.parent.enableLog = True
-        #self.parent.firstVisit = True
+        self.enableLog = True
+        self.firstVisit = True
         self.logFile = logFile
         self.parent = parent
         self.__name__ = stateName
@@ -17,7 +17,7 @@ class gameState(object):
     def __call__(self, *args):
 
         if self.logFile:
-            if self.parent.enableLog:
+            if self.enableLog:
                 timeNow = time.time()
                 self.logFile.write("\n%s\t%4.4f" % ( self.__name__, timeNow))
 
@@ -27,7 +27,7 @@ class gameState(object):
         else:
             #print("in Python: Override is NOT none! I am %s" % self.__name__)
             ret = self.parent.remoteOverride
-            parent.enableLog = True
+            self.enableLog = True
             self.parent.remoteOverride = None
         #print("returning %s" % ret)
         return ret
@@ -35,10 +35,6 @@ class gameState(object):
 class fixation(gameState):
 
     def operation(self, parent):
-
-        #disable logging for subsequent visits to this state, until we leave it
-        parent.enableLog = False
-
         timeNow = time.time()
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
@@ -51,19 +47,21 @@ class fixation(gameState):
             parent.startEnable = True
 
         if parent.startEnable:
-            parent.enableLog = True
-            parent.firstVisit = True
+            #leaving fixation, turn logging on for next return to fixation
+            self.enableLog = True
+            self.firstVisit = True
+            parent.startEnable = False
             return self.nextState[0]
         else:
+            # not yet enabled
+            #disable logging for subsequent visits to this state, until we leave it
+            self.enableLog = False
+            self.firstVisit = False
             return self.nextState[1]
 
 class strict_fixation(gameState):
     # IF button presses happen here, give bad feedback
     def operation(self, parent):
-
-        #disable logging for subsequent visits to this state, until we leave it
-        parent.enableLog = False
-
         timeNow = time.time()
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
@@ -84,10 +82,16 @@ class strict_fixation(gameState):
             parent.startEnable = True
 
         if parent.startEnable:
-            parent.enableLog = True
-            parent.firstVisit = True
+            #leaving fixation, turn logging on for next return to fixation
+            self.enableLog = True
+            self.firstVisit = True
+            parent.startEnable = False
             return self.nextState[0]
         else:
+            # not yet enabled
+            #disable logging for subsequent visits to this state, until we leave it
+            self.enableLog = False
+            self.firstVisit = False
             return self.nextState[1]
 
 class turnPedalRandom(gameState):
@@ -139,17 +143,17 @@ class set_correct(gameState):
 
 class wait_for_any_button(gameState):
     def operation(self, parent):
-
-        parent.enableLog = False
         # Read from inbox
         event_label = parent.request_last_touch()
-        parent.startEnable = False
 
         if event_label:
             if self.logFile:
                 self.logFile.write("\ncorrect_button\t%s\t" % event_label)
             print("\n%s button pressed!" % event_label)
-            parent.enableLog = True
+
+            #leaving wait_for_button, turn logging on for next return to fixation
+            self.enableLog = True
+            self.fistVisit = True
             return self.nextState[0]
         else:
             time.sleep(0.1)
@@ -157,24 +161,21 @@ class wait_for_any_button(gameState):
             sys.stdout.write("Waiting for button...\r")
             sys.stdout.flush()
 
+            self.enableLog = False
+            self.fistVisit = False
             return 'wait_for_any_button'
 
 class wait_for_any_button_timed(gameState):
     def operation(self, parent):
-        # Turn LED's On
-
-        parent.enableLog = False
-        #disable logging for subsequent visits to this state, until we leave it
-
         # Read from inbox
         event_label = parent.request_last_touch()
-        parent.startEnable = False
 
         timeNow = time.time()
         if not parent.firstVisit:
             if parent.nextButtonTimeout < timeNow:
                 parent.buttonTimedOut = True
         else:
+            # Turn LED's On
             parent.outbox.put('redLED')
             parent.outbox.put('blueLED')
 
@@ -183,26 +184,28 @@ class wait_for_any_button_timed(gameState):
                 self.logFile.write("\ncorrect_button\t%4.4f\t%s" % (timeNow, event_label))
             print("\n%s button pressed!" % event_label)
 
-            parent.enableLog = True
+            #leaving wait_for_button, turn logging on for next return to this state
+            self.enableLog = True
+            self.fistVisit = True
             parent.buttonTimedOut = False
-            # re enable logging for future visits
-
             return self.nextState[0]
 
         if parent.buttonTimedOut:
             if self.logFile:
                 self.logFile.write("\nbutton timed out!\t %4.4f\t" % timeNow)
 
-            parent.enableLog = True
+            #leaving wait_for_button, turn logging on for next return to this state
+            self.enableLog = True
+            self.fistVisit = True
             parent.buttonTimedOut = False
             # re enable logging for future visits
             return self.nextState[1]
         else: # if not parent.buttonTimedOut
 
             time.sleep(0.1)
-
-            if parent.firstVisit:
-                parent.firstVisit = False
+            if self.firstVisit:
+                self.firstVisit = False
+                self.enableLog = False
                 parent.nextButtonTimeout = timeNow + parent.trialTimeout
 
             sys.stdout.write("Waiting for button... Time left: %4.4f \r" %
@@ -216,13 +219,16 @@ class wait_for_correct_button(gameState):
     def operation(self, parent):
         # Read from inbox
         event_label = parent.request_last_touch()
-        parent.startEnable = False
 
+        self.firstVisit = False
+        self.enableLog = False
         if event_label:
             if self.logFile:
                 self.logFile.write("\nbutton_pressed\t%s\t" % event_label)
             print("\n%s button pressed!" % event_label)
             nextFun = self.nextState[0] if parent.correctButton == event_label else self.nextState[1]
+            self.firstVisit = True
+            self.enableLog = True
             return nextFun
         else:
             time.sleep(0.01)
@@ -263,7 +269,6 @@ class end(gameState):
 class do_nothing(gameState):
 
     def operation(self, parent):
-
         #parent.enableLog = False
         time.sleep(1)
         return self.nextState[0]
