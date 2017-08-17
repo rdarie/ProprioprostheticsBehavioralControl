@@ -171,13 +171,17 @@ class wait_for_any_button_timed(gameState):
         event_label = parent.request_last_touch()
 
         timeNow = time.time()
-        if not self.firstVisit:
-            if parent.nextButtonTimeout < timeNow:
-                parent.buttonTimedOut = True
-        else:
+        if self.firstVisit:
             # Turn LED's On
             parent.outbox.put('redLED')
             parent.outbox.put('blueLED')
+
+            self.firstVisit = False
+            self.enableLog = False
+            parent.nextButtonTimeout = timeNow + parent.trialTimeout
+
+        if parent.nextButtonTimeout < timeNow:
+            parent.buttonTimedOut = True
 
         if event_label:
             if self.logFile:
@@ -202,10 +206,6 @@ class wait_for_any_button_timed(gameState):
             return self.nextState[1] # usually the post-trial state
         else: # if not parent.buttonTimedOut
             time.sleep(0.1)
-            if self.firstVisit:
-                self.firstVisit = False
-                self.enableLog = False
-                parent.nextButtonTimeout = timeNow + parent.trialTimeout
 
             sys.stdout.write("Waiting for button... Time left: %4.4f \r" %
                 (parent.nextButtonTimeout - timeNow))
