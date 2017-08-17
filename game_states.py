@@ -188,7 +188,7 @@ class wait_for_any_button_timed(gameState):
             self.enableLog = True
             self.fistVisit = True
             parent.buttonTimedOut = False
-            return self.nextState[0]
+            return self.nextState[0] # usually the good state
 
         if parent.buttonTimedOut:
             if self.logFile:
@@ -199,9 +199,8 @@ class wait_for_any_button_timed(gameState):
             self.fistVisit = True
             parent.buttonTimedOut = False
             # re enable logging for future visits
-            return self.nextState[1]
+            return self.nextState[1] # usually the post-trial state
         else: # if not parent.buttonTimedOut
-
             time.sleep(0.1)
             if self.firstVisit:
                 self.firstVisit = False
