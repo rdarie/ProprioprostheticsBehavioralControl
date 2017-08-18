@@ -27,7 +27,6 @@ class gameState(object):
         if self.nextTimeOut < timeNow:
             self.timedOut = True
 
-
     def __call__(self, *args):
 
         if self.logFile:
@@ -49,13 +48,13 @@ class gameState(object):
 class fixation(gameState):
 
     def operation(self, parent):
+        self.checkTimedOut()
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (self.nextTimeOut - timeNow))
         sys.stdout.flush()
 
         time.sleep(self.sleepTime)
-        self.checkTimedOut()
 
         if self.timedOut:
             #leaving fixation, turn logging on for next return to fixation
@@ -73,30 +72,31 @@ class fixation(gameState):
 class strict_fixation(gameState):
     # IF button presses happen here, give bad feedback
     def operation(self, parent):
-        timeNow = time.time()
+        self.checkTimedOut()
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (parent.nextEnableTime - timeNow))
         sys.stdout.flush()
 
-        time.sleep(0.25)
+        time.sleep(self.sleepTime)
         # Read from inbox
         event_label = parent.request_last_touch()
+
         if event_label:
+            # if erroneous button press, play bad tone, and penalize with an extra
+            # 2 second wait
             parent.speaker.play_tone('Bad')
             time.sleep(2)
-            parent.nextEnableTime = parent.nextEnableTime + 2
+            self.nextTimeOut = self.nextTimeOut + 2
+            # clear button queue for next iteration
             if parent.inputPin.last_data is not None:
                 parent.inputPin.last_data = None
 
-        if parent.nextEnableTime < timeNow:
-            parent.startEnable = True
-
-        if parent.startEnable:
+        if self.timedOut:
             #leaving fixation, turn logging on for next return to fixation
             self.enableLog = True
             self.firstVisit = True
-            parent.startEnable = False
+            self.timedOut = False
             return self.nextState[0]
         else:
             # not yet enabled
@@ -146,7 +146,7 @@ class trial_start(gameState):
 class set_correct(gameState):
 
     def operation(self, parent):
-        parent.correctButton = 'red' if random.randint(0,1) == 0 else 'blue'
+        parent.correctButton = 'red' if randint(0,1) == 0 else 'blue'
         print('  ')
         print('Correct button set to: %s' % parent.correctButton)
 
@@ -167,7 +167,7 @@ class wait_for_any_button(gameState):
             self.firstVisit = True
             return self.nextState[0]
         else:
-            time.sleep(0.1)
+            time.sleep(self.sleepTime)
 
             sys.stdout.write("Waiting for button...\r")
             sys.stdout.flush()
@@ -178,10 +178,7 @@ class wait_for_any_button(gameState):
 
 class wait_for_any_button_timed(gameState):
     def operation(self, parent):
-        # Read from inbox
-        event_label = parent.request_last_touch()
 
-        timeNow = time.time()
         if self.firstVisit:
             # Turn LED's On
             parent.outbox.put('redLED')
@@ -189,14 +186,15 @@ class wait_for_any_button_timed(gameState):
 
             self.firstVisit = False
             self.enableLog = False
-            parent.nextButtonTimeout = timeNow + parent.trialTimeout
+            self.nextTimeOut = self.timeNow + parent.trialTimeout
 
-        if parent.nextButtonTimeout < timeNow:
-            parent.buttonTimedOut = True
+        self.checkTimedOut()
+        # Read from inbox
+        event_label = parent.request_last_touch()
 
         if event_label:
             if self.logFile:
-                self.logFile.write("\ncorrect_button\t%4.4f\t%s" % (timeNow, event_label))
+                self.logFile.write("\ncorrect_button\t%4.4f\t%s" % (self.timeNow, event_label))
             print("\n%s button pressed!" % event_label)
 
             #leaving wait_for_button, turn logging on for next return to this state
@@ -205,9 +203,9 @@ class wait_for_any_button_timed(gameState):
             parent.buttonTimedOut = False
             return self.nextState[0] # usually the good state
 
-        if parent.buttonTimedOut:
+        if self.timedOut:
             if self.logFile:
-                self.logFile.write("\nbutton timed out!\t %4.4f\t" % timeNow)
+                self.logFile.write("\nbutton timed out!\t %4.4f\t" % self.timeNow)
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
@@ -215,33 +213,39 @@ class wait_for_any_button_timed(gameState):
             parent.buttonTimedOut = False
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
+
         else: # if not parent.buttonTimedOut
-            time.sleep(0.1)
+            time.sleep(self.sleepTime)
 
             sys.stdout.write("Waiting for button... Time left: %4.4f \r" %
-                (parent.nextButtonTimeout - timeNow))
+                (self.nextTimeOut - self.timeNow))
             sys.stdout.flush()
 
             return 'wait_for_any_button_timed'
 
 
 class wait_for_correct_button(gameState):
+
     def operation(self, parent):
         # Read from inbox
         event_label = parent.request_last_touch()
 
-        self.firstVisit = False
-        self.enableLog = False
+        if self.firstVisit:
+            self.firstVisit = False
+            self.enableLog = False
+
         if event_label:
             if self.logFile:
                 self.logFile.write("\nbutton_pressed\t%s\t" % event_label)
             print("\n%s button pressed!" % event_label)
+
             nextFun = self.nextState[0] if parent.correctButton == event_label else self.nextState[1]
+
             self.firstVisit = True
             self.enableLog = True
             return nextFun
         else:
-            time.sleep(0.01)
+            time.sleep(self.sleepTime)
             sys.stdout.write("Waiting for button...\r")
             sys.stdout.flush()
             return 'wait_for_correct_button'
@@ -272,7 +276,6 @@ class post_trial(gameState):
 class end(gameState):
 
     def operation(self, parent):
-
         print('@game_states.py, end')
         return self.nextState[0]
 
