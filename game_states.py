@@ -5,14 +5,28 @@ from random import uniform, randint
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
         self.nextState = nextState
+
         self.enableLog = True
         self.firstVisit = True
+
+        self.sleepTime = 0.1
+        self.timeNow = time.time()
+        self.timedOut = False
+        self.nextTimeOut = 0
+
         self.logFile = logFile
         self.parent = parent
         self.__name__ = stateName
 
     def operation(self, parent):
         pass
+
+    def checkTimedOut(self):
+        self.timeNow = time.time()
+
+        if self.nextTimeOut < timeNow:
+            self.timedOut = True
+
 
     def __call__(self, *args):
 
@@ -35,18 +49,15 @@ class gameState(object):
 class fixation(gameState):
 
     def operation(self, parent):
-        timeNow = time.time()
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
-         % (parent.nextEnableTime - timeNow))
+         % (self.nextTimeOut - timeNow))
         sys.stdout.flush()
 
-        time.sleep(0.5)
+        time.sleep(self.sleepTime)
+        self.checkTimedOut()
 
-        if parent.nextEnableTime < timeNow:
-            parent.startEnable = True
-
-        if parent.startEnable:
+        if self.timedOut:
             #leaving fixation, turn logging on for next return to fixation
             self.enableLog = True
             self.firstVisit = True
