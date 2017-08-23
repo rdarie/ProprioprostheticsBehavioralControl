@@ -185,6 +185,8 @@ class wait_for_any_button(gameState):
 class wait_for_any_button_timed(gameState):
     def operation(self, parent):
 
+        self.checkTimedOut()
+
         if self.firstVisit:
             # Turn LED's On
             parent.outbox.put('redLED')
@@ -192,9 +194,8 @@ class wait_for_any_button_timed(gameState):
 
             self.firstVisit = False
             self.enableLog = False
-            self.nextTimeOut = self.timeNow + parent.trialTimeout
 
-        self.checkTimedOut()
+            self.nextTimeOut = self.timeNow + parent.trialTimeout
         # Read from inbox
         event_label = parent.request_last_touch()
 
@@ -206,7 +207,7 @@ class wait_for_any_button_timed(gameState):
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
             self.firstVisit = True
-            parent.buttonTimedOut = False
+            self.timedOut = False
             return self.nextState[0] # usually the good state
 
         if self.timedOut:
@@ -216,7 +217,7 @@ class wait_for_any_button_timed(gameState):
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
             self.firstVisit = True
-            parent.buttonTimedOut = False
+            self.timedOut = False
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
 
