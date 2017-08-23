@@ -50,6 +50,9 @@ class fixation(gameState):
     def operation(self, parent):
         self.checkTimedOut()
 
+        if self.firstVisit:
+            self.nextTimeOut = self.timeNow + parent.trialLength
+
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (self.nextTimeOut - self.timeNow))
         sys.stdout.flush()
@@ -73,6 +76,9 @@ class strict_fixation(gameState):
     # IF button presses happen here, give bad feedback
     def operation(self, parent):
         self.checkTimedOut()
+
+        if self.firstVisit:
+            self.nextTimeOut = self.timeNow + parent.trialLength
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (self.nextTimeOut - self.timeNow))
