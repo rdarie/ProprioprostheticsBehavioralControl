@@ -200,7 +200,7 @@ class wait_for_any_button_timed(gameState):
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
             self.firstVisit = True
-            parent.buttonTimedOut = False
+            self.timedOut = False
             return self.nextState[0] # usually the good state
 
         if self.timedOut:
@@ -210,7 +210,7 @@ class wait_for_any_button_timed(gameState):
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
             self.firstVisit = True
-            parent.buttonTimedOut = False
+            self.timedOut = False
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
 
