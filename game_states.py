@@ -197,7 +197,7 @@ class wait_for_any_button_timed(gameState):
             self.firstVisit = False
             self.enableLog = False
 
-            self.nextTimeOut = self.timeNow + parent.trialTimeout
+            self.nextTimeOut = self.timeNow + self.nextTimeOut
         # Read from inbox
         event_label = parent.request_last_touch()
 
@@ -278,7 +278,6 @@ class post_trial(gameState):
 
     def operation(self, parent):
         print('At post trial')
-        parent.nextEnableTime = time.time() + parent.trialLength
         parent.outbox.put('redLED')
         parent.outbox.put('blueLED')
         return self.nextState[0]
