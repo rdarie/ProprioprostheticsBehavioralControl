@@ -63,7 +63,7 @@ class fixation(gameState):
             #leaving fixation, turn logging on for next return to fixation
             self.enableLog = True
             self.firstVisit = True
-            parent.startEnable = False
+            self.timedOut = False
             return self.nextState[0]
         else:
             # not yet enabled
