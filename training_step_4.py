@@ -61,6 +61,9 @@ gitPath = os.path.dirname(os.path.realpath(__file__))
 with open(gitPath + '/' + '.waveLocation', 'r') as wf:
     wavePath = wf.read().replace('\n', '')
 
+with open(gitPath + '/' + '.dataAnalysisLocation', 'r') as f:
+	dataAnalysisPath = f.read().replace('\n', '')
+
 soundPaths = {
 'Go' : wavePath + "/go_tone.wav",
 'Good' : wavePath + "/good_tone.wav",
@@ -204,7 +207,7 @@ if logToWeb:
 
     shutil.move(src,dst)
 
-    scriptPath = '/home/pi/research/Data-Analysis/evaluatePerformance.py'
+    scriptPath = dataAnalysisPath + '/dataAnalysis/behavioral/evaluatePerformance.py'
     subprocess.check_output('python3 ' + scriptPath + ' --file '  + '\"' +
         SM.logFileName.split('/')[-1] + '\"' + ' --folder \"' +
         SM.serverFolder + '\"', shell=True)

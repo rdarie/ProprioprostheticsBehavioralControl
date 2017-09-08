@@ -24,15 +24,15 @@ class gameState(object):
     def checkTimedOut(self):
         self.timeNow = time.time()
 
-        if self.nextTimeOut < timeNow:
+        if self.nextTimeOut < self.timeNow:
             self.timedOut = True
 
     def __call__(self, *args):
 
         if self.logFile:
             if self.enableLog:
-                timeNow = time.time()
-                self.logFile.write("\n%s\t%4.4f" % ( self.__name__, timeNow))
+                self.timeNow = time.time()
+                self.logFile.write("\n%s\t%4.4f" % ( self.__name__, self.timeNow))
 
         if self.parent.remoteOverride is None:
             #print("in Python: Override is none! I am %s" % self.__name__)
@@ -50,8 +50,11 @@ class fixation(gameState):
     def operation(self, parent):
         self.checkTimedOut()
 
+        if self.firstVisit:
+            self.nextTimeOut = self.timeNow + parent.trialLength
+
         sys.stdout.write("At fixation. Time left: %4.4f \r"
-         % (self.nextTimeOut - timeNow))
+         % (self.nextTimeOut - self.timeNow))
         sys.stdout.flush()
 
         time.sleep(self.sleepTime)
@@ -74,8 +77,11 @@ class strict_fixation(gameState):
     def operation(self, parent):
         self.checkTimedOut()
 
+        if self.firstVisit:
+            self.nextTimeOut = self.timeNow + parent.trialLength
+
         sys.stdout.write("At fixation. Time left: %4.4f \r"
-         % (parent.nextEnableTime - timeNow))
+         % (self.nextTimeOut - self.timeNow))
         sys.stdout.flush()
 
         time.sleep(self.sleepTime)
@@ -179,6 +185,8 @@ class wait_for_any_button(gameState):
 class wait_for_any_button_timed(gameState):
     def operation(self, parent):
 
+        self.checkTimedOut()
+
         if self.firstVisit:
             # Turn LED's On
             parent.outbox.put('redLED')
@@ -186,9 +194,8 @@ class wait_for_any_button_timed(gameState):
 
             self.firstVisit = False
             self.enableLog = False
-            self.nextTimeOut = self.timeNow + parent.trialTimeout
 
-        self.checkTimedOut()
+            self.nextTimeOut = self.timeNow + parent.trialTimeout
         # Read from inbox
         event_label = parent.request_last_touch()
 

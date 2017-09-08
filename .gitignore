@@ -51,6 +51,7 @@ Temporary Items
 
 # Repo specific files
 .waveLocation
+.dataAnalysisPath
 go_tone.wav
 good_tone.wav
 bad_tone.wav
