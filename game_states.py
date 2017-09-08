@@ -80,6 +80,7 @@ class strict_fixation(gameState):
         self.checkTimedOut()
 
         if self.firstVisit:
+            print('Started strict fixation')
             self.nextTimeOut = self.timeNow + parent.trialLength
             self.enableLog = False
             self.firstVisit = False
@@ -193,6 +194,7 @@ class wait_for_any_button_timed(gameState):
         self.checkTimedOut()
 
         if self.firstVisit:
+            print('Started Timed Button')
             # Turn LED's On
             parent.outbox.put('redLED')
             parent.outbox.put('blueLED')
