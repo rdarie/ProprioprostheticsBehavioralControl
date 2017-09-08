@@ -79,6 +79,8 @@ class strict_fixation(gameState):
 
         if self.firstVisit:
             self.nextTimeOut = self.timeNow + parent.trialLength
+            self.enableLog = False
+            self.firstVisit = False
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (self.nextTimeOut - self.timeNow))
