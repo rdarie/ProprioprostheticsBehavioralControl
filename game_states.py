@@ -275,6 +275,7 @@ class bad(gameState):
 class post_trial(gameState):
 
     def operation(self, parent):
+        print('At post trial')
         parent.nextEnableTime = time.time() + parent.trialLength
         parent.outbox.put('redLED')
         parent.outbox.put('blueLED')
