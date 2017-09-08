@@ -77,8 +77,6 @@ class fixation(gameState):
 class strict_fixation(gameState):
     # IF button presses happen here, give bad feedback
     def operation(self, parent):
-        self.checkTimedOut()
-
         if self.firstVisit:
             print('Started strict fixation')
             self.nextTimeOut = self.timeNow + parent.trialLength
@@ -88,6 +86,8 @@ class strict_fixation(gameState):
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (self.nextTimeOut - self.timeNow))
         sys.stdout.flush()
+
+        self.checkTimedOut()
 
         time.sleep(self.sleepTime)
         # Read from inbox
@@ -191,8 +191,6 @@ class wait_for_any_button(gameState):
 class wait_for_any_button_timed(gameState):
     def operation(self, parent):
 
-        self.checkTimedOut()
-
         if self.firstVisit:
             print('Started Timed Button')
             # Turn LED's On
@@ -205,6 +203,8 @@ class wait_for_any_button_timed(gameState):
             self.nextTimeOut = self.timeNow + parent.trialTimeout
         # Read from inbox
         event_label = parent.request_last_touch()
+
+        self.checkTimedOut()
 
         if event_label:
             if self.logFile:
