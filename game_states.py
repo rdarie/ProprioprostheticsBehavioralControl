@@ -53,6 +53,7 @@ class fixation(gameState):
         if self.firstVisit:
             self.nextTimeOut = self.timeNow + parent.trialLength
 
+
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (self.nextTimeOut - self.timeNow))
         sys.stdout.flush()
@@ -64,6 +65,7 @@ class fixation(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            print(' ')
             return self.nextState[0]
         else:
             # not yet enabled
@@ -105,6 +107,7 @@ class strict_fixation(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            print(' ')
             return self.nextState[0]
         else:
             # not yet enabled
@@ -210,6 +213,7 @@ class wait_for_any_button_timed(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            print(' ')
             return self.nextState[0] # usually the good state
 
         if self.timedOut:
@@ -220,6 +224,7 @@ class wait_for_any_button_timed(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            print(' ')
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
 
