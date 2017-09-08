@@ -46,7 +46,7 @@ parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
 parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
-parser.add_argument('--volume', default = '0.01')
+parser.add_argument('--volume', default = '0.2')
 
 args = parser.parse_args()
 

@@ -62,7 +62,7 @@ with open(gitPath + '/' + '.waveLocation', 'r') as wf:
     wavePath = wf.read().replace('\n', '')
 
 with open(gitPath + '/' + '.dataAnalysisLocation', 'r') as f:
-dataAnalysisPath = f.read().replace('\n', '')
+	dataAnalysisPath = f.read().replace('\n', '')
 
 soundPaths = {
 'Go' : wavePath + "/go_tone.wav",
