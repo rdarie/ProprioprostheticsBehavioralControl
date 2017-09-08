@@ -202,7 +202,7 @@ class wait_for_any_button_timed(gameState):
             self.firstVisit = False
             self.enableLog = False
 
-            self.nextTimeOut = self.timeNow + self.nextTimeOut
+            self.nextTimeOut = self.timeNow + parent.trialTimeout
         # Read from inbox
         event_label = parent.request_last_touch()
 
