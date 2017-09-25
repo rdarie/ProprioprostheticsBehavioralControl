@@ -44,7 +44,7 @@ parser.add_argument('--trialTimeout', default = '5')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
-parser.add_argument('--logLocally', default = 'False')
+parser.add_argument('--logLocally', default = 'True')
 parser.add_argument('--logToWeb', default = 'False')
 parser.add_argument('--volume', default = '0.1')
 
