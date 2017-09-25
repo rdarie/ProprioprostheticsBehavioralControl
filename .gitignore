@@ -48,6 +48,9 @@ Temporary Items
 
 # Python specific files
 .pyc
+build/
+dist/
+
 
 # Repo specific files
 .waveLocation

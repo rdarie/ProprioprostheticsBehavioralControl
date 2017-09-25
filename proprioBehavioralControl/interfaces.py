@@ -106,7 +106,7 @@ class motorInterface(object):
         self.idle_current = 2.5
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
-        self.velocity = 5 #move speed in rev/sec. Range is .025 - 50
+        self.velocity = 3 #move speed in rev/sec. Range is .025 - 50
         serial_message = "VE" + str(self.velocity) + "\r"
         self.serial.write(serial_message.encode())
 
@@ -126,6 +126,10 @@ class motorInterface(object):
         serial_message = "DI"+str(self.step_size)+"\r"
 
         self.serial.write(serial_message.encode())
+
+        if self.debugging:
+            print("sent message: " + serial_message)
+
         self.serial.write("FL\r".encode())
 
         self.current_position += self.step_size
