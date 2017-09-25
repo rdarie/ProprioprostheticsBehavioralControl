@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Training Step 3
+Training Step 4
 ========
 The "Go" tone goes off.
 Buttons light up.
@@ -29,7 +29,7 @@ from game_states import *
 import interfaces as ifaces
 from helperFunctions import *
 
-import argparse, os, shutil, subprocess
+import argparse, os, os.path, shutil, subprocess
 
 # Power indicator
 GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
@@ -44,7 +44,7 @@ parser.add_argument('--trialTimeout', default = '5')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
-parser.add_argument('--logLocally', default = 'True')
+parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
 parser.add_argument('--volume', default = '0.1')
 
@@ -57,11 +57,15 @@ argPlayWelcomeTone = args.playWelcomeTone
 argVolume = float(args.volume)
 
 global wavePath
-gitPath = os.path.dirname(os.path.realpath(__file__))
-with open(gitPath + '/' + '.waveLocation', 'r') as wf:
+curfilePath = os.path.abspath(__file__)
+curDir = os.path.abspath(os.path.join(curfilePath,os.pardir)) # this will return current directory in which python file resides.
+parentDir = os.path.abspath(os.path.join(curDir,os.pardir)) # this will return parent directory.
+print(parentDir)
+
+with open(parentDir + '/' + '.waveLocation', 'r') as wf:
     wavePath = wf.read().replace('\n', '')
 
-with open(gitPath + '/' + '.dataAnalysisLocation', 'r') as f:
+with open(parentDir + '/' + '.dataAnalysisLocation', 'r') as f:
 	dataAnalysisPath = f.read().replace('\n', '')
 
 soundPaths = {
