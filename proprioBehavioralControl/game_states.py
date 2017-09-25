@@ -1,6 +1,6 @@
 import sys, random, time, pdb, shutil
 from helperFunctions import overRideAdder
-from random import uniform, randint
+
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
@@ -126,17 +126,16 @@ class turnPedalRandom(gameState):
         #parent.speaker.play_tone('Go')
         #time.sleep(5)
 
-        parent.motor.step_size = uniform(2e4, 4e4)
+        parent.motor.step_size = random.uniform(3e4, 6e4)
 
-        direction = randint(0, 1)
+        direction = bool(random.getrandbits(1))
         if direction:
             parent.motor.forward()
         else:
             parent.motor.backward()
 
-        time.sleep(1.5)
         parent.motor.go_home()
-        time.sleep(1.5)
+        time.sleep(2)
         return self.nextState[0]
 
 class clear_input_queue(gameState):
