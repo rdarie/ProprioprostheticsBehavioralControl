@@ -1,6 +1,6 @@
 import sys, random, time, pdb, shutil
 from helperFunctions import overRideAdder
-
+from collections import OrderedDict
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
@@ -52,7 +52,6 @@ class fixation(gameState):
 
         if self.firstVisit:
             self.nextTimeOut = self.timeNow + parent.trialLength
-
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (self.nextTimeOut - self.timeNow))
@@ -126,16 +125,24 @@ class turnPedalRandom(gameState):
         #parent.speaker.play_tone('Go')
         #time.sleep(5)
 
-        parent.motor.step_size = random.uniform(3e4, 6e4)
+        category = 'small' if bool(random.getrandbits(1)) else 'big'
+        parent.motor.step_size = random.uniform(2e4, 4e4) if category == 'small' else random.uniform(5e4, 7e4)
 
-        direction = bool(random.getrandbits(1))
-        if direction:
+        direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+        if direction == 'forward':
             parent.motor.forward()
+            if self.logFile:
+                self.logFile.write("\nmoved to: \t%4.4f\t" % parent.motor.step_size)
         else:
             parent.motor.backward()
+            if self.logFile:
+                self.logFile.write("\nmoved to: \t%4.4f\t" % -parent.motor.step_size)
 
         parent.motor.go_home()
         time.sleep(2)
+
+        parent.magnitudeQueue.append(parent.motor.step_size)
+
         return self.nextState[0]
 
 class clear_input_queue(gameState):
@@ -154,10 +161,18 @@ class trial_start(gameState):
         print('Trial Started!')
         return self.nextState[0]
 
+class chooseNextTrial(gameState):
+
+    def operation(self, parent):
+        bins = [0, 1/3, 1]
+        draw = random.uniform(0,1)
+        return self.nextState[int(np.digitize(draw, bins) - 1)]
+
 class set_correct(gameState):
 
     def operation(self, parent):
-        parent.correctButton = 'red' if randint(0,1) == 0 else 'blue'
+        parent.correctButton = 'red' if parent.magnitudeQueue[0] < parent.magnitudeQueue[1] else 'green'
+        parent.magnitudeQueue = []
         print('  ')
         print('Correct button set to: %s' % parent.correctButton)
 
@@ -194,7 +209,7 @@ class wait_for_any_button_timed(gameState):
             print('Started Timed Button')
             # Turn LED's On
             parent.outbox.put('redLED')
-            parent.outbox.put('blueLED')
+            parent.outbox.put('greenLED')
 
             self.firstVisit = False
             self.enableLog = False
@@ -214,6 +229,8 @@ class wait_for_any_button_timed(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            parent.outbox.put('redLED')
+            parent.outbox.put('blueLED')
             print(' ')
             return self.nextState[0] # usually the good state
 
@@ -225,6 +242,8 @@ class wait_for_any_button_timed(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            parent.outbox.put('redLED')
+            parent.outbox.put('blueLED')
             print(' ')
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
@@ -236,7 +255,68 @@ class wait_for_any_button_timed(gameState):
                 (self.nextTimeOut - self.timeNow))
             sys.stdout.flush()
 
-            return 'wait_for_any_button_timed'
+            return self.nextState[2]
+
+class wait_for_correct_button_timed(gameState):
+    def operation(self, parent):
+
+        if self.firstVisit:
+            print('Started Timed Button')
+            # Turn LED's On
+            parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
+
+            self.firstVisit = False
+            self.enableLog = False
+
+            self.nextTimeOut = self.timeNow + parent.trialTimeout
+        # Read from inbox
+        event_label = parent.request_last_touch()
+
+        self.checkTimedOut()
+
+        if event_label:
+
+            #leaving wait_for_button, turn logging on for next return to this state
+            self.enableLog = True
+            self.firstVisit = True
+            self.timedOut = False
+            parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
+
+            print(' ')
+
+            if event_label == parent.correctButton:
+                if self.logFile:
+                    self.logFile.write("\ncorrect_button\t%4.4f\t%s" % (self.timeNow, event_label))
+                print("\n%s button pressed correctly!" % event_label)
+                return self.nextState[0] # usually the good state
+            else:
+                if self.logFile:
+                    self.logFile.write("\nincorrect_button\t%4.4f\t%s" % (self.timeNow, event_label))
+                print("\n%s button pressed incorrectly!" % event_label)
+                return self.nextState[1] # usually the good state
+
+        if self.timedOut:
+            if self.logFile:
+                self.logFile.write("\nbutton timed out!\t %4.4f\t" % self.timeNow)
+
+            #leaving wait_for_button, turn logging on for next return to this state
+            self.enableLog = True
+            self.firstVisit = True
+            self.timedOut = False
+            parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
+
+            print(' ')
+            # re enable logging for future visits
+            return self.nextState[1] # usually the post-trial state
+
+        else: # if not parent.buttonTimedOut
+            time.sleep(self.sleepTime)
+
+            sys.stdout.write("Waiting for button... Time left: %4.4f \r" %
+                (self.nextTimeOut - self.timeNow))
+            sys.stdout.flush()
+
+            return self.nextState[2]
 
 
 class wait_for_correct_button(gameState):
@@ -284,8 +364,6 @@ class post_trial(gameState):
 
     def operation(self, parent):
         print('At post trial')
-        parent.outbox.put('redLED')
-        parent.outbox.put('blueLED')
         return self.nextState[0]
 
 class end(gameState):
