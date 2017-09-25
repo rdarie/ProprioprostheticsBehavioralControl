@@ -100,13 +100,13 @@ class motorInterface(object):
         self.serialPortName = serialPortName
         self.serial = ser
 
-        self.current = 3
+        self.current = 2.5
         serial_message = "CC" + str(self.current) + "\r"
         self.serial.write(serial_message.encode())
-        self.idle_current = 3
+        self.idle_current = 2.5
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
-        self.velocity = 2 #move speed in rev/sec. Range is .025 - 50
+        self.velocity = 5 #move speed in rev/sec. Range is .025 - 50
         serial_message = "VE" + str(self.velocity) + "\r"
         self.serial.write(serial_message.encode())
 
