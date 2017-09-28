@@ -40,7 +40,7 @@ sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trialLength', default = '1')
-parser.add_argument('--trialTimeout', default = '1')
+parser.add_argument('--trialTimeout', default = '3')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
@@ -77,7 +77,7 @@ playWelcomeTone = True if args.playWelcomeTone == 'True' else False
 if playWelcomeTone:
     pygame.mixer.init()
     welcomeChime = pygame.mixer.Sound(wavePath + "/violin_C5.wav")
-    welcomeChime.set_volume(argVolume)
+    welcomeChime.set_volume(2 * argVolume)
     welcomeChime.play()
 
 playWhiteNoise = True if args.playWhiteNoise == 'True' else False
@@ -99,7 +99,7 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
     levels = [GPIO.LOW, GPIO.LOW], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[6,16,25], labels=['redLED', 'greenLED', 'Reward'],
+juicePin = GPIO_Output(pins=[16,6,25], labels=['redLED', 'greenLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', ('pulse', .5)])
 

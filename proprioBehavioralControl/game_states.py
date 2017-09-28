@@ -1,4 +1,5 @@
 import sys, random, time, pdb, shutil
+import numpy as np
 from helperFunctions import overRideAdder
 from collections import OrderedDict
 
@@ -123,10 +124,11 @@ class turnPedalRandom(gameState):
         #parent.speaker.play_tone('Go')
         #time.sleep(0.5)
         #parent.speaker.play_tone('Go')
-        #time.sleep(5)
+        
+        time.sleep(2)
 
         category = 'small' if bool(random.getrandbits(1)) else 'big'
-        parent.motor.step_size = random.uniform(2e4, 4e4) if category == 'small' else random.uniform(5e4, 7e4)
+        parent.motor.step_size = random.uniform(1e4, 2e4) if category == 'small' else random.uniform(5e4, 6e4)
 
         direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
         if direction == 'forward':
@@ -172,7 +174,6 @@ class set_correct(gameState):
 
     def operation(self, parent):
         parent.correctButton = 'red' if parent.magnitudeQueue[0] < parent.magnitudeQueue[1] else 'green'
-        parent.magnitudeQueue = []
         print('  ')
         print('Correct button set to: %s' % parent.correctButton)
 
@@ -230,7 +231,7 @@ class wait_for_any_button_timed(gameState):
             self.firstVisit = True
             self.timedOut = False
             parent.outbox.put('redLED')
-            parent.outbox.put('blueLED')
+            parent.outbox.put('greenLED')
             print(' ')
             return self.nextState[0] # usually the good state
 
@@ -243,7 +244,7 @@ class wait_for_any_button_timed(gameState):
             self.firstVisit = True
             self.timedOut = False
             parent.outbox.put('redLED')
-            parent.outbox.put('blueLED')
+            parent.outbox.put('greenLED')
             print(' ')
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
@@ -364,6 +365,7 @@ class post_trial(gameState):
 
     def operation(self, parent):
         print('At post trial')
+        parent.magnitudeQueue = []
         return self.nextState[0]
 
 class end(gameState):
