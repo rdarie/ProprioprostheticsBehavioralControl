@@ -99,7 +99,7 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
     levels = [GPIO.LOW, GPIO.LOW], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[6,16,25], labels=['redLED', 'blueLED', 'Reward'],
+juicePin = GPIO_Output(pins=[6,16,25], labels=['redLED', 'greenLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', ('pulse', .5)])
 

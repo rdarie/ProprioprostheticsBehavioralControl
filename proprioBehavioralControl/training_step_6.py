@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Training Step 5
+Training Step 6
 ========
 The "Go" tone goes off.
 Buttons light up.
@@ -148,7 +148,7 @@ logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
-        [sessionTime, 'Button Pressing Step 5', '', '',
+        [sessionTime, 'Button Pressing Step 6', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime]
         ]
 
@@ -162,14 +162,15 @@ SM.add_state(strict_fixation(['turnPedalRandom_1',  'fixation'], SM, 'fixation',
 SM.add_state(turnPedalRandom(['turnPedalRandom_2'], SM, 'turnPedalRandom_1', logFile = thisLog))
 SM.add_state(turnPedalRandom(['clear_input_queue'], SM, 'turnPedalRandom_2', logFile = thisLog))
 SM.add_state(clear_input_queue(['chooseNextTrial'], SM, 'clear_input_queue', logFile = thisLog))
-SM.add_state(chooseNextTrial(['goBoth', 'set_correct'], SM, 'chooseNextTrial', logFile = thisLog))
+SM.add_state(chooseNextTrial(['easy', 'hard'], SM, 'chooseNextTrial', logFile = thisLog))
 
 # if in this trial, both buttons will be seen as correct
-SM.add_state(trial_start(['wait_for_any_button_timed'], SM, 'goBoth', logFile = thisLog))
-SM.add_state(wait_for_any_button_timed(['good', 'bad', 'wait_for_any_button_timed'], SM, 'wait_for_any_button_timed', logFile = thisLog))
+SM.add_state(set_correct(['goHard'], SM, 'hard', logFile = thisLog))
+SM.add_state(trial_start(['wait_for_correct_button_timed_uncued'], SM, 'goHard', logFile = thisLog))
+SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad', 'wait_for_correct_button_timed_uncued'], SM, 'wait_for_correct_button_timed_uncued', logFile = thisLog))
 #if in this trial, a button will be assigned based on the longer direction
-SM.add_state(set_correct(['goOne'], SM, 'set_correct', logFile = thisLog))
-SM.add_state(trial_start(['wait_for_correct_button_timed'], SM, 'goOne', logFile = thisLog))
+SM.add_state(set_correct(['goEasy'], SM, 'easy', logFile = thisLog))
+SM.add_state(trial_start(['wait_for_correct_button_timed'], SM, 'goEasy', logFile = thisLog))
 SM.add_state(wait_for_correct_button_timed(['good', 'bad', 'wait_for_correct_button_timed'], SM, 'wait_for_correct_button_timed', logFile = thisLog))
 
 SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog))
@@ -227,7 +228,7 @@ finally:
             SM.logFileName.split('/')[-1] + '\"' + ' --folder \"' +
             SM.serverFolder + '\"', shell=True)
 
-    print('Ending Execution of Training_step_5.py')
+    print('Ending Execution of Training_step_6.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
