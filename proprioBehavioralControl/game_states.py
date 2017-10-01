@@ -183,7 +183,7 @@ class wait_for_any_button(gameState):
 
         if event_label:
             if self.logFile:
-                self.logFile.write("\ncorrect_button\t%s\t" % event_label)
+                self.logFile.write("\ncorrect button\t%s\t" % event_label)
             print("\n%s button pressed!" % event_label)
 
             #leaving wait_for_button, turn logging on for next return to fixation
@@ -220,7 +220,7 @@ class wait_for_any_button_timed(gameState):
 
         if event_label:
             if self.logFile:
-                self.logFile.write("\ncorrect_button\t%4.4f\t%s" % (self.timeNow, event_label))
+                self.logFile.write("\ncorrect button\t%4.4f\t%s" % (self.timeNow, event_label))
             print("\n%s button pressed!" % event_label)
 
             #leaving wait_for_button, turn logging on for next return to this state
@@ -234,7 +234,7 @@ class wait_for_any_button_timed(gameState):
 
         if self.timedOut:
             if self.logFile:
-                self.logFile.write("\nbutton timed out!\t %4.4f\t" % self.timeNow)
+                self.logFile.write("\nbutton timed out\t %4.4f\t" % self.timeNow)
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
@@ -284,18 +284,18 @@ class wait_for_correct_button_timed(gameState):
 
             if event_label == parent.correctButton:
                 if self.logFile:
-                    self.logFile.write("\ncorrect_button\t%4.4f\t%s" % (self.timeNow, event_label))
+                    self.logFile.write("\ncorrect button\t%4.4f\t%s" % (self.timeNow, event_label))
                 print("\n%s button pressed correctly!" % event_label)
                 return self.nextState[0] # usually the good state
             else:
                 if self.logFile:
-                    self.logFile.write("\nincorrect_button\t%4.4f\t%s" % (self.timeNow, event_label))
+                    self.logFile.write("\nincorrect button\t%4.4f\t%s" % (self.timeNow, event_label))
                 print("\n%s button pressed incorrectly!" % event_label)
                 return self.nextState[1] # usually the good state
 
         if self.timedOut:
             if self.logFile:
-                self.logFile.write("\nbutton timed out!\t %4.4f\t" % self.timeNow)
+                self.logFile.write("\nbutton timed out\t %4.4f\t" % self.timeNow)
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
@@ -343,18 +343,18 @@ class wait_for_correct_button_timed_uncued(gameState):
 
             if event_label == parent.correctButton:
                 if self.logFile:
-                    self.logFile.write("\ncorrect_button\t%4.4f\t%s" % (self.timeNow, event_label))
+                    self.logFile.write("\ncorrect button\t%4.4f\t%s" % (self.timeNow, event_label))
                 print("\n%s button pressed correctly!" % event_label)
                 return self.nextState[0] # usually the good state
             else:
                 if self.logFile:
-                    self.logFile.write("\nincorrect_button\t%4.4f\t%s" % (self.timeNow, event_label))
+                    self.logFile.write("\nincorrect button\t%4.4f\t%s" % (self.timeNow, event_label))
                 print("\n%s button pressed incorrectly!" % event_label)
                 return self.nextState[1] # usually the good state
 
         if self.timedOut:
             if self.logFile:
-                self.logFile.write("\nbutton timed out!\t %4.4f\t" % self.timeNow)
+                self.logFile.write("\nbutton timed out\t %4.4f\t" % self.timeNow)
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
@@ -387,7 +387,7 @@ class wait_for_correct_button(gameState):
 
         if event_label:
             if self.logFile:
-                self.logFile.write("\nbutton_pressed\t%s\t" % event_label)
+                self.logFile.write("\nbutton pressed\t%s\t" % event_label)
             print("\n%s button pressed!" % event_label)
 
             nextFun = self.nextState[0] if parent.correctButton == event_label else self.nextState[1]
