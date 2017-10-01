@@ -1,4 +1,5 @@
 import sys, random, time, pdb, shutil
+import numpy as np
 from helperFunctions import overRideAdder
 from collections import OrderedDict
 
@@ -13,6 +14,8 @@ class gameState(object):
         self.timeNow = time.time()
         self.timedOut = False
         self.nextTimeOut = 0
+
+        self.payload = np.nan
 
         self.logFile = logFile
         self.parent = parent
@@ -29,11 +32,6 @@ class gameState(object):
 
     def __call__(self, *args):
 
-        if self.logFile:
-            if self.enableLog:
-                self.timeNow = time.time()
-                self.logFile.write("\n%s\t%4.4f" % ( self.__name__, self.timeNow))
-
         if self.parent.remoteOverride is None:
             #print("in Python: Override is none! I am %s" % self.__name__)
             ret = self.operation(self.parent)
@@ -43,6 +41,12 @@ class gameState(object):
             self.enableLog = True
             self.parent.remoteOverride = None
         #print("returning %s" % ret)
+        if self.logFile:
+            self.checkTimedOut()
+            if self.enableLog:
+                self.timeNow = time.time()
+                self.logFile.write("\n%s\t%4.4f\t%4.4f" % ( self.__name__, self.timeNow, self.payload))
+
         return ret
 
 class fixation(gameState):
@@ -120,11 +124,6 @@ class turnPedalRandom(gameState):
 
     def operation(self, parent):
 
-        #parent.speaker.play_tone('Go')
-        #time.sleep(0.5)
-        #parent.speaker.play_tone('Go')
-        #time.sleep(5)
-
         category = 'small' if bool(random.getrandbits(1)) else 'big'
         parent.motor.step_size = random.uniform(2e4, 4e4) if category == 'small' else random.uniform(5e4, 7e4)
 
@@ -132,11 +131,11 @@ class turnPedalRandom(gameState):
         if direction == 'forward':
             parent.motor.forward()
             if self.logFile:
-                self.logFile.write("\nmoved to: \t%4.4f\t" % parent.motor.step_size)
+                self.payload = parent.motor.step_size
         else:
             parent.motor.backward()
             if self.logFile:
-                self.logFile.write("\nmoved to: \t%4.4f\t" % -parent.motor.step_size)
+                self.payload = -parent.motor.step_size
 
         parent.motor.go_home()
         time.sleep(2)
