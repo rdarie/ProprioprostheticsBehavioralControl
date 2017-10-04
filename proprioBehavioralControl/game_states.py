@@ -42,7 +42,6 @@ class gameState(object):
             self.parent.remoteOverride = None
         #print("returning %s" % ret)
         if self.logFile:
-            self.checkTimedOut()
             if self.enableLog:
                 self.timeNow = time.time()
                 self.logFile.write("\n%s\t%4.4f\t%4.4f" % ( self.__name__, self.timeNow, self.payload))
