@@ -81,6 +81,7 @@ class strict_fixation(gameState):
     def operation(self, parent):
         if self.firstVisit:
             print('Started strict fixation')
+            self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.trialLength
             self.enableLog = False
             self.firstVisit = False
@@ -99,8 +100,8 @@ class strict_fixation(gameState):
             # if erroneous button press, play bad tone, and penalize with an extra
             # 2 second wait
             parent.speaker.play_tone('Bad')
-            time.sleep(2)
-            self.nextTimeOut = self.nextTimeOut + 2
+            time.sleep(3)
+            self.nextTimeOut = self.nextTimeOut + 3
             # clear button queue for next iteration
             if parent.inputPin.last_data is not None:
                 parent.inputPin.last_data = None
@@ -162,7 +163,7 @@ class trial_start(gameState):
 class chooseNextTrial(gameState):
 
     def operation(self, parent):
-        bins = [0, 3/4, 1]
+        bins = [0, 1/2, 1]
         draw = random.uniform(0,1)
         return self.nextState[int(np.digitize(draw, bins) - 1)]
 
@@ -211,6 +212,7 @@ class wait_for_any_button_timed(gameState):
             self.firstVisit = False
             self.enableLog = False
 
+            self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.trialTimeout
         # Read from inbox
         event_label = parent.request_last_touch()
@@ -265,6 +267,7 @@ class wait_for_correct_button_timed(gameState):
             self.firstVisit = False
             self.enableLog = False
 
+            self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.trialTimeout
         # Read from inbox
         event_label = parent.request_last_touch()
@@ -325,6 +328,7 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.firstVisit = False
             self.enableLog = False
 
+            self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.trialTimeout
         # Read from inbox
         event_label = parent.request_last_touch()
