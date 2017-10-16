@@ -50,7 +50,7 @@ Temporary Items
 .pyc
 build/
 dist/
-
+ProprioBehavioralControl.egg-info/SOURCES.txt
 
 # Repo specific files
 .waveLocation
