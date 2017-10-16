@@ -225,9 +225,9 @@ finally:
 
         scriptPath = dataAnalysisPath + '/dataAnalysis/behavioral/evaluatePerformance.py'
         subprocess.check_output('python3 ' + scriptPath +
-            ' --file '  + '\"' + SM.logFileName.split('/')[-1] + '\"' +
-            ' --folder \"' +  SM.serverFolder + '\"' +
-            '--outputFile \"' + SM.logFileName.split('/')[-1] + '\"',
+            ' --file '  + '\"' + SM.logFileName.split('/')[-1] + '\" ' +
+            ' --folder \"' +  SM.serverFolder + '\" ' +
+            '--outputFile \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
     print('Ending Execution of Training_step_6.py')
