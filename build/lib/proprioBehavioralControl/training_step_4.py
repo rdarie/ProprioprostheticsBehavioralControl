@@ -39,8 +39,8 @@ GPIO.output(5,True) ## Turn on GPIO pin 24
 sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--trialLength', default = '10')
-parser.add_argument('--trialTimeout', default = '5')
+parser.add_argument('--trialLength', default = '1')
+parser.add_argument('--trialTimeout', default = '1')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
@@ -57,10 +57,9 @@ argPlayWelcomeTone = args.playWelcomeTone
 argVolume = float(args.volume)
 
 global wavePath
-curFilePath = os.path.abspath(__file__)
+curfilePath = os.path.abspath(__file__)
 curDir = os.path.abspath(os.path.join(curfilePath,os.pardir)) # this will return current directory in which python file resides.
 parentDir = os.path.abspath(os.path.join(curDir,os.pardir)) # this will return parent directory.
-print(parentDir)
 
 with open(parentDir + '/' + '.waveLocation', 'r') as wf:
     wavePath = wf.read().replace('\n', '')
@@ -100,7 +99,7 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
     levels = [GPIO.LOW, GPIO.LOW], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[6,16,25], labels=['redLED', 'blueLED', 'Reward'],
+juicePin = GPIO_Output(pins=[6,16,25], labels=['redLED', 'greenLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', ('pulse', .5)])
 

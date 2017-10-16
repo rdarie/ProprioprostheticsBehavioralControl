@@ -16,11 +16,13 @@ proprioBehavioralControl/list_uarts.py
 proprioBehavioralControl/scratch.py
 proprioBehavioralControl/speech_synthesis.py
 proprioBehavioralControl/startup_mailer.py
-proprioBehavioralControl/temp.py
 proprioBehavioralControl/test_SM.py
+proprioBehavioralControl/test_motor.py
 proprioBehavioralControl/training.py
 proprioBehavioralControl/training_step_1.py
 proprioBehavioralControl/training_step_2.py
 proprioBehavioralControl/training_step_3.py
 proprioBehavioralControl/training_step_4.py
+proprioBehavioralControl/training_step_5.py
+proprioBehavioralControl/training_step_6.py
 proprioBehavioralControl/training_with_remote.py
