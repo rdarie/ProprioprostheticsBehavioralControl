@@ -163,7 +163,7 @@ class trial_start(gameState):
 class chooseNextTrial(gameState):
 
     def operation(self, parent):
-        bins = [0, 1/3, 1]
+        bins = [0, 2/3, 1]
         draw = random.uniform(0,1)
         return self.nextState[int(np.digitize(draw, bins) - 1)]
 
@@ -405,7 +405,7 @@ class wait_for_correct_button(gameState):
             return 'wait_for_correct_button'
 
 class good(gameState):
-
+    # TODO: add amount dispensed to log
     def operation(self, parent):
         print('Good job!')
         parent.outbox.put('Reward')

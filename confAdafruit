@@ -1,0 +1,62 @@
+begin
+  remote = *
+  button = KEY_BACK
+  prog = training
+  config = quit
+end
+
+begin
+  remote = *
+  button = KEY_1
+  prog = training
+  config = 1
+end
+
+begin
+  remote = *
+  button = KEY_2
+  prog = training
+  config = 2
+end
+
+begin
+  remote = *
+  button = KEY_3
+  prog = training
+  config = 3
+end
+
+begin
+  remote = *
+  button = KEY_ENTER
+  prog = training
+  config = enter
+end
+
+begin
+  remote = *
+  button = KEY_PREV
+  prog = training
+  config = prev
+end
+
+begin
+  remote = *
+  button = KEY_NEXT
+  prog = training
+  config = next
+end
+
+begin
+  remote = *
+  button = KEY_CHANNELDOWN
+  prog = training
+  config = left
+end
+
+begin
+  remote = *
+  button = KEY_CHANNELUP
+  prog = training
+  config = right
+end
