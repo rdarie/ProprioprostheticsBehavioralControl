@@ -2,9 +2,11 @@ import pygame, pdb, lirc, serial, os, os.path
 from helperFunctions import serial_ports
 
 global wavePath
+
 curfilePath = os.path.abspath(__file__)
 curDir = os.path.abspath(os.path.join(curfilePath,os.pardir)) # this will return current directory in which python file resides.
 parentDir = os.path.abspath(os.path.join(curDir,os.pardir)) # this will return parent directory.
+
 with open(parentDir + '/' + '.waveLocation', 'r') as wf:
     wavePath = wf.read().replace('\n', '')
 
