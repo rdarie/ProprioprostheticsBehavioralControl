@@ -284,7 +284,7 @@ class wait_for_correct_button_timed(gameState):
             self.nextTimeOut = self.timeNow + parent.trialTimeout
 
             if parent.easyReward is not None:
-                parent.juicePin.instructions =
+                parent.juicePin.instructions =\
                     ['flip', 'flip', ('pulse', parent.easyReward)]
         # Read from inbox
         event_label = parent.request_last_touch()
@@ -349,7 +349,7 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.nextTimeOut = self.timeNow + parent.trialTimeout
 
             if parent.hardReward is not None:
-                parent.juicePin.instructions =
+                parent.juicePin.instructions =\
                     ['flip', 'flip', ('pulse', parent.hardReward)]
         # Read from inbox
         event_label = parent.request_last_touch()
