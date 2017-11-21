@@ -180,8 +180,8 @@ class chooseNextTrial(gameState):
 class set_correct(gameState):
 
     def operation(self, parent):
-        parent.correctButton = 'red'
-            if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]
+        parent.correctButton = 'red'\
+            if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
             else 'green'
 
         print('  ')
