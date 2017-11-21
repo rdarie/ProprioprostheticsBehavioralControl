@@ -143,12 +143,16 @@ SM.logFileName = logFileName
 thisLog = File_Printer(filePath = logFileName, append = True)
 
 SM.magnitudeQueue = []
+SM.lastCategory = None
+SM.lastDirection = None
+SM.easyReward = .4
+SM.hardReward = 1.2
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
-        [sessionTime, 'Button Pressing Step 7', '', '',
+        [sessionTime, 'Button Pressing Step 8', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime]
         ]
 
@@ -244,7 +248,7 @@ finally:
             '--outputFile \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
-    print('Ending Execution of Training_step_6.py')
+    print('Ending Execution of Training_step_8.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO

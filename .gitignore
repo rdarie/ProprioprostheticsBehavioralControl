@@ -61,5 +61,6 @@ bad_tone.wav
 violin_C5.wav
 whitenoisegaussian.wav
 debugLog.txt
+scratch.py
 logs/
 __pycache__
