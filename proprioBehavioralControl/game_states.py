@@ -130,7 +130,7 @@ class turnPedalRandom(gameState):
             category = 'big' if parent.lastCategory == 'small' else 'small'
             parent.lastCategory = None
 
-        parent.motor.step_size = random.uniform(1e4, 1.5e4) if category == 'small'
+        parent.motor.step_size = random.uniform(1e4, 1.5e4) if category == 'small'\
             else random.uniform(6.5e4, 7e4)
 
         if parent.lastDirection is None:
