@@ -125,7 +125,11 @@ class turnPedalRandom(gameState):
     def operation(self, parent):
 
         if parent.lastCategory is None:
-            category = 'small' if bool(random.getrandbits(1)) else 'big'
+            if parent.blocsRemaining == 0:
+                category = 'small' if bool(random.getrandbits(1)) else 'big'
+                parent.initBlocType['category'] = category
+            else:
+                category = parent.initBlocType['category']
             parent.lastCategory = category
         else:
             category = 'big' if parent.lastCategory == 'small' else 'small'
@@ -135,7 +139,14 @@ class turnPedalRandom(gameState):
             else random.uniform(6.5e4, 7e4)
 
         if parent.lastDirection is None:
-            direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+            if parent.blocsRemaining == 0:
+                direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+                parent.initBlocType['direction'] = direction
+                parent.blocsRemaining = parent.blocLength
+            else:
+                direction = parent.initBlocType['direction']
+                parent.blocsRemaining = parent.blocsRemaining - 1
+                
             parent.lastDirection = direction
         else:
             direction = 'forward' if parent.lastDirection == 'forward' else 'backward'

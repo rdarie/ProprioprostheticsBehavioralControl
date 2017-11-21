@@ -147,6 +147,14 @@ SM.lastCategory = None
 SM.lastDirection = None
 SM.easyReward = .4
 SM.hardReward = 1.2
+
+#block structure
+SM.blocLength = 5
+SM.blocsRemaining = SM.blocLength
+SM.initBlocType = {
+    'category' : 'big',
+    'direction' : 'forward'
+    }
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
