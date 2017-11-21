@@ -126,6 +126,7 @@ class turnPedalRandom(gameState):
 
         if parent.lastCategory is None:
             category = 'small' if bool(random.getrandbits(1)) else 'big'
+            parent.lastCategory = category
         else:
             category = 'big' if parent.lastCategory == 'small' else 'small'
             parent.lastCategory = None
@@ -135,8 +136,10 @@ class turnPedalRandom(gameState):
 
         if parent.lastDirection is None:
             direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+            parent.lastDirection = direction
         else:
             direction = 'forward' if parent.lastDirection == 'forward' else 'backward'
+            parent.lastDirection = None
 
         if direction == 'forward':
             parent.motor.forward()
