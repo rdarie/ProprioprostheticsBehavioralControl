@@ -25,4 +25,6 @@ proprioBehavioralControl/training_step_3.py
 proprioBehavioralControl/training_step_4.py
 proprioBehavioralControl/training_step_5.py
 proprioBehavioralControl/training_step_6.py
+proprioBehavioralControl/training_step_7.py
+proprioBehavioralControl/training_step_8.py
 proprioBehavioralControl/training_with_remote.py

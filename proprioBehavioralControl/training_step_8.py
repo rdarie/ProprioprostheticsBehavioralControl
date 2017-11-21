@@ -245,7 +245,7 @@ finally:
         subprocess.check_output('python3 ' + scriptPath +
             ' --file '  + '\"' + SM.logFileName.split('/')[-1] + '\" ' +
             ' --folder \"' +  SM.serverFolder + '\" ' +
-            '--outputFile \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
+            '--outputFileName \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
     print('Ending Execution of Training_step_8.py')

@@ -42,7 +42,6 @@ class gameState(object):
             self.parent.remoteOverride = None
         #print("returning %s" % ret)
         if self.logFile:
-            self.checkTimedOut()
             if self.enableLog:
                 self.timeNow = time.time()
                 self.logFile.write("\n%s\t%4.4f\t%4.4f" % ( self.__name__, self.timeNow, self.payload))
@@ -82,6 +81,7 @@ class strict_fixation(gameState):
     def operation(self, parent):
         if self.firstVisit:
             print('Started strict fixation')
+            self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.trialLength
             self.enableLog = False
             self.firstVisit = False
@@ -100,8 +100,8 @@ class strict_fixation(gameState):
             # if erroneous button press, play bad tone, and penalize with an extra
             # 2 second wait
             parent.speaker.play_tone('Bad')
-            time.sleep(2)
-            self.nextTimeOut = self.nextTimeOut + 2
+            time.sleep(3)
+            self.nextTimeOut = self.nextTimeOut + 3
             # clear button queue for next iteration
             if parent.inputPin.last_data is not None:
                 parent.inputPin.last_data = None
@@ -124,10 +124,23 @@ class turnPedalRandom(gameState):
 
     def operation(self, parent):
 
-        category = 'small' if bool(random.getrandbits(1)) else 'big'
-        parent.motor.step_size = random.uniform(1e4, 2e4) if category == 'small' else random.uniform(5e4, 6e4)
+        if parent.lastCategory is None:
+            category = 'small' if bool(random.getrandbits(1)) else 'big'
+            parent.lastCategory = category
+        else:
+            category = 'big' if parent.lastCategory == 'small' else 'small'
+            parent.lastCategory = None
 
-        direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+        parent.motor.step_size = random.uniform(1e4, 1.5e4) if category == 'small'\
+            else random.uniform(6.5e4, 7e4)
+
+        if parent.lastDirection is None:
+            direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+            parent.lastDirection = direction
+        else:
+            direction = 'forward' if parent.lastDirection == 'forward' else 'backward'
+            parent.lastDirection = None
+
         if direction == 'forward':
             parent.motor.forward()
             if self.logFile:
@@ -163,14 +176,17 @@ class trial_start(gameState):
 class chooseNextTrial(gameState):
 
     def operation(self, parent):
-        bins = [0, 3/4, 1]
+        bins = [0, 1/3, 1]
         draw = random.uniform(0,1)
         return self.nextState[int(np.digitize(draw, bins) - 1)]
 
 class set_correct(gameState):
 
     def operation(self, parent):
-        parent.correctButton = 'red' if parent.magnitudeQueue[0] < parent.magnitudeQueue[1] else 'green'
+        parent.correctButton = 'red'\
+            if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
+            else 'green'
+
         print('  ')
         print('Correct button set to: %s' % parent.correctButton)
 
@@ -212,6 +228,7 @@ class wait_for_any_button_timed(gameState):
             self.firstVisit = False
             self.enableLog = False
 
+            self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.trialTimeout
         # Read from inbox
         event_label = parent.request_last_touch()
@@ -266,7 +283,12 @@ class wait_for_correct_button_timed(gameState):
             self.firstVisit = False
             self.enableLog = False
 
+            self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.trialTimeout
+
+            if parent.easyReward is not None:
+                parent.juicePin.instructions =\
+                    ['flip', 'flip', ('pulse', parent.easyReward)]
         # Read from inbox
         event_label = parent.request_last_touch()
 
@@ -326,7 +348,12 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.firstVisit = False
             self.enableLog = False
 
+            self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.trialTimeout
+
+            if parent.hardReward is not None:
+                parent.juicePin.instructions =\
+                    ['flip', 'flip', ('pulse', parent.hardReward)]
         # Read from inbox
         event_label = parent.request_last_touch()
 
@@ -402,7 +429,7 @@ class wait_for_correct_button(gameState):
             return 'wait_for_correct_button'
 
 class good(gameState):
-
+    # TODO: add amount dispensed to log
     def operation(self, parent):
         print('Good job!')
         parent.outbox.put('Reward')
