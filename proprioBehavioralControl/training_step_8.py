@@ -46,7 +46,7 @@ parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
 parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
-parser.add_argument('--volume', default = '0.1')
+parser.add_argument('--volume', default = '0.08')
 
 args = parser.parse_args()
 
@@ -83,7 +83,7 @@ if playWelcomeTone:
 playWhiteNoise = True if args.playWhiteNoise == 'True' else False
 if playWhiteNoise:
     whiteNoise = pygame.mixer.Sound(wavePath + "/whitenoisegaussian.wav")
-    whiteNoise.set_volume(argVolume/2)
+    whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
 motor = ifaces.motorInterface(debugging = True)
@@ -149,7 +149,7 @@ SM.easyReward = .4
 SM.hardReward = 1.2
 
 #block structure
-SM.blocLength = 5
+SM.blocLength = 4
 SM.blocsRemaining = SM.blocLength
 SM.initBlocType = {
     'category' : 'big',
@@ -161,7 +161,9 @@ if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
         [sessionTime, 'Button Pressing Step 8', '', '',
-            'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime]
+            'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
+            SM.trialLength, SM.trialTimeout, argVolume, SM.easyReward, SM.hardReward,
+            SM.blocLength]
         ]
 
     spreadsheetID = '1BWjBqbtoVr9j6dU_7eHp-bQMJApNn8Wkl_N1jv20faE'
