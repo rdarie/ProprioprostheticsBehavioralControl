@@ -130,8 +130,8 @@ class turnPedalRandom(gameState):
                 draw = random.uniform(0,1)
                 
                 catBool = int(np.digitize(draw, bins) - 1) == 0
-                #print('catBool = ')
-                #print(catBool)
+                print('Choosing category = ')
+                print(catBool)
                 
                 category = 'small' if catBool else 'big'
                 parent.initBlocType['category'] = category
