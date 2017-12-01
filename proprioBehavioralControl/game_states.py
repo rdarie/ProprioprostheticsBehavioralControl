@@ -126,7 +126,14 @@ class turnPedalRandom(gameState):
 
         if parent.lastCategory is None:
             if parent.blocsRemaining == 0:
-                category = 'small' if bool(random.getrandbits(1)) else 'big'
+                bins = [0, 1/2, 1]
+                draw = random.uniform(0,1)
+                
+                catBool = int(np.digitize(draw, bins) - 1) == 0
+                #print('catBool = ')
+                #print(catBool)
+                
+                category = 'small' if catBool else 'big'
                 parent.initBlocType['category'] = category
             else:
                 category = parent.initBlocType['category']
@@ -142,7 +149,7 @@ class turnPedalRandom(gameState):
             if parent.blocsRemaining == 0:
                 direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
                 parent.initBlocType['direction'] = direction
-                parent.blocsRemaining = parent.blocLength
+                parent.blocsRemaining = parent.smallBlocLength if parent.initBlocType['category'] == 'small' else parent.bigBlocLength
             else:
                 direction = parent.initBlocType['direction']
                 parent.blocsRemaining = parent.blocsRemaining - 1
@@ -187,7 +194,7 @@ class trial_start(gameState):
 class chooseNextTrial(gameState):
 
     def operation(self, parent):
-        bins = [0, 1/3, 1]
+        bins = [0, 1/2, 1]
         draw = random.uniform(0,1)
         return self.nextState[int(np.digitize(draw, bins) - 1)]
 

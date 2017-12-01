@@ -149,12 +149,15 @@ SM.easyReward = .4
 SM.hardReward = 1.2
 
 #block structure
-SM.blocLength = 4
-SM.blocsRemaining = SM.blocLength
+SM.smallBlocLength = 3
+SM.bigBlocLength = 7
+
+SM.blocsRemaining = SM.bigBlocLength
 SM.initBlocType = {
     'category' : 'big',
     'direction' : 'forward'
     }
+
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
@@ -163,7 +166,7 @@ if logToWeb:
         [sessionTime, 'Button Pressing Step 8', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
             SM.trialLength, SM.trialTimeout, argVolume, SM.easyReward, SM.hardReward,
-            SM.blocLength]
+            SM.smallBlocLength, SM.bigBlocLength]
         ]
 
     spreadsheetID = '1BWjBqbtoVr9j6dU_7eHp-bQMJApNn8Wkl_N1jv20faE'
