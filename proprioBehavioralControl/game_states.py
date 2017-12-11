@@ -179,7 +179,7 @@ class turnPedalRandom(gameState):
             time.sleep(0.5)
             sleepTime = sleepTime - 0.5
 
-            if event_label and parent.lastDirection is not None:
+            if event_label and parent.lastCategory is not None:
                 # if erroneous button press, play bad tone, and penalize with an extra
                 # 2 second wait
                 parent.speaker.play_tone('Bad')
