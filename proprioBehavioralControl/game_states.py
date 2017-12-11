@@ -128,11 +128,11 @@ class turnPedalRandom(gameState):
             if parent.blocsRemaining == 0:
                 bins = [0, 1/2, 1]
                 draw = random.uniform(0,1)
-                
+
                 catBool = int(np.digitize(draw, bins) - 1) == 0
                 print('Choosing category = ')
                 print(catBool)
-                
+
                 category = 'small' if catBool else 'big'
                 parent.initBlocType['category'] = category
             else:
@@ -153,7 +153,7 @@ class turnPedalRandom(gameState):
             else:
                 direction = parent.initBlocType['direction']
                 parent.blocsRemaining = parent.blocsRemaining - 1
-                
+
             parent.lastDirection = direction
         else:
             direction = 'forward' if parent.lastDirection == 'forward' else 'backward'
@@ -170,8 +170,20 @@ class turnPedalRandom(gameState):
 
         parent.motor.go_home()
         time.sleep(2)
-
         parent.magnitudeQueue.append(parent.motor.step_size)
+
+        # Read from inbox
+        event_label = parent.request_last_touch()
+
+        while event_label:
+            # if erroneous button press, play bad tone, and penalize with an extra
+            # 2 second wait
+            parent.speaker.play_tone('Bad')
+            time.sleep(1)
+            # clear button queue for next iteration
+            if parent.inputPin.last_data is not None:
+                parent.inputPin.last_data = None
+            event_label = parent.request_last_touch()
 
         return self.nextState[0]
 
@@ -322,6 +334,17 @@ class wait_for_correct_button_timed(gameState):
 
             print(' ')
 
+            if event_label == 'red':
+                parent.smallTally = parent.smallTally + 1
+            else:
+                parent.bigTally = parent.bigTally + 1
+
+            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
+            bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+
+            parent.smallBlocLength = round(10 * bigProp) + 1
+            parent.bigBlocLength = round(10 * smallProp) + 1
+
             if event_label == parent.correctButton:
                 if self.logFile:
                     self.logFile.write("\ncorrect button\t%4.4f\t%s" % (self.timeNow, event_label))
@@ -385,6 +408,17 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.timedOut = False
 
             print(' ')
+
+            if event_label == 'red':
+                parent.smallTally = parent.smallTally + 1
+            else:
+                parent.bigTally = parent.bigTally + 1
+
+            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
+            bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+
+            parent.smallBlocLength = round(10 * bigProp) + 1
+            parent.bigBlocLength = round(10 * smallProp) + 1
 
             if event_label == parent.correctButton:
                 if self.logFile:
