@@ -425,7 +425,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
 
             parent.smallBlocLength = round(10 * bigProp) + 1
+            print('\nUpdated number of small throws to : %d' % parent.smallBlocLength)
             parent.bigBlocLength = round(10 * smallProp) + 1
+            print('\nUpdated number of big throws to : %d' % parent.bigBlocLength)
 
             if event_label == parent.correctButton:
                 if self.logFile:
