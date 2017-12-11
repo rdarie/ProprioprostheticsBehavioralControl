@@ -169,23 +169,25 @@ class turnPedalRandom(gameState):
                 self.payload = -parent.motor.step_size
 
         parent.motor.go_home()
-        time.sleep(2)
         parent.magnitudeQueue.append(parent.motor.step_size)
 
-        if parent.lastDirection is not None:
+        sleepTime = 2
+
+        while sleepTime > 0:
             # Read from inbox
             event_label = parent.request_last_touch()
+            time.sleep(0.5)
+            sleepTime = sleepTime - 0.5
 
-            while event_label:
+            if event_label:
                 # if erroneous button press, play bad tone, and penalize with an extra
                 # 2 second wait
                 parent.speaker.play_tone('Bad')
-                for i in range(10):
-                    time.sleep(1)
+                sleepTime = sleepTime + 1
+
                 # clear button queue for next iteration
                 if parent.inputPin.last_data is not None:
                     parent.inputPin.last_data = None
-                event_label = parent.request_last_touch()
 
         return self.nextState[0]
 
