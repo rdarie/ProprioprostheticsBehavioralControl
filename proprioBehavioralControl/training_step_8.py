@@ -150,7 +150,7 @@ SM.hardReward = 1.2
 
 #block structure
 SM.smallBlocLength = 6
-SM.bigBlocLength = 4
+SM.bigBlocLength = 6
 
 SM.blocsRemaining = SM.bigBlocLength
 SM.initBlocType = {
