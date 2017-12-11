@@ -123,6 +123,7 @@ class strict_fixation(gameState):
 class turnPedalRandom(gameState):
 
     def operation(self, parent):
+        enforceWait = True if parent.lastCategory is not None else False
 
         if parent.lastCategory is None:
             if parent.blocsRemaining == 0:
@@ -179,7 +180,7 @@ class turnPedalRandom(gameState):
             time.sleep(0.5)
             sleepTime = sleepTime - 0.5
 
-            if event_label and parent.lastCategory is not None:
+            if event_label and enforceWait:
                 # if erroneous button press, play bad tone, and penalize with an extra
                 # 2 second wait
                 parent.speaker.play_tone('Bad')
