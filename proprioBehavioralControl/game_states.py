@@ -172,18 +172,20 @@ class turnPedalRandom(gameState):
         time.sleep(2)
         parent.magnitudeQueue.append(parent.motor.step_size)
 
-        # Read from inbox
-        event_label = parent.request_last_touch()
-
-        while event_label:
-            # if erroneous button press, play bad tone, and penalize with an extra
-            # 2 second wait
-            parent.speaker.play_tone('Bad')
-            time.sleep(1)
-            # clear button queue for next iteration
-            if parent.inputPin.last_data is not None:
-                parent.inputPin.last_data = None
+        if parent.lastDirection is not None:
+            # Read from inbox
             event_label = parent.request_last_touch()
+
+            while event_label:
+                # if erroneous button press, play bad tone, and penalize with an extra
+                # 2 second wait
+                parent.speaker.play_tone('Bad')
+                for i in range(10):
+                    time.sleep(1)
+                # clear button queue for next iteration
+                if parent.inputPin.last_data is not None:
+                    parent.inputPin.last_data = None
+                event_label = parent.request_last_touch()
 
         return self.nextState[0]
 
