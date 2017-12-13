@@ -392,6 +392,8 @@ class wait_for_correct_button_timed_uncued(gameState):
         if self.firstVisit:
             print('Started Timed Button')
             # Turn LED's On
+            parent.outbox.put('redLED')
+            parent.outbox.put('greenLED')
 
             self.firstVisit = False
             self.enableLog = False
@@ -413,6 +415,8 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            parent.outbox.put('redLED')
+            parent.outbox.put('greenLED')
 
             print(' ')
 
