@@ -99,7 +99,7 @@ class strict_fixation(gameState):
         if event_label:
             # if erroneous button press, play bad tone, and penalize with an extra
             # 2 second wait
-            parent.speaker.play_tone('Bad')
+            parent.speaker.play_tone('Wait')
             time.sleep(3)
             self.nextTimeOut = self.nextTimeOut + 3
             # clear button queue for next iteration
@@ -183,7 +183,7 @@ class turnPedalRandom(gameState):
             if event_label and enforceWait:
                 # if erroneous button press, play bad tone, and penalize with an extra
                 # 2 second wait
-                parent.speaker.play_tone('Bad')
+                parent.speaker.play_tone('Wait')
                 sleepTime = sleepTime + 1
 
                 # clear button queue for next iteration
