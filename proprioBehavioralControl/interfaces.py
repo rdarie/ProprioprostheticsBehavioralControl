@@ -125,7 +125,7 @@ class motorInterface(object):
         if self.debugging:
             print("going clockwise")
 
-        serial_message = "DI"+str(self.step_size)+"\r"
+        serial_message = "DI"+str(int(self.step_size))+"\r"
 
         self.serial.write(serial_message.encode())
 
@@ -143,7 +143,7 @@ class motorInterface(object):
         if self.debugging:
             print("going counter-clockwise")
 
-        serial_message = "DI"+str(-self.step_size)+"\r"
+        serial_message = "DI"+str(-int(self.step_size))+"\r"
 
         self.serial.write(serial_message.encode())
         self.serial.write("FL\r".encode())
