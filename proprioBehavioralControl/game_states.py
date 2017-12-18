@@ -452,6 +452,8 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            parent.outbox.put('redLED')
+            parent.outbox.put('greenLED')
 
             print(' ')
             # re enable logging for future visits
