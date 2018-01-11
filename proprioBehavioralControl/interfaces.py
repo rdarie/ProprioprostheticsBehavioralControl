@@ -102,10 +102,10 @@ class motorInterface(object):
         self.serialPortName = serialPortName
         self.serial = ser
 
-        self.current = 2.5
+        self.current = 3.2
         serial_message = "CC" + str(self.current) + "\r"
         self.serial.write(serial_message.encode())
-        self.idle_current = 2.5
+        self.idle_current = 3.2
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
         self.velocity = 3 #move speed in rev/sec. Range is .025 - 50
@@ -125,7 +125,7 @@ class motorInterface(object):
         if self.debugging:
             print("going clockwise")
 
-        serial_message = "DI"+str(self.step_size)+"\r"
+        serial_message = "DI"+str(int(self.step_size))+"\r"
 
         self.serial.write(serial_message.encode())
 
@@ -143,7 +143,7 @@ class motorInterface(object):
         if self.debugging:
             print("going counter-clockwise")
 
-        serial_message = "DI"+str(-self.step_size)+"\r"
+        serial_message = "DI"+str(-int(self.step_size))+"\r"
 
         self.serial.write(serial_message.encode())
         self.serial.write("FL\r".encode())
