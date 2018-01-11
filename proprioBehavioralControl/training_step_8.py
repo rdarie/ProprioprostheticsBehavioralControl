@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Training Step 6
+Training Step 8
 ========
 The "Go" tone goes off.
 Buttons light up.
@@ -150,8 +150,8 @@ SM.easyReward = .3
 SM.hardReward = 1
 
 #block structure
-SM.smallBlocLength = 4
-SM.bigBlocLength = 4
+SM.smallBlocLength = 3
+SM.bigBlocLength = 3
 SM.smallTally = 1
 SM.bigTally = 1
 

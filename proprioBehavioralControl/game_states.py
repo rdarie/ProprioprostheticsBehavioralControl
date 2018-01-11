@@ -347,9 +347,9 @@ class wait_for_correct_button_timed(gameState):
             smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
 
-            parent.smallBlocLength = round(6 * bigProp) + 1
+            parent.smallBlocLength = round(4 * bigProp) + 1
             print('\nUpdated number of small throws to : %d' % parent.smallBlocLength)
-            parent.bigBlocLength = round(6 * smallProp) + 1
+            parent.bigBlocLength = round(4 * smallProp) + 1
             print('\nUpdated number of big throws to : %d' % parent.bigBlocLength)
 
             if event_label == parent.correctButton:
@@ -428,9 +428,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
 
-            parent.smallBlocLength = round(10 * bigProp) + 1
+            parent.smallBlocLength = round(4 * bigProp) + 1
             print('\nUpdated number of small throws to : %d' % parent.smallBlocLength)
-            parent.bigBlocLength = round(10 * smallProp) + 1
+            parent.bigBlocLength = round(4 * smallProp) + 1
             print('\nUpdated number of big throws to : %d' % parent.bigBlocLength)
 
             if event_label == parent.correctButton:
