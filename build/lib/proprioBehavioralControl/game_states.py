@@ -99,7 +99,7 @@ class strict_fixation(gameState):
         if event_label:
             # if erroneous button press, play bad tone, and penalize with an extra
             # 2 second wait
-            parent.speaker.play_tone('Bad')
+            parent.speaker.play_tone('Wait')
             time.sleep(3)
             self.nextTimeOut = self.nextTimeOut + 3
             # clear button queue for next iteration
@@ -123,9 +123,21 @@ class strict_fixation(gameState):
 class turnPedalRandom(gameState):
 
     def operation(self, parent):
+        enforceWait = True if parent.lastCategory is not None else False
 
         if parent.lastCategory is None:
-            category = 'small' if bool(random.getrandbits(1)) else 'big'
+            if parent.blocsRemaining == 0:
+                bins = [0, 1/2, 1]
+                draw = random.uniform(0,1)
+
+                catBool = int(np.digitize(draw, bins) - 1) == 0
+                print('Choosing category = ')
+                print(catBool)
+
+                category = 'small' if catBool else 'big'
+                parent.initBlocType['category'] = category
+            else:
+                category = parent.initBlocType['category']
             parent.lastCategory = category
         else:
             category = 'big' if parent.lastCategory == 'small' else 'small'
@@ -135,7 +147,14 @@ class turnPedalRandom(gameState):
             else random.uniform(6.5e4, 7e4)
 
         if parent.lastDirection is None:
-            direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+            if parent.blocsRemaining == 0:
+                direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+                parent.initBlocType['direction'] = direction
+                parent.blocsRemaining = parent.smallBlocLength if parent.initBlocType['category'] == 'small' else parent.bigBlocLength
+            else:
+                direction = parent.initBlocType['direction']
+                parent.blocsRemaining = parent.blocsRemaining - 1
+
             parent.lastDirection = direction
         else:
             direction = 'forward' if parent.lastDirection == 'forward' else 'backward'
@@ -151,9 +170,25 @@ class turnPedalRandom(gameState):
                 self.payload = -parent.motor.step_size
 
         parent.motor.go_home()
-        time.sleep(2)
-
         parent.magnitudeQueue.append(parent.motor.step_size)
+
+        sleepTime = 2
+
+        while sleepTime > 0:
+            # Read from inbox
+            event_label = parent.request_last_touch()
+            time.sleep(0.5)
+            sleepTime = sleepTime - 0.5
+
+            if event_label and enforceWait:
+                # if erroneous button press, play bad tone, and penalize with an extra
+                # 2 second wait
+                parent.speaker.play_tone('Wait')
+                sleepTime = sleepTime + 1
+
+                # clear button queue for next iteration
+                if parent.inputPin.last_data is not None:
+                    parent.inputPin.last_data = None
 
         return self.nextState[0]
 
@@ -304,6 +339,19 @@ class wait_for_correct_button_timed(gameState):
 
             print(' ')
 
+            if event_label == 'red':
+                parent.smallTally = parent.smallTally * 0.9 + 1
+            else:
+                parent.bigTally = parent.bigTally * 0.9 + 1
+
+            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
+            bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+
+            parent.smallBlocLength = round(4 * bigProp) + 1
+            print('\nUpdated number of small throws to : %d' % parent.smallBlocLength)
+            parent.bigBlocLength = round(4 * smallProp) + 1
+            print('\nUpdated number of big throws to : %d' % parent.bigBlocLength)
+
             if event_label == parent.correctButton:
                 if self.logFile:
                     self.logFile.write("\ncorrect button\t%4.4f\t%s" % (self.timeNow, event_label))
@@ -344,6 +392,8 @@ class wait_for_correct_button_timed_uncued(gameState):
         if self.firstVisit:
             print('Started Timed Button')
             # Turn LED's On
+            parent.outbox.put('redLED')
+            parent.outbox.put('greenLED')
 
             self.firstVisit = False
             self.enableLog = False
@@ -365,8 +415,23 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            parent.outbox.put('redLED')
+            parent.outbox.put('greenLED')
 
             print(' ')
+
+            if event_label == 'red':
+                parent.smallTally = parent.smallTally + 1
+            else:
+                parent.bigTally = parent.bigTally + 1
+
+            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
+            bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+
+            parent.smallBlocLength = round(4 * bigProp) + 1
+            print('\nUpdated number of small throws to : %d' % parent.smallBlocLength)
+            parent.bigBlocLength = round(4 * smallProp) + 1
+            print('\nUpdated number of big throws to : %d' % parent.bigBlocLength)
 
             if event_label == parent.correctButton:
                 if self.logFile:
@@ -387,6 +452,8 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
+            parent.outbox.put('redLED')
+            parent.outbox.put('greenLED')
 
             print(' ')
             # re enable logging for future visits
