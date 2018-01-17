@@ -171,7 +171,7 @@ class turnPedalRandom(gameState):
                 parent.bigBlocLength = round(nominalBlockLength * smallProp) + 1
                 print('\nUpdated number of big throws to : %d' % parent.bigBlocLength)
 
-                parent.blocsRemaining = random.randrange(1, parent.smallBlocLength) if parent.initBlocType['category'] == 'small' else random.randrange(1, parent.bigBlocLength)
+                parent.blocsRemaining = random.randint(1, parent.smallBlocLength) if parent.initBlocType['category'] == 'small' else random.randint(1, parent.bigBlocLength)
             else:
                 direction = parent.initBlocType['direction']
                 parent.blocsRemaining = parent.blocsRemaining - 1
