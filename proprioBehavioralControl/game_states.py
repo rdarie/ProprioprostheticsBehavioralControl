@@ -3,7 +3,7 @@ import numpy as np
 from helperFunctions import overRideAdder
 from collections import OrderedDict
 
-nominalBlockLength  = 8
+nominalBlockLength  = 6
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
@@ -180,7 +180,7 @@ class turnPedalRandom(gameState):
                     bigDraw = 1
                 parent.blocsRemaining = smallDraw if parent.initBlocType['category'] == 'small' else bigDraw
 
-                print('\nUpdated mean number of throws to : %d' % parent.blocsRemaining)
+                print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
             else:
                 direction = parent.initBlocType['direction']
                 parent.blocsRemaining = parent.blocsRemaining - 1
