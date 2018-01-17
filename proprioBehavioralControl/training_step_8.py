@@ -150,8 +150,8 @@ SM.easyReward = .05
 SM.hardReward = .3
 
 #block structure
-SM.smallBlocLength = 3
-SM.bigBlocLength = 3
+SM.smallBlocLength = 7
+SM.bigBlocLength = 7
 SM.smallTally = 1
 SM.bigTally = 1
 

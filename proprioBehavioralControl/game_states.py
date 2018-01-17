@@ -3,7 +3,7 @@ import numpy as np
 from helperFunctions import overRideAdder
 from collections import OrderedDict
 
-nominalBlockLength  = 8
+nominalBlockLength  = 14
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
