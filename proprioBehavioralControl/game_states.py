@@ -174,9 +174,10 @@ class turnPedalRandom(gameState):
                 smallDraw = round(random.gauss(parent.smallBlocLength, 1))
                 if smallDraw <= 0:
                     smallDraw = 1
+
                 bigDraw = round(random.gauss(parent.bigBlocLength, 1))
-                if BigDraw <= 0:
-                    BigDraw = 1
+                if bigDraw <= 0:
+                    bigDraw = 1
                 parent.blocsRemaining = smallDraw if parent.initBlocType['category'] == 'small' else bigDraw
 
                 print('\nUpdated mean number of throws to : %d' % parent.blocsRemaining)
