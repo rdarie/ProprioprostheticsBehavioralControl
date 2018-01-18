@@ -1,5 +1,5 @@
 [Eagle]
-Version="08 03 00"
+Version="08 05 02"
 Platform="Windows"
 Globals="Globals"
 Desktop="Desktop"
@@ -7,14 +7,11 @@ Desktop="Desktop"
 [Globals]
 AutoSaveProject=1
 UsedLibraryUrn="urn:adsk.eagle:library:420"
-UsedLibrary="E:/Google Drive/Github/Spinal-Electrode/microleads-proprioprosthetics-array/proprioprosthetics.lbr"
 UsedLibrary="C:/Users/Radu/Documents/GitHub/radu-eagle-lib/radu-eagle-lib.lbr"
 UsedLibrary="C:/Users/Radu/Documents/GitHub/SparkFun-Eagle-Libraries/SparkFun-Connectors.lbr"
 
 [Win_1]
 Type="Control Panel"
-Loc="-8 -8 1911 1008"
-State=1
 Number=0
 
 [Desktop]
