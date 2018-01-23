@@ -513,6 +513,7 @@ class good(gameState):
     # TODO: add amount dispensed to log
     def operation(self, parent):
         print('Good job!')
+        parent.trialLength = parent.nominalTrialLength
         parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]
@@ -521,6 +522,7 @@ class bad(gameState):
 
     def operation(self, parent):
         print('Wrong! Try again!')
+        parent.trialLength = parent.nominalTrialLength + parent.wrongTimeout
         parent.speaker.play_tone('Bad')
         return self.nextState[0]
 
