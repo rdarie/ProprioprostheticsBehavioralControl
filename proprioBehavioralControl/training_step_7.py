@@ -36,7 +36,7 @@ GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
 GPIO.output(5,True) ## Turn on GPIO pin 24
 
 # What time is it?
-sessionTime = time.strftime("%d_%m_%Y_%H_%M_%S")
+sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--trialLength', default = '1')
