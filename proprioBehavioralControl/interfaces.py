@@ -108,8 +108,18 @@ class motorInterface(object):
         self.idle_current = 3.2
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
-        self.velocity = 3 #move speed in rev/sec. Range is .025 - 50
+
+        self.velocity = 6 #move speed in rev/sec. Range is .025 - 50
+        # note that the worm gearbox is 7.5:1 ratioed
         serial_message = "VE" + str(self.velocity) + "\r"
+        self.serial.write(serial_message.encode())
+
+        self.acceleration = 200 #move speed in rev/sec^2.
+        serial_message = "AC" + str(self.acceleration) + "\r"
+        self.serial.write(serial_message.encode())
+
+        self.deceleration = 200 #move speed in rev/sec^2.
+        serial_message = "DE" + str(self.deceleration) + "\r"
         self.serial.write(serial_message.encode())
 
         # Initialize motor
