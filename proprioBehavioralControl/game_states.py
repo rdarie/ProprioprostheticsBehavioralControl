@@ -203,13 +203,21 @@ class turnPedalRandom(gameState):
         parent.motor.go_home()
         parent.magnitudeQueue.append(parent.motor.step_size)
 
-        sleepTime = 2
+        if parent.motor.useEncoder:
+            doneMoving = False
+            while not doneMoving:
+                curPos = parent.motor.get_encoder_position()
+                if curPos < 5 # ~ 2 degrees
+                    doneMoving = True
+            sleepTime = 0.1
+        else:
+            sleepTime = 2
 
         while sleepTime > 0:
             # Read from inbox
             event_label = parent.request_last_touch()
-            time.sleep(0.5)
-            sleepTime = sleepTime - 0.5
+            time.sleep(0.1)
+            sleepTime = sleepTime - 0.1
 
             if event_label and enforceWait:
                 # if erroneous button press, play bad tone, and penalize with an extra
@@ -242,7 +250,7 @@ class trial_start(gameState):
 class chooseNextTrial(gameState):
 
     def operation(self, parent):
-        bins = [0, 1/4, 1]
+        bins = [0, 1/8, 1]
         draw = random.uniform(0,1)
         return self.nextState[int(np.digitize(draw, bins) - 1)]
 

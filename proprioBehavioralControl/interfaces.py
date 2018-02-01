@@ -72,7 +72,10 @@ class sparkfunRemoteInterface(object):
 
 class motorInterface(object):
     # Configure the serial port connection the the Si3540 motor driver
-    def __init__(self, serialPortName = '/dev/ttyUSB0', debugging = False, velocity = 3, acceleration = 100, deceleration = 100):
+    def __init__(self, serialPortName = '/dev/ttyUSB0',
+        debugging = False, velocity = 3, acceleration = 100,
+        deceleration = 100, useEncoder = False):
+
         try:
             ser = serial.Serial(
                 port= serialPortName,
@@ -108,6 +111,33 @@ class motorInterface(object):
         self.idle_current = 3.2
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
+
+        self.useEncoder = useEncoder
+        if useEncoder:
+            serial_message = "MR10\r"
+            self.serial.write(serial_message.encode())
+            #Sets, or requests microstep resolution. For a drive with built-in amplifier, like the Si5580, the range is 3
+            #– 15, from the table below. The MR command should be used before setting the accel and decel rates
+            #and speed, because a change in motor resolution will corrupt these settings. The MR command also
+            #resets the step table, which moves the motor to the nearest pole position. The absolute position register
+            #is not changed.
+            serial_message = "ER6\r"
+            self.serial.write(serial_message.encode())
+            #On drives supporting encoder feedback, the ER command defines the encoder ratio. This number is
+            #the motor resolution, in steps/rev, divided by the encoder resolution, in counts/rev.
+            serial_message = "ED50\r"
+            self.serial.write(serial_message.encode())
+            #On drives that have the encoder feedback option, this defines the
+            #size of the “in position” region. i.e. feedback is engaged if the
+            #actual position is not within ED encoder counds, until it is.
+            serial_message = "EF3\r"
+            self.serial.write(serial_message.encode())
+            #Enables static position maintenance and end of move correction
+            serial_message = "EP0\r"
+            self.serial.write(serial_message.encode())
+            #For example, if the encoder it at 4500 counts, and you would like to refer to this position
+            #as 0, send “EP0”. Sending EP with no position parameter requests the present encoder position
+            #from the drive.
 
         self.velocity = velocity #move speed in rev/sec. Range is .025 - 50
         # note that the worm gearbox is 7.5:1 ratioed
@@ -191,6 +221,15 @@ class motorInterface(object):
 
             self.step_size = hold_step_size
 
+    def get_encoder_position(self):
+        self.serial.write("EP\r".encode())
+        epStr = self.serial.read(100)
+        ep = float(epStr.split("=")[-1]) / 4
+        #Note: the Si™ drive electronics use “X4” decoding, so a 1000 line encoder such as the U.S. Digital
+        #E2-1000-250-H produces 4000 counts/revolution.
+        #therefore, divide by 4
+        return ep
+        
     def stop_all(self):
         serial_message = "SK\r"
         self.serial.write(serial_message.encode())
