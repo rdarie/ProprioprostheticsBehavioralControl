@@ -72,7 +72,7 @@ class sparkfunRemoteInterface(object):
 
 class motorInterface(object):
     # Configure the serial port connection the the Si3540 motor driver
-    def __init__(self, serialPortName = '/dev/ttyUSB0', debugging = False):
+    def __init__(self, serialPortName = '/dev/ttyUSB0', debugging = False, velocity = 3, acceleration = 100, deceleration = 100):
         try:
             ser = serial.Serial(
                 port= serialPortName,
@@ -109,16 +109,16 @@ class motorInterface(object):
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
 
-        self.velocity = 6 #move speed in rev/sec. Range is .025 - 50
+        self.velocity = velocity #move speed in rev/sec. Range is .025 - 50
         # note that the worm gearbox is 7.5:1 ratioed
         serial_message = "VE" + str(self.velocity) + "\r"
         self.serial.write(serial_message.encode())
 
-        self.acceleration = 200 #move speed in rev/sec^2.
+        self.acceleration = acceleration #move speed in rev/sec^2.
         serial_message = "AC" + str(self.acceleration) + "\r"
         self.serial.write(serial_message.encode())
 
-        self.deceleration = 200 #move speed in rev/sec^2.
+        self.deceleration = deceleration #move speed in rev/sec^2.
         serial_message = "DE" + str(self.deceleration) + "\r"
         self.serial.write(serial_message.encode())
 
