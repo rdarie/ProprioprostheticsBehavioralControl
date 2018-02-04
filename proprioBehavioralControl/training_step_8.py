@@ -87,7 +87,7 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = True)
+motor = ifaces.motorInterface(debugging = True, velocity = 3.3, acceleration = 110, deceleration = 110)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = True, enableSound = argEnableSound)
 
@@ -249,7 +249,7 @@ remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
 welcomeChime.play()
 try:
     remoteListener.run()
-    
+
 except:
     pass
 

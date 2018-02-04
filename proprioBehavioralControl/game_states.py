@@ -207,7 +207,12 @@ class turnPedalRandom(gameState):
             doneMoving = False
             while not doneMoving:
                 curPos = parent.motor.get_encoder_position()
+<<<<<<< HEAD
                 if curPos < 5: # ~ 2 degrees
+=======
+                #print('Current position = %4.4f' % curPos)
+                if curPos < 5 # ~ 2 degrees
+>>>>>>> 852eca21edf1874efcd4d68864defb49af7ebda1
                     doneMoving = True
             sleepTime = 0.1
         else:
