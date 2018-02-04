@@ -3,6 +3,8 @@ import numpy as np
 from helperFunctions import overRideAdder
 from collections import OrderedDict
 
+nominalBlockLength  = 6
+
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
         self.nextState = nextState
@@ -123,23 +125,27 @@ class strict_fixation(gameState):
 class turnPedalRandom(gameState):
 
     def operation(self, parent):
+        # should we add time penalties for button presses?
         enforceWait = True if parent.lastCategory is not None else False
 
         if parent.lastCategory is None:
+            # this is the first throw
+
             if parent.blocsRemaining == 0:
-                bins = [0, 1/2, 1]
-                draw = random.uniform(0,1)
+                #start a new block!
 
-                catBool = int(np.digitize(draw, bins) - 1) == 0
-                print('Choosing category = ')
-                print(catBool)
+                #switch block category
+                category = 'small' if parent.initBlocType['category'] == 'big' else 'big'
 
-                category = 'small' if catBool else 'big'
+                #set the block category for the rest of the block
                 parent.initBlocType['category'] = category
             else:
+                # repeat the last block type
                 category = parent.initBlocType['category']
+
             parent.lastCategory = category
         else:
+            # this is the second throw; do the opposite of the first one
             category = 'big' if parent.lastCategory == 'small' else 'small'
             parent.lastCategory = None
 
@@ -147,10 +153,35 @@ class turnPedalRandom(gameState):
             else random.uniform(6.5e4, 7e4)
 
         if parent.lastDirection is None:
+            # this is the first throw
+
             if parent.blocsRemaining == 0:
+                #start a new block!
+
+                #set the block direction for the rest of the block
                 direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
                 parent.initBlocType['direction'] = direction
-                parent.blocsRemaining = parent.smallBlocLength if parent.initBlocType['category'] == 'small' else parent.bigBlocLength
+
+                # re-evaluate the block lengths
+                smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
+                bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+
+                parent.smallBlocLength = round(nominalBlockLength * bigProp) + 1
+                print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
+                parent.bigBlocLength = round(nominalBlockLength * smallProp) + 1
+                print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
+
+                smallDraw = round(random.gauss(parent.smallBlocLength, 2))
+                if smallDraw <= 0:
+                    smallDraw = 1
+
+                bigDraw = round(random.gauss(parent.bigBlocLength, 2))
+                if bigDraw <= 0:
+                    bigDraw = 1
+
+                parent.blocsRemaining = smallDraw if parent.initBlocType['category'] == 'small' else bigDraw
+
+                print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
             else:
                 direction = parent.initBlocType['direction']
                 parent.blocsRemaining = parent.blocsRemaining - 1
@@ -172,17 +203,26 @@ class turnPedalRandom(gameState):
         parent.motor.go_home()
         parent.magnitudeQueue.append(parent.motor.step_size)
 
-        sleepTime = 2
+        if parent.motor.useEncoder:
+            doneMoving = False
+            while not doneMoving:
+                curPos = parent.motor.get_encoder_position()
+                #print('Current position = %4.4f' % curPos)
+                if curPos < 5: # ~ 2 degrees
+                    doneMoving = True
+            sleepTime = 0.1
+        else:
+            sleepTime = 2
 
         while sleepTime > 0:
             # Read from inbox
             event_label = parent.request_last_touch()
-            time.sleep(0.5)
-            sleepTime = sleepTime - 0.5
+            time.sleep(0.1)
+            sleepTime = sleepTime - 0.1
 
             if event_label and enforceWait:
                 # if erroneous button press, play bad tone, and penalize with an extra
-                # 2 second wait
+                # 1 second wait
                 parent.speaker.play_tone('Wait')
                 sleepTime = sleepTime + 1
 
@@ -211,7 +251,7 @@ class trial_start(gameState):
 class chooseNextTrial(gameState):
 
     def operation(self, parent):
-        bins = [0, 1/3, 1]
+        bins = [0, 1/8, 1]
         draw = random.uniform(0,1)
         return self.nextState[int(np.digitize(draw, bins) - 1)]
 
@@ -344,14 +384,6 @@ class wait_for_correct_button_timed(gameState):
             else:
                 parent.bigTally = parent.bigTally * 0.9 + 1
 
-            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
-            bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
-
-            parent.smallBlocLength = round(4 * bigProp) + 1
-            print('\nUpdated number of small throws to : %d' % parent.smallBlocLength)
-            parent.bigBlocLength = round(4 * smallProp) + 1
-            print('\nUpdated number of big throws to : %d' % parent.bigBlocLength)
-
             if event_label == parent.correctButton:
                 if self.logFile:
                     self.logFile.write("\ncorrect button\t%4.4f\t%s" % (self.timeNow, event_label))
@@ -421,17 +453,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             print(' ')
 
             if event_label == 'red':
-                parent.smallTally = parent.smallTally + 1
+                parent.smallTally = 0.9 * parent.smallTally + 1
             else:
-                parent.bigTally = parent.bigTally + 1
-
-            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
-            bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
-
-            parent.smallBlocLength = round(4 * bigProp) + 1
-            print('\nUpdated number of small throws to : %d' % parent.smallBlocLength)
-            parent.bigBlocLength = round(4 * smallProp) + 1
-            print('\nUpdated number of big throws to : %d' % parent.bigBlocLength)
+                parent.bigTally = 0.9 * parent.bigTally + 1
 
             if event_label == parent.correctButton:
                 if self.logFile:
@@ -499,6 +523,7 @@ class good(gameState):
     # TODO: add amount dispensed to log
     def operation(self, parent):
         print('Good job!')
+        parent.trialLength = parent.nominalTrialLength
         parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]
@@ -507,6 +532,7 @@ class bad(gameState):
 
     def operation(self, parent):
         print('Wrong! Try again!')
+        parent.trialLength = parent.nominalTrialLength + parent.wrongTimeout
         parent.speaker.play_tone('Bad')
         return self.nextState[0]
 

@@ -223,7 +223,12 @@ class motorInterface(object):
     def get_encoder_position(self):
         self.serial.write("EP\r".encode())
         epStr = self.serial.read(100)
-        ep = float(epStr.split("=")[-1]) / 4
+        print(epStr)
+        epValueStr = epStr.decode().split("=")[-1]
+        try:
+            ep = float(epValueStr.encode()) / 4
+        except:
+            ep = None
         #Note: the Si™ drive electronics use “X4” decoding, so a 1000 line encoder such as the U.S. Digital
         #E2-1000-250-H produces 4000 counts/revolution.
         #therefore, divide by 4
