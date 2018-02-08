@@ -3,7 +3,7 @@ import numpy as np
 from helperFunctions import overRideAdder
 from collections import OrderedDict
 
-nominalBlockLength  = 6
+nominalBlockLength  = 3
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
@@ -171,7 +171,7 @@ class turnPedalRandom(gameState):
                 parent.bigBlocLength = round(nominalBlockLength * smallProp) + 1
                 print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
 
-                smallDraw = round(random.gauss(parent.smallBlocLength, 2))
+                smallDraw = round(random.gauss(parent.smallBlocLength, 1.5))
                 if smallDraw <= 0:
                     smallDraw = 1
 
@@ -208,7 +208,7 @@ class turnPedalRandom(gameState):
             while not doneMoving:
                 curPos = parent.motor.get_encoder_position()
                 #print('Current position = %4.4f' % curPos)
-                if curPos < 5: # ~ 2 degrees
+                if curPos is not None: # ~ 2 degrees
                     doneMoving = True
             sleepTime = 0.1
         else:

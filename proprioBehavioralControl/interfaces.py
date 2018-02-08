@@ -223,7 +223,7 @@ class motorInterface(object):
     def get_encoder_position(self):
         self.serial.write("EP\r".encode())
         epStr = self.serial.read(100)
-        print(epStr)
+        #print(epStr)
         epValueStr = epStr.decode().split("=")[-1]
         try:
             ep = float(epValueStr.encode()) / 4
