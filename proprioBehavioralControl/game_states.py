@@ -222,9 +222,9 @@ class turnPedalRandom(gameState):
 
             if event_label and enforceWait:
                 # if erroneous button press, play bad tone, and penalize with an extra
-                # 1 second wait
+                # 500 millisecond wait
                 parent.speaker.play_tone('Wait')
-                sleepTime = sleepTime + 1
+                sleepTime = sleepTime + 0.5
 
                 # clear button queue for next iteration
                 if parent.inputPin.last_data is not None:
