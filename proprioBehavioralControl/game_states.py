@@ -3,7 +3,7 @@ import numpy as np
 from helperFunctions import overRideAdder
 from collections import OrderedDict
 
-nominalBlockLength  = 3
+nominalBlockLength  = 2
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None):
@@ -175,7 +175,7 @@ class turnPedalRandom(gameState):
                 if smallDraw <= 0:
                     smallDraw = 1
 
-                bigDraw = round(random.gauss(parent.bigBlocLength, 2))
+                bigDraw = round(random.gauss(parent.bigBlocLength, 1.5))
                 if bigDraw <= 0:
                     bigDraw = 1
 

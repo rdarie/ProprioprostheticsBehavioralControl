@@ -87,7 +87,7 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = True, velocity = 4, acceleration = 160, deceleration = 160, useEncoder = True)
+motor = ifaces.motorInterface(debugging = True, velocity = 4.3, acceleration = 200, deceleration = 200, useEncoder = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = True, enableSound = argEnableSound)
 
@@ -152,8 +152,8 @@ SM.easyReward = .05
 SM.hardReward = .3
 
 #block structure
-SM.smallBlocLength = 3
-SM.bigBlocLength = 3
+SM.smallBlocLength = 2
+SM.bigBlocLength = 2
 SM.smallTally = 1
 SM.bigTally = 1
 
