@@ -12,7 +12,7 @@ class gameState(object):
         self.enableLog = True
         self.firstVisit = True
 
-        self.sleepTime = 0.1
+        self.sleepTime = 0.05
         self.timeNow = time.time()
         self.timedOut = False
         self.nextTimeOut = 0
@@ -207,25 +207,25 @@ class turnPedalRandom(gameState):
             doneMoving = False
             while not doneMoving:
                 curPos = parent.motor.get_encoder_position()
+                time.sleep(0.1)
                 #print('Current position = %4.4f' % curPos)
-                if curPos is not None: # ~ 2 degrees
+                if curPos is not None:
                     doneMoving = True
-            sleepTime = 0.1
+            sleepTime = 0.05
         else:
             sleepTime = 2
 
         while sleepTime > 0:
             # Read from inbox
             event_label = parent.request_last_touch()
-            time.sleep(0.1)
-            sleepTime = sleepTime - 0.1
+            time.sleep(0.05)
+            sleepTime = sleepTime - 0.05
 
             if event_label and enforceWait:
                 # if erroneous button press, play bad tone, and penalize with an extra
                 # 500 millisecond wait
                 parent.speaker.play_tone('Wait')
                 sleepTime = sleepTime + 0.5
-
                 # clear button queue for next iteration
                 if parent.inputPin.last_data is not None:
                     parent.inputPin.last_data = None
