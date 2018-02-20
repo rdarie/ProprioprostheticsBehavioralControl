@@ -46,7 +46,12 @@ class gameState(object):
         if self.logFile:
             if self.enableLog:
                 self.timeNow = time.time()
-                self.logFile.write("\n%s\t%4.4f\t%4.4f" % ( self.__name__, self.timeNow, self.payload))
+                logData = {
+                    'name' : self.__name__,
+                    'time' :  self.timeNow,
+                    'payload' self.payload
+                    }
+                self.logFile.write(logData)
 
         return ret
 
@@ -230,6 +235,126 @@ class turnPedalRandom(gameState):
                 if parent.inputPin.last_data is not None:
                     parent.inputPin.last_data = None
 
+        return self.nextState[0]
+
+class turnPedalCompound(gameState):
+
+    def operation(self, parent):
+        # should we add time penalties for button presses?
+        enforceWait = True
+
+        if parent.blocsRemaining == 0:
+            #start a new block!
+
+            #switch block category
+            category = 'small' if parent.initBlocType['category'] == 'big' else 'big'
+
+            #set the block category for the rest of the block
+            parent.initBlocType['category'] = category
+
+            #set the block direction for the rest of the block
+            direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+            parent.initBlocType['direction'] = direction
+
+            # re-evaluate the block lengths
+            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
+            bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+
+            parent.smallBlocLength = round(nominalBlockLength * bigProp) + 1
+            print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
+            parent.bigBlocLength = round(nominalBlockLength * smallProp) + 1
+            print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
+
+            smallDraw = round(random.gauss(parent.smallBlocLength, 1.5))
+            if smallDraw <= 0:
+                smallDraw = 1
+
+            bigDraw = round(random.gauss(parent.bigBlocLength, 1.5))
+            if bigDraw <= 0:
+                bigDraw = 1
+
+            parent.blocsRemaining = smallDraw if parent.initBlocType['category'] == 'small' else bigDraw
+
+            print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
+        else:
+            # repeat the last block type
+            category = parent.initBlocType['category']
+            direction = parent.initBlocType['direction']
+            parent.blocsRemaining = parent.blocsRemaining - 1
+
+        parent.motor.step_size = random.uniform(1e4, 1.5e4) if category == 'small'\
+            else random.uniform(6.5e4, 7e4)
+
+        self.payload = {'firstThrow': 0, 'secondThrow' : 0}
+        if direction == 'forward':
+            parent.motor.forward()
+            if self.logFile:
+                self.payload['firstThrow'] = parent.motor.step_size
+        else:
+            parent.motor.backward()
+            if self.logFile:
+                self.payload['firstThrow'] = -parent.motor.step_size
+
+        parent.motor.go_home()
+        parent.magnitudeQueue.append(parent.motor.step_size)
+
+        ## Second Movement
+        ## TODO: Sleep the parent some number of milliseconds
+        ## TODO: fix logging
+        parent.motor.step_size = random.uniform(6.5e4, 7e4) if category == 'small'\
+            else random.uniform(1e4, 1.5e4)
+
+        if direction == 'forward':
+            parent.motor.forward()
+            if self.logFile:
+                self.payload['secondThrow'] = parent.motor.step_size
+        else:
+            parent.motor.backward()
+            if self.logFile:
+                self.payload['secondThrow'] = -parent.motor.step_size
+
+        parent.motor.go_home()
+        parent.magnitudeQueue.append(parent.motor.step_size)
+
+        #Obviate the need to stop by the set_correct state
+        parent.correctButton = 'red'\
+            if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
+            else 'green'
+
+        print('  ')
+        print('Correct button set to: %s' % parent.correctButton)
+
+        if parent.motor.useEncoder:
+            doneMoving = False
+            while not doneMoving:
+                curPos = parent.motor.get_encoder_position()
+                time.sleep(0.1)
+                #
+                if curPos is not None:
+                    doneMoving = True
+                    print('Current position = %4.4f' % curPos)
+            sleepTime = 0.05
+        else:
+            sleepTime = 2
+
+        while sleepTime > 0:
+            # Read from inbox
+            event_label = parent.request_last_touch()
+            time.sleep(0.05)
+            sleepTime = sleepTime - 0.05
+
+            if event_label and enforceWait:
+                # if erroneous button press, play bad tone, and penalize with an extra
+                # 500 millisecond wait
+                parent.speaker.play_tone('Wait')
+                sleepTime = sleepTime + 0.5
+                # clear button queue for next iteration
+                if parent.inputPin.last_data is not None:
+                    parent.inputPin.last_data = None
+
+        # obviate the need to go to clear_input_queue
+        if parent.inputPin.last_data is not None:
+            parent.inputPin.last_data = None
         return self.nextState[0]
 
 class clear_input_queue(gameState):
