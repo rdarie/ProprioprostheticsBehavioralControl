@@ -111,7 +111,7 @@ SM = State_Machine()
 # Add attributes to the state machine
 SM.startEnable = False
 SM.nominalTrialLength = float(argTrialLength)
-SM.wrongTimeout = 7
+SM.wrongTimeout = 5
 SM.trialLength = SM.nominalTrialLength
 SM.nextEnableTime = 0
 

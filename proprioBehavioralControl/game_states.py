@@ -170,7 +170,7 @@ class turnPedalRandom(gameState):
                 # re-evaluate the block lengths
                 smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
                 bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
-                
+
                 bias = smallProp - bigProp # positive if biased towards the small, negative otherwise
                 smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
                 bigProp = 0.5 + 2 * bias # opposite
@@ -323,6 +323,7 @@ class turnPedalCompound(gameState):
 
         parent.motor.go_home()
         parent.magnitudeQueue.append(parent.motor.step_size)
+        parent.motor.serial.write("WT0.3".encode())
 
         #Obviate the need to stop by the set_correct state
         parent.correctButton = 'red'\
