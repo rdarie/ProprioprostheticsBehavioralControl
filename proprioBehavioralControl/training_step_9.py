@@ -162,7 +162,7 @@ SM.initBlocType = {
     'category' : 'big',
     'direction' : 'forward'
     }
-
+SM.correctButton = 'green'
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
