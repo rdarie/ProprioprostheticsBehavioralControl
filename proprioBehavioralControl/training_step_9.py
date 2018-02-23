@@ -182,7 +182,7 @@ if logToWeb:
 # connect state machine states
 SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
     thisLog))
-SM.add_state(turnPedalRandom(['chooseNextTrial'], SM, 'turnPedalCompound',
+SM.add_state(turnPedalCompound(['chooseNextTrial'], SM, 'turnPedalCompound',
     logFile = thisLog))
 SM.add_state(chooseNextTrial(['goEasy', 'goHard'], SM, 'chooseNextTrial',
     logFile = thisLog))
