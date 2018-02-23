@@ -49,7 +49,7 @@ class gameState(object):
                 logData = {
                     'name' : self.__name__,
                     'time' :  self.timeNow,
-                    'payload' self.payload
+                    'payload': self.payload
                     }
                 self.logFile.write(logData)
 
