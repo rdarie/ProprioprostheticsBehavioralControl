@@ -170,6 +170,10 @@ class turnPedalRandom(gameState):
                 # re-evaluate the block lengths
                 smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
                 bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+                
+                bias = smallProp - bigProp # positive if biased towards the small, negative otherwise
+                smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
+                bigProp = 0.5 + 2 * bias # opposite
 
                 parent.smallBlocLength = round(nominalBlockLength * bigProp) + 1
                 print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
@@ -259,6 +263,10 @@ class turnPedalCompound(gameState):
             # re-evaluate the block lengths
             smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+
+            bias = smallProp - bigProp # positive if biased towards the small, negative otherwise
+            smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
+            bigProp = 0.5 + 2 * bias # opposite
 
             parent.smallBlocLength = round(nominalBlockLength * bigProp) + 1
             print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
