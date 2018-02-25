@@ -265,8 +265,13 @@ class turnPedalCompound(gameState):
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
 
             bias = smallProp - bigProp # positive if biased towards the small, negative otherwise
+
             smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
+
+            #bounds
             smallProp = 0 if smallProp < 0 else smallProp
+            smallProp = 1 if smallProp > 1 else smallProp
+
             bigProp = 1 - smallProp # opposite
 
             parent.smallBlocLength = round(nominalBlockLength * bigProp) + 1
@@ -291,8 +296,8 @@ class turnPedalCompound(gameState):
             direction = parent.initBlocType['direction']
             parent.blocsRemaining = parent.blocsRemaining - 1
 
-        parent.motor.step_size = random.uniform(1e4, 1.5e4) if category == 'small'\
-            else random.uniform(6.5e4, 7e4)
+        parent.motor.step_size = random.uniform(0.5e4, 1e4) if category == 'small'\
+            else random.uniform(5e4, 5.5e4)
 
         self.payload = {'firstThrow': 0, 'secondThrow' : 0}
         if direction == 'forward':
@@ -306,13 +311,13 @@ class turnPedalCompound(gameState):
 
         parent.motor.go_home()
         parent.magnitudeQueue.append(parent.motor.step_size)
-        parent.motor.serial.write("WT0.5\r".encode())
+        parent.motor.serial.write("WT0.25\r".encode())
 
         ## Second Movement
         ## TODO: Sleep the parent some number of milliseconds
         ## TODO: fix logging
-        parent.motor.step_size = random.uniform(6.5e4, 7e4) if category == 'small'\
-            else random.uniform(1e4, 1.5e4)
+        parent.motor.step_size = random.uniform(5e4, 5.5e4) if category == 'small'\
+            else random.uniform(0.5e4, 1e4)
 
         if direction == 'forward':
             parent.motor.forward()
