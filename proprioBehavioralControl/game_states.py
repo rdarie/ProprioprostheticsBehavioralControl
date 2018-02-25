@@ -516,7 +516,7 @@ class wait_for_correct_button_timed(gameState):
 
             if event_label == 'red':
                 parent.smallTally = parent.smallTally * 0.9 + 1
-            else:
+            elif  event_label == 'green':
                 parent.bigTally = parent.bigTally * 0.9 + 1
 
             if event_label == parent.correctButton:
@@ -589,7 +589,7 @@ class wait_for_correct_button_timed_uncued(gameState):
 
             if event_label == 'red':
                 parent.smallTally = 0.9 * parent.smallTally + 1
-            else:
+            elif  event_label == 'green':
                 parent.bigTally = 0.9 * parent.bigTally + 1
 
             if event_label == parent.correctButton:
