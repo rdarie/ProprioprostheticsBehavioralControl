@@ -261,8 +261,13 @@ class turnPedalCompound(gameState):
             parent.initBlocType['direction'] = direction
 
             # re-evaluate the block lengths
+            print('\ntally of small choices is : %4.2f' % parent.smallTally)
             smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
+            print('\nsmall proportion is : %4.2f' % smallProp )
+
+            print('\ntally of big choices is : %4.2f' % parent.bigTally)
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+            print('\nbig proportion is : %4.2f' % bigProp )
 
             bias = smallProp - bigProp # positive if biased towards the small, negative otherwise
 
