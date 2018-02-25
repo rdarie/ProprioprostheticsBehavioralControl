@@ -269,7 +269,7 @@ class turnPedalCompound(gameState):
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
             print('\nbig proportion is : %4.2f' % bigProp )
 
-            bias = smallProp - bigProp # positive if biased towards the small, negative otherwise
+            bias = smallProp - 0.5 # positive if biased towards the small, negative otherwise
 
             smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
 
@@ -279,9 +279,9 @@ class turnPedalCompound(gameState):
 
             bigProp = 1 - smallProp # opposite
 
-            parent.smallBlocLength = round(nominalBlockLength * bigProp) + 1
+            parent.smallBlocLength = round(nominalBlockLength * smallProp) + 1
             print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
-            parent.bigBlocLength = round(nominalBlockLength * smallProp) + 1
+            parent.bigBlocLength = round(nominalBlockLength * bigProp) + 1
             print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
 
             smallDraw = round(random.gauss(parent.smallBlocLength, 1.5))
