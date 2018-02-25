@@ -305,7 +305,7 @@ class turnPedalCompound(gameState):
 
         parent.motor.go_home()
         parent.magnitudeQueue.append(parent.motor.step_size)
-        parent.motor.serial.write("WT0.5".encode())
+        #parent.motor.serial.write("WT0.5".encode())
 
         ## Second Movement
         ## TODO: Sleep the parent some number of milliseconds
