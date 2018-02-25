@@ -266,7 +266,8 @@ class turnPedalCompound(gameState):
 
             bias = smallProp - bigProp # positive if biased towards the small, negative otherwise
             smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
-            bigProp = 0.5 + 2 * bias # opposite
+            smallProp = 0 if smallProp < 0 else smallProp
+            bigProp = 1 - smallProp # opposite
 
             parent.smallBlocLength = round(nominalBlockLength * bigProp) + 1
             print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
