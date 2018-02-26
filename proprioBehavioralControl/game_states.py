@@ -400,9 +400,6 @@ class turnPedalCompound(gameState):
         # obviate the need to go to clear_input_queue
         if parent.inputPin.last_data is not None:
             parent.inputPin.last_data = None
-
-        #obviate the need to stop by trial_start
-        parent.speaker.play_tone('Go')
         return self.nextState[0]
 
 class clear_input_queue(gameState):
@@ -537,6 +534,9 @@ class wait_for_correct_button_timed(gameState):
             if self.printStatements:
                 print('Started Timed Button')
             # Turn LED's On
+
+            #obviate the need to stop by trial_start
+            parent.speaker.play_tone('Go')
             parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
 
             self.firstVisit = False
@@ -629,7 +629,10 @@ class wait_for_correct_button_timed_uncued(gameState):
         if self.firstVisit:
             if self.printStatements:
                 print('Started Timed Button')
+            #obviate the need to stop by trial_start
+            parent.speaker.play_tone('Go')
             # Turn LED's On
+
             if lighting:
                 parent.outbox.put('redLED')
                 parent.outbox.put('greenLED')
