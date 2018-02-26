@@ -215,7 +215,7 @@ class turnPedalRandom(gameState):
             doneMoving = False
             while not doneMoving:
                 curPos = parent.motor.get_encoder_position()
-                
+
                 #print('Current position = %4.4f' % curPos)
                 if curPos is not None:
                     doneMoving = True
