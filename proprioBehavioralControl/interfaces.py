@@ -224,7 +224,7 @@ class motorInterface(object):
         self.serial.write("EP\r".encode())
         epStr = self.serial.read(100)
         #print(epStr)
-        epValueStr = epStr.decode().split("= ")[-1]
+        epValueStr = epStr.decode().split("=")[-1]
         try:
             ep = float(epValueStr.encode()) / 4
         except:
@@ -246,7 +246,7 @@ class motorInterface(object):
         self.serial.write("RS\r".encode())
         stStr = self.serial.read(100)
         #print(epStr)
-        return stStr.decode().split("= ")[-1]
+        return stStr.decode().split("=")[-1][-1]
 
     def stop_all(self):
         serial_message = "SK\r"
