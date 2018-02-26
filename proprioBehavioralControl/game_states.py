@@ -342,6 +342,7 @@ class turnPedalCompound(gameState):
 
         print('  ')
         print('Correct button set to: %s' % parent.correctButton)
+        parent.magnitudeQueue = []
 
         if parent.motor.useEncoder:
             doneMoving = False
@@ -719,7 +720,6 @@ class post_trial(gameState):
 
     def operation(self, parent):
         print('At post trial')
-        parent.magnitudeQueue = []
         return self.nextState[0]
 
 class end(gameState):

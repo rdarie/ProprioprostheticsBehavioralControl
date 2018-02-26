@@ -190,7 +190,7 @@ SM.add_state(chooseNextTrial(['goEasy', 'goHard'], SM, 'chooseNextTrial',
 
 # if in this trial, both buttons will be seen as correct
 SM.add_state(trial_start(['wait_for_correct_button_timed_uncued'], SM, 'goHard',
-    logFile = thisLog))
+    logFile = None))
 SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
     'wait_for_correct_button_timed_uncued'], SM,
     'wait_for_correct_button_timed_uncued', logFile = thisLog))
