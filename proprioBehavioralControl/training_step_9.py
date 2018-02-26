@@ -87,7 +87,7 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = True, velocity = 5.3, acceleration = 200, deceleration = 200, useEncoder = True)
+motor = ifaces.motorInterface(debugging = False, velocity = 5.3, acceleration = 250, deceleration = 250, useEncoder = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = True, enableSound = argEnableSound)
 
