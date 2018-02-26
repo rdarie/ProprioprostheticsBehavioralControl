@@ -11,7 +11,8 @@ class gameState(object):
 
         self.enableLog = True
         self.firstVisit = True
-
+        self.printStatements = printStatements
+        
         self.sleepTime = 0.05
         self.timeNow = time.time()
         self.timedOut = False
