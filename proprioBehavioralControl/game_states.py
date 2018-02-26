@@ -17,7 +17,7 @@ class gameState(object):
         self.timedOut = False
         self.nextTimeOut = 0
 
-        self.payload = np.nan
+        self.payload = None
 
         self.logFile = logFile
         self.parent = parent
@@ -652,7 +652,7 @@ class wait_for_correct_button_timed_uncued(gameState):
                 logData = {
                     'name' : 'button timed out',
                     'time' :  self.timeNow,
-                    'payload': event_label
+                    'payload': self.payload
                     }
                 self.logFile.write(logData)
 
