@@ -248,6 +248,7 @@ except:
     pass
 
 finally:
+    thisLog.close()
     if logToWeb:
         subprocess.check_output('sudo mount -a', shell = True)
         src = SM.logFileName
