@@ -246,7 +246,7 @@ class motorInterface(object):
         self.serial.write("RS\r".encode())
         stStr = self.serial.read(100)
         #print(epStr)
-        return stStr
+        return stStr.decode().split("=")[-1]
 
     def stop_all(self):
         serial_message = "SK\r"
