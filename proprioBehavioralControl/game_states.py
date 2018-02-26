@@ -6,7 +6,7 @@ from collections import OrderedDict
 nominalBlockLength  = 2
 
 class gameState(object):
-    def __init__(self, nextState, parent, stateName, logFile = None):
+    def __init__(self, nextState, parent, stateName, logFile = None, printStatements = False):
         self.nextState = nextState
 
         self.enableLog = True
@@ -73,7 +73,8 @@ class fixation(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
-            print(' ')
+            if self.printStatements:
+                print(' ')
             return self.nextState[0]
         else:
             # not yet enabled
@@ -86,7 +87,8 @@ class strict_fixation(gameState):
     # IF button presses happen here, give bad feedback
     def operation(self, parent):
         if self.firstVisit:
-            print('Started strict fixation')
+            if self.printStatements:
+                print('Started strict fixation')
             self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.trialLength
             self.enableLog = False
@@ -117,7 +119,8 @@ class strict_fixation(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
-            print(' ')
+            if self.printStatements:
+                print(' ')
             return self.nextState[0]
         else:
             # not yet enabled
@@ -175,9 +178,11 @@ class turnPedalRandom(gameState):
                 bigProp = 0.5 + 2 * bias # opposite
 
                 parent.smallBlocLength = round(nominalBlockLength * bigProp) + 1
-                print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
+                if self.printStatements:
+                    print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
                 parent.bigBlocLength = round(nominalBlockLength * smallProp) + 1
-                print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
+                if self.printStatements:
+                    print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
 
                 smallDraw = round(random.gauss(parent.smallBlocLength, 1.5))
                 if smallDraw <= 0:
@@ -189,7 +194,8 @@ class turnPedalRandom(gameState):
 
                 parent.blocsRemaining = smallDraw if parent.initBlocType['category'] == 'small' else bigDraw
 
-                print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
+                if self.printStatements:
+                    print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
             else:
                 direction = parent.initBlocType['direction']
                 parent.blocsRemaining = parent.blocsRemaining - 1
@@ -260,13 +266,21 @@ class turnPedalCompound(gameState):
             parent.initBlocType['direction'] = direction
 
             # re-evaluate the block lengths
-            print('\ntally of small choices is : %4.2f' % parent.smallTally)
-            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
-            print('\nsmall proportion is : %4.2f' % smallProp )
 
-            print('\ntally of big choices is : %4.2f' % parent.bigTally)
+            if self.printStatements:
+                print('\ntally of small choices is : %4.2f' % parent.smallTally)
+            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
+
+            if self.printStatements:
+                print('\nsmall proportion is : %4.2f' % smallProp )
+
+
+            if self.printStatements:
+                print('\ntally of big choices is : %4.2f' % parent.bigTally)
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
-            print('\nbig proportion is : %4.2f' % bigProp )
+
+            if self.printStatements:
+                print('\nbig proportion is : %4.2f' % bigProp )
 
             bias = smallProp - 0.5 # positive if biased towards the small, negative otherwise
 
@@ -279,9 +293,13 @@ class turnPedalCompound(gameState):
             bigProp = 1 - smallProp # opposite
 
             parent.smallBlocLength = round(nominalBlockLength * smallProp) + 1
-            print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
+
+            if self.printStatements:
+                print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
             parent.bigBlocLength = round(nominalBlockLength * bigProp) + 1
-            print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
+
+            if self.printStatements:
+                print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
 
             smallDraw = round(random.gauss(parent.smallBlocLength, 1.5))
             if smallDraw <= 0:
@@ -293,7 +311,8 @@ class turnPedalCompound(gameState):
 
             parent.blocsRemaining = smallDraw if parent.initBlocType['category'] == 'small' else bigDraw
 
-            print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
+            if self.printStatements:
+                print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
         else:
             # repeat the last block type
             category = parent.initBlocType['category']
@@ -340,22 +359,23 @@ class turnPedalCompound(gameState):
             if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
             else 'green'
 
-        print('  ')
-        print('Correct button set to: %s' % parent.correctButton)
+        if self.printStatements:
+            print('  ')
+            print('Correct button set to: %s' % parent.correctButton)
         parent.magnitudeQueue = []
 
         doneMoving = False
         while not doneMoving:
             curStatus = parent.motor.get_status()
-            print('Current Status = %s' % curStatus)
+            #print('Current Status = %s' % curStatus)
             #pdb.set_trace()
             if 'R' in curStatus:
                 doneMoving = True
 
         if parent.motor.useEncoder:
             curPos = parent.motor.get_encoder_position()
-            if curPos is not None:
-                print('Current position = %4.4f' % curPos)
+            #if curPos is not None:
+            #    print('Current position = %4.4f' % curPos)
 
         sleepTime = 0.05
         if parent.inputPin.last_data is not None:
@@ -394,7 +414,7 @@ class trial_start(gameState):
 
     def operation(self, parent):
         parent.speaker.play_tone('Go')
-        print('Trial Started!')
+        #print('Trial Started!')
         return self.nextState[0]
 
 class chooseNextTrial(gameState):
@@ -411,8 +431,9 @@ class set_correct(gameState):
             if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
             else 'green'
 
-        print('  ')
-        print('Correct button set to: %s' % parent.correctButton)
+        if self.printStatements:
+            print('  ')
+            print('Correct button set to: %s' % parent.correctButton)
 
         return self.nextState[0]
 
@@ -424,7 +445,9 @@ class wait_for_any_button(gameState):
         if event_label:
             if self.logFile:
                 self.logFile.write("\ncorrect button\t%s\t" % event_label)
-            print("\n%s button pressed!" % event_label)
+
+            if self.printStatements:
+                print("\n%s button pressed!" % event_label)
 
             #leaving wait_for_button, turn logging on for next return to fixation
             self.enableLog = True
@@ -444,7 +467,9 @@ class wait_for_any_button_timed(gameState):
     def operation(self, parent):
 
         if self.firstVisit:
-            print('Started Timed Button')
+
+            if self.printStatements:
+                print('Started Timed Button')
             # Turn LED's On
             parent.outbox.put('redLED')
             parent.outbox.put('greenLED')
@@ -462,7 +487,9 @@ class wait_for_any_button_timed(gameState):
         if event_label:
             if self.logFile:
                 self.logFile.write("\ncorrect button\t%4.4f\t%s" % (self.timeNow, event_label))
-            print("\n%s button pressed!" % event_label)
+
+            if self.printStatements:
+                print("\n%s button pressed!" % event_label)
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
@@ -470,7 +497,8 @@ class wait_for_any_button_timed(gameState):
             self.timedOut = False
             parent.outbox.put('redLED')
             parent.outbox.put('greenLED')
-            print(' ')
+            if self.printStatements:
+                print(' ')
             return self.nextState[0] # usually the good state
 
         if self.timedOut:
@@ -483,7 +511,9 @@ class wait_for_any_button_timed(gameState):
             self.timedOut = False
             parent.outbox.put('redLED')
             parent.outbox.put('greenLED')
-            print(' ')
+
+            if self.printStatements:
+                print(' ')
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
 
@@ -500,7 +530,8 @@ class wait_for_correct_button_timed(gameState):
     def operation(self, parent):
 
         if self.firstVisit:
-            print('Started Timed Button')
+            if self.printStatements:
+                print('Started Timed Button')
             # Turn LED's On
             parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
 
@@ -526,7 +557,8 @@ class wait_for_correct_button_timed(gameState):
             self.timedOut = False
             parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
 
-            print(' ')
+            if self.printStatements:
+                print(' ')
 
             if event_label == 'red':
                 parent.smallTally = parent.smallTally * 0.9 + 1
@@ -541,7 +573,8 @@ class wait_for_correct_button_timed(gameState):
                         'payload': event_label
                         }
                     self.logFile.write(logData)
-                print("\n%s button pressed correctly!" % event_label)
+                if self.printStatements:
+                    print("\n%s button pressed correctly!" % event_label)
                 return self.nextState[0] # usually the good state
             else:
                 if self.logFile:
@@ -551,7 +584,8 @@ class wait_for_correct_button_timed(gameState):
                         'payload': event_label
                         }
                     self.logFile.write(logData)
-                print("\n%s button pressed incorrectly!" % event_label)
+                if self.printStatements:
+                    print("\n%s button pressed incorrectly!" % event_label)
                 return self.nextState[1] # usually the good state
 
         if self.timedOut:
@@ -569,7 +603,8 @@ class wait_for_correct_button_timed(gameState):
             self.timedOut = False
             parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
 
-            print(' ')
+            if self.printStatements:
+                print(' ')
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
 
@@ -588,7 +623,8 @@ class wait_for_correct_button_timed_uncued(gameState):
         lighting = True
 
         if self.firstVisit:
-            print('Started Timed Button')
+            if self.printStatements:
+                print('Started Timed Button')
             # Turn LED's On
             if lighting:
                 parent.outbox.put('redLED')
@@ -619,7 +655,8 @@ class wait_for_correct_button_timed_uncued(gameState):
                 parent.outbox.put('redLED')
                 parent.outbox.put('greenLED')
 
-            print(' ')
+            if self.printStatements:
+                print(' ')
 
             if event_label == 'red':
                 parent.smallTally = 0.9 * parent.smallTally + 1
@@ -634,7 +671,9 @@ class wait_for_correct_button_timed_uncued(gameState):
                         'payload': event_label
                         }
                     self.logFile.write(logData)
-                print("\n%s button pressed correctly!" % event_label)
+
+                if self.printStatements:
+                    print("\n%s button pressed correctly!" % event_label)
                 return self.nextState[0] # usually the good state
             else:
                 if self.logFile:
@@ -644,7 +683,9 @@ class wait_for_correct_button_timed_uncued(gameState):
                         'payload': event_label
                         }
                     self.logFile.write(logData)
-                print("\n%s button pressed incorrectly!" % event_label)
+
+                if self.printStatements:
+                    print("\n%s button pressed incorrectly!" % event_label)
                 return self.nextState[1] # usually the good state
 
         if self.timedOut:
@@ -664,16 +705,18 @@ class wait_for_correct_button_timed_uncued(gameState):
                 parent.outbox.put('redLED')
                 parent.outbox.put('greenLED')
 
-            print(' ')
+            if self.printStatements:
+                print(' ')
             # re enable logging for future visits
             return self.nextState[1] # usually the post-trial state
 
         else: # if not parent.buttonTimedOut
             time.sleep(self.sleepTime)
 
-            sys.stdout.write("Waiting for button... Time left: %4.4f \r" %
-                (self.nextTimeOut - self.timeNow))
-            sys.stdout.flush()
+            if self.printStatements:
+                sys.stdout.write("Waiting for button... Time left: %4.4f \r" %
+                    (self.nextTimeOut - self.timeNow))
+                sys.stdout.flush()
 
             return self.nextState[2]
 
@@ -690,7 +733,8 @@ class wait_for_correct_button(gameState):
         if event_label:
             if self.logFile:
                 self.logFile.write("\nbutton pressed\t%s\t" % event_label)
-            print("\n%s button pressed!" % event_label)
+            if self.printStatements:
+                print("\n%s button pressed!" % event_label)
 
             nextFun = self.nextState[0] if parent.correctButton == event_label else self.nextState[1]
 
@@ -699,14 +743,16 @@ class wait_for_correct_button(gameState):
             return nextFun
         else:
             time.sleep(self.sleepTime)
-            sys.stdout.write("Waiting for button...\r")
-            sys.stdout.flush()
+            if self.printStatements:
+                sys.stdout.write("Waiting for button...\r")
+                sys.stdout.flush()
             return 'wait_for_correct_button'
 
 class good(gameState):
     # TODO: add amount dispensed to log
     def operation(self, parent):
-        print('Good job!')
+        if self.printStatements:
+            print('Good job!')
         parent.trialLength = parent.nominalTrialLength
         parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
@@ -715,7 +761,8 @@ class good(gameState):
 class bad(gameState):
 
     def operation(self, parent):
-        print('Wrong! Try again!')
+        if self.printStatements:
+            print('Wrong! Try again!')
         parent.trialLength = parent.nominalTrialLength + parent.wrongTimeout
         parent.speaker.play_tone('Bad')
         return self.nextState[0]
