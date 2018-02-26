@@ -344,24 +344,28 @@ class turnPedalCompound(gameState):
         print('Correct button set to: %s' % parent.correctButton)
         parent.magnitudeQueue = []
 
+        doneMoving = False
+        while not doneMoving:
+            curStatus = parent.motor.get_status()
+            print('Current Status = %s' % curStatus)
+            if curStatus == 'R':
+                doneMoving = True
+
         if parent.motor.useEncoder:
-            doneMoving = False
-            while not doneMoving:
-                curPos = parent.motor.get_encoder_position()
-                time.sleep(0.1)
-                #
-                if curPos is not None:
-                    doneMoving = True
-                    print('Current position = %4.4f' % curPos)
-            sleepTime = 0.05
-        else:
-            sleepTime = 2
+            curPos = parent.motor.get_encoder_position()
+
+            if curPos is not None:
+                print('Current position = %4.4f' % curPos)
+
+        sleepTime = 0.05
+        if parent.inputPin.last_data is not None:
+            parent.inputPin.last_data = None
 
         while sleepTime > 0:
             # Read from inbox
-            event_label = parent.request_last_touch()
             time.sleep(0.05)
             sleepTime = sleepTime - 0.05
+            event_label = parent.request_last_touch()
 
             if event_label and enforceWait:
                 # if erroneous button press, play bad tone, and penalize with an extra

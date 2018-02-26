@@ -234,6 +234,20 @@ class motorInterface(object):
         #therefore, divide by 4
         return ep
 
+
+    def get_status(self):
+        """
+        M = motion in progress
+        W = wait input command executing
+        T = wait time command executing
+        E = servo positioning fault (drive must be reset by interrupting power to clear this fault)
+        R = ready (none of the above happening)
+        """
+        self.serial.write("RS\r".encode())
+        stStr = self.serial.read(100)
+        #print(epStr)
+        return stStr
+
     def stop_all(self):
         serial_message = "SK\r"
         self.serial.write(serial_message.encode())
