@@ -180,11 +180,12 @@ if logToWeb:
 
     print(logEntryLocation)
 
+debugging = True
 # connect state machine states
 SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
-    thisLog))
+    thisLog, printStatements = debugging))
 SM.add_state(turnPedalCompound(['chooseNextTrial'], SM, 'turnPedalCompound',
-    logFile = thisLog))
+    logFile = thisLog, printStatements = debugging))
 SM.add_state(chooseNextTrial(['goEasy', 'goHard'], SM, 'chooseNextTrial',
     logFile = None))
 
@@ -192,20 +193,20 @@ SM.add_state(chooseNextTrial(['goEasy', 'goHard'], SM, 'chooseNextTrial',
 #SM.add_state(trial_start(['wait_for_correct_button_timed_uncued'], SM, 'goHard',
 #    logFile = None))
 SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
-    'goHard'], SM, 'goHard', logFile = thisLog))
+    'goHard'], SM, 'goHard', logFile = thisLog, printStatements = debugging))
 
 #if in this trial, a button will be assigned based on the longer direction
 #SM.add_state(trial_start(['wait_for_correct_button_timed'], SM, 'goEasy',
 #    logFile = None))
 SM.add_state(wait_for_correct_button_timed(['good', 'bad',
-    'goEasy'], SM, 'goEasy', logFile = thisLog))
+    'goEasy'], SM, 'goEasy', logFile = thisLog, printStatements = debugging))
 
-SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog))
-SM.add_state(bad(['post_trial'], SM, 'bad', logFile = thisLog))
+SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog, printStatements = debugging))
+SM.add_state(bad(['post_trial'], SM, 'bad', logFile = thisLog, printStatements = debugging))
 SM.add_state(post_trial(['clear_input_queue_2'], SM, 'post_trial',
-    logFile = thisLog))
+    logFile = thisLog, printStatements = debugging))
 SM.add_state(clear_input_queue(['fixation'], SM, 'clear_input_queue_2',
-    logFile = thisLog))
+    logFile = thisLog, printStatements = debugging))
 SM.add_state(end([False], SM, 'end', logFile = thisLog))
 
 SM.set_init('fixation')
