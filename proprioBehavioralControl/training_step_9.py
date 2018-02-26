@@ -189,18 +189,16 @@ SM.add_state(chooseNextTrial(['goEasy', 'goHard'], SM, 'chooseNextTrial',
     logFile = None))
 
 # if in this trial, both buttons will be seen as correct
-SM.add_state(trial_start(['wait_for_correct_button_timed_uncued'], SM, 'goHard',
-    logFile = None))
+#SM.add_state(trial_start(['wait_for_correct_button_timed_uncued'], SM, 'goHard',
+#    logFile = None))
 SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
-    'wait_for_correct_button_timed_uncued'], SM,
-    'wait_for_correct_button_timed_uncued', logFile = thisLog))
+    'goHard'], SM, 'goHard', logFile = thisLog))
 
 #if in this trial, a button will be assigned based on the longer direction
-SM.add_state(trial_start(['wait_for_correct_button_timed'], SM, 'goEasy',
-    logFile = None))
+#SM.add_state(trial_start(['wait_for_correct_button_timed'], SM, 'goEasy',
+#    logFile = None))
 SM.add_state(wait_for_correct_button_timed(['good', 'bad',
-    'wait_for_correct_button_timed'], SM, 'wait_for_correct_button_timed',
-        logFile = thisLog))
+    'goEasy'], SM, 'goEasy', logFile = thisLog))
 
 SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog))
 SM.add_state(bad(['post_trial'], SM, 'bad', logFile = thisLog))

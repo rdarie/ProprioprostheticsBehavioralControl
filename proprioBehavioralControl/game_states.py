@@ -12,7 +12,7 @@ class gameState(object):
         self.enableLog = True
         self.firstVisit = True
         self.printStatements = printStatements
-        
+
         self.sleepTime = 0.05
         self.timeNow = time.time()
         self.timedOut = False
@@ -400,6 +400,9 @@ class turnPedalCompound(gameState):
         # obviate the need to go to clear_input_queue
         if parent.inputPin.last_data is not None:
             parent.inputPin.last_data = None
+
+        #obviate the need to stop by trial_start
+        parent.speaker.play_tone('Go')
         return self.nextState[0]
 
 class clear_input_queue(gameState):
