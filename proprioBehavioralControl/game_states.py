@@ -215,7 +215,7 @@ class turnPedalRandom(gameState):
             doneMoving = False
             while not doneMoving:
                 curPos = parent.motor.get_encoder_position()
-                time.sleep(0.1)
+                
                 #print('Current position = %4.4f' % curPos)
                 if curPos is not None:
                     doneMoving = True
@@ -348,7 +348,8 @@ class turnPedalCompound(gameState):
         while not doneMoving:
             curStatus = parent.motor.get_status()
             print('Current Status = %s' % curStatus)
-            if curStatus == 'R':
+            #pdb.set_trace()
+            if 'R' in curStatus:
                 doneMoving = True
 
         if parent.motor.useEncoder:
