@@ -566,11 +566,14 @@ class wait_for_correct_button_timed(gameState):
 class wait_for_correct_button_timed_uncued(gameState):
     def operation(self, parent):
 
+        lighting = False
+
         if self.firstVisit:
             print('Started Timed Button')
             # Turn LED's On
-            parent.outbox.put('redLED')
-            parent.outbox.put('greenLED')
+            if lighting:
+                parent.outbox.put('redLED')
+                parent.outbox.put('greenLED')
 
             self.firstVisit = False
             self.enableLog = False
@@ -592,8 +595,10 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
-            parent.outbox.put('redLED')
-            parent.outbox.put('greenLED')
+            
+            if lighting:
+                parent.outbox.put('redLED')
+                parent.outbox.put('greenLED')
 
             print(' ')
 
@@ -621,8 +626,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
-            parent.outbox.put('redLED')
-            parent.outbox.put('greenLED')
+            if lighting:
+                parent.outbox.put('redLED')
+                parent.outbox.put('greenLED')
 
             print(' ')
             # re enable logging for future visits
@@ -636,7 +642,6 @@ class wait_for_correct_button_timed_uncued(gameState):
             sys.stdout.flush()
 
             return self.nextState[2]
-
 
 class wait_for_correct_button(gameState):
 
