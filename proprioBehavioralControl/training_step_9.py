@@ -158,6 +158,7 @@ SM.smallTally = 1
 SM.bigTally = 1
 
 SM.blocsRemaining = SM.bigBlocLength
+
 SM.initBlocType = {
     'category' : 'big',
     'direction' : 'forward'
@@ -168,7 +169,7 @@ logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
-        [sessionTime, 'Button Pressing Step 8', '', '',
+        [sessionTime, 'Button Pressing Step 9', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
             SM.trialLength, SM.trialTimeout, argVolume, SM.easyReward, SM.hardReward,
             SM.smallBlocLength, SM.bigBlocLength]
@@ -185,7 +186,7 @@ SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
 SM.add_state(turnPedalCompound(['chooseNextTrial'], SM, 'turnPedalCompound',
     logFile = thisLog))
 SM.add_state(chooseNextTrial(['goEasy', 'goHard'], SM, 'chooseNextTrial',
-    logFile = thisLog))
+    logFile = None))
 
 # if in this trial, both buttons will be seen as correct
 SM.add_state(trial_start(['wait_for_correct_button_timed_uncued'], SM, 'goHard',
@@ -196,7 +197,7 @@ SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
 
 #if in this trial, a button will be assigned based on the longer direction
 SM.add_state(trial_start(['wait_for_correct_button_timed'], SM, 'goEasy',
-    logFile = thisLog))
+    logFile = None))
 SM.add_state(wait_for_correct_button_timed(['good', 'bad',
     'wait_for_correct_button_timed'], SM, 'wait_for_correct_button_timed',
         logFile = thisLog))
@@ -263,7 +264,7 @@ finally:
             '--outputFileName \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
-    print('Ending Execution of Training_step_8.py')
+    print('Ending Execution of Training_step_9.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO

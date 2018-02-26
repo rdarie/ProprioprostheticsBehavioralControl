@@ -43,15 +43,14 @@ class gameState(object):
             self.enableLog = True
             self.parent.remoteOverride = None
         #print("returning %s" % ret)
-        if self.logFile:
-            if self.enableLog:
-                self.timeNow = time.time()
-                logData = {
-                    'name' : self.__name__,
-                    'time' :  self.timeNow,
-                    'payload': self.payload
-                    }
-                self.logFile.write(logData)
+        if self.logFile and self.enableLog:
+            self.timeNow = time.time()
+            logData = {
+                'name' : self.__name__,
+                'time' :  self.timeNow,
+                'payload': self.payload
+                }
+            self.logFile.write(logData)
 
         return ret
 
