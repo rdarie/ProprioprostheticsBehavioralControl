@@ -353,7 +353,6 @@ class turnPedalCompound(gameState):
 
         if parent.motor.useEncoder:
             curPos = parent.motor.get_encoder_position()
-
             if curPos is not None:
                 print('Current position = %4.4f' % curPos)
 
