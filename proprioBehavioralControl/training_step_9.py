@@ -248,7 +248,6 @@ except:
     pass
 
 finally:
-    thisLog.close()
     if logToWeb:
         # mount the shared directory
         subprocess.check_output('sudo mount -a', shell = True)
@@ -270,3 +269,4 @@ finally:
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
+    thisLog.close()

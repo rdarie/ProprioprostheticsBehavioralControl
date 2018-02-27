@@ -47,9 +47,9 @@ class gameState(object):
         if self.logFile and self.enableLog:
             self.timeNow = time.time()
             logData = {
-                'name' : self.__name__,
-                'time' :  self.timeNow,
-                'payload': self.payload
+                'Label' : self.__name__,
+                'Time' :  self.timeNow,
+                'Details': self.payload
                 }
             self.logFile.write(logData)
 
@@ -540,10 +540,10 @@ class wait_for_correct_button_timed(gameState):
         if self.firstVisit:
             if self.printStatements:
                 print('Started Timed Button')
-            # Turn LED's On
 
             #obviate the need to stop by trial_start
             parent.speaker.play_tone('Go')
+            # Turn LED's On
             parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
 
             self.firstVisit = False
@@ -579,9 +579,9 @@ class wait_for_correct_button_timed(gameState):
             if event_label == parent.correctButton:
                 if self.logFile:
                     logData = {
-                        'name' : 'correct button',
-                        'time' :  self.timeNow,
-                        'payload': event_label
+                        'Label' : 'correct button',
+                        'Time' :  self.timeNow,
+                        'Details': event_label
                         }
                     self.logFile.write(logData)
                 if self.printStatements:
@@ -590,9 +590,9 @@ class wait_for_correct_button_timed(gameState):
             else:
                 if self.logFile:
                     logData = {
-                        'name' : 'incorrect button',
-                        'time' :  self.timeNow,
-                        'payload': event_label
+                        'Label' : 'incorrect button',
+                        'Time' :  self.timeNow,
+                        'Details': event_label
                         }
                     self.logFile.write(logData)
                 if self.printStatements:
@@ -602,9 +602,9 @@ class wait_for_correct_button_timed(gameState):
         if self.timedOut:
             if self.logFile:
                 logData = {
-                    'name' : 'button timed out',
-                    'time' :  self.timeNow,
-                    'payload': self.payload
+                    'Label' : 'button timed out',
+                    'Time' :  self.timeNow,
+                    'Details': self.payload
                     }
                 self.logFile.write(logData)
 
@@ -680,9 +680,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             if event_label == parent.correctButton:
                 if self.logFile:
                     logData = {
-                        'name' : 'correct button',
-                        'time' :  self.timeNow,
-                        'payload': event_label
+                        'Label' : 'correct button',
+                        'Time' :  self.timeNow,
+                        'Details': event_label
                         }
                     self.logFile.write(logData)
 
@@ -692,9 +692,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             else:
                 if self.logFile:
                     logData = {
-                        'name' : 'incorrect button',
-                        'time' :  self.timeNow,
-                        'payload': event_label
+                        'Label' : 'incorrect button',
+                        'Time' :  self.timeNow,
+                        'Details': event_label
                         }
                     self.logFile.write(logData)
 
@@ -705,9 +705,9 @@ class wait_for_correct_button_timed_uncued(gameState):
         if self.timedOut:
             if self.logFile:
                 logData = {
-                    'name' : 'button timed out',
-                    'time' :  self.timeNow,
-                    'payload': self.payload
+                    'Label' : 'button timed out',
+                    'Time' :  self.timeNow,
+                    'Details': self.payload
                     }
                 self.logFile.write(logData)
 
