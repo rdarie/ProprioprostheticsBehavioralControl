@@ -250,10 +250,13 @@ except:
 finally:
     thisLog.close()
     if logToWeb:
+        # mount the shared directory
         subprocess.check_output('sudo mount -a', shell = True)
+        # this is the path to the the source file
         src = SM.logFileName
+        # this is the path to the the destiantion file
         dst = SM.serverFolder + '/' + SM.logFileName.split('/')[-1]
-
+        # move from source to destiantion
         shutil.move(src,dst)
 
         scriptPath = dataAnalysisPath + '/dataAnalysis/behavioral/evaluatePerformance.py'
