@@ -33,8 +33,18 @@ class gameState(object):
         if self.nextTimeOut < self.timeNow:
             self.timedOut = True
 
-    def __call__(self, *args):
+    def logEvent(self, eventName, eventPayload):
+        if self.logFile and self.enableLog:
+            self.timeNow = time.time()
+            logData = {
+                'Label' : eventName,
+                'Time' :  time.time(),
+                'Details': eventPayload
+                }
+            self.logFile.write(logData)
 
+    def __call__(self, *args):
+        self.logEvent(self.__name__, self.payload)
         if self.parent.remoteOverride is None:
             #print("in Python: Override is none! I am %s" % self.__name__)
             ret = self.operation(self.parent)
@@ -44,14 +54,6 @@ class gameState(object):
             self.enableLog = True
             self.parent.remoteOverride = None
         #print("returning %s" % ret)
-        if self.logFile and self.enableLog:
-            self.timeNow = time.time()
-            logData = {
-                'Label' : self.__name__,
-                'Time' :  self.timeNow,
-                'Details': self.payload
-                }
-            self.logFile.write(logData)
 
         return ret
 
