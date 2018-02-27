@@ -360,6 +360,10 @@ class turnPedalCompound(gameState):
             if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
             else 'green'
 
+        # empty event queue and start monitoring for aberrant button presses
+        if parent.inputPin.last_data is not None:
+            parent.inputPin.last_data = None
+
         if self.printStatements:
             print('  ')
             print('Correct button set to: %s' % parent.correctButton)
@@ -378,9 +382,12 @@ class turnPedalCompound(gameState):
             #if curPos is not None:
             #    print('Current position = %4.4f' % curPos)
 
-        sleepTime = 0.05
-        if parent.inputPin.last_data is not None:
-            parent.inputPin.last_data = None
+        event_label = parent.request_last_touch()
+        if event_label and enforceWait:
+            parent.speaker.play_tone('Wait')
+            sleepTime = 0.05
+        else:
+            sleepTime = 0
 
         while sleepTime > 0:
             # Read from inbox
