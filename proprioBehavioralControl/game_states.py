@@ -597,7 +597,7 @@ class wait_for_correct_button_timed(gameState):
 
         if self.timedOut:
             if self.logFile:
-                self.logEvent('button timed out', event_label)
+                self.logEvent('button timed out', None)
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
@@ -687,7 +687,7 @@ class wait_for_correct_button_timed_uncued(gameState):
 
         if self.timedOut:
             if self.logFile:
-                self.logEvent('button timed out', event_label)
+                self.logEvent('button timed out', None)
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
