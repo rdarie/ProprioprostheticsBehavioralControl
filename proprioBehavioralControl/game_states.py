@@ -44,7 +44,6 @@ class gameState(object):
             self.logFile.write(logData)
 
     def __call__(self, *args):
-        self.logEvent(self.__name__, self.payload)
         if self.parent.remoteOverride is None:
             #print("in Python: Override is none! I am %s" % self.__name__)
             ret = self.operation(self.parent)
@@ -54,6 +53,7 @@ class gameState(object):
             self.enableLog = True
             self.parent.remoteOverride = None
         #print("returning %s" % ret)
+        self.logEvent(self.__name__, self.payload)
 
         return ret
 
@@ -543,6 +543,8 @@ class wait_for_correct_button_timed(gameState):
             if self.printStatements:
                 print('Started Timed Button')
 
+
+            self.logEvent('goEasy', None)
             #obviate the need to stop by trial_start
             parent.speaker.play_tone('Go')
             # Turn LED's On
@@ -580,35 +582,22 @@ class wait_for_correct_button_timed(gameState):
 
             if event_label == parent.correctButton:
                 if self.logFile:
-                    logData = {
-                        'Label' : 'correct button',
-                        'Time' :  self.timeNow,
-                        'Details': event_label
-                        }
-                    self.logFile.write(logData)
+                    #TODO: replace all these with calls to logEvent
+                    self.logEvent('correct button', event_label)
+
                 if self.printStatements:
                     print("\n%s button pressed correctly!" % event_label)
                 return self.nextState[0] # usually the good state
             else:
                 if self.logFile:
-                    logData = {
-                        'Label' : 'incorrect button',
-                        'Time' :  self.timeNow,
-                        'Details': event_label
-                        }
-                    self.logFile.write(logData)
+                    self.logEvent('incorrect button', event_label)
                 if self.printStatements:
                     print("\n%s button pressed incorrectly!" % event_label)
                 return self.nextState[1] # usually the good state
 
         if self.timedOut:
             if self.logFile:
-                logData = {
-                    'Label' : 'button timed out',
-                    'Time' :  self.timeNow,
-                    'Details': self.payload
-                    }
-                self.logFile.write(logData)
+                self.logEvent('button timed out', event_label)
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
@@ -638,10 +627,12 @@ class wait_for_correct_button_timed_uncued(gameState):
         if self.firstVisit:
             if self.printStatements:
                 print('Started Timed Button')
+
+
+            self.logEvent('goHard', None)
             #obviate the need to stop by trial_start
             parent.speaker.play_tone('Go')
             # Turn LED's On
-
             if lighting:
                 parent.outbox.put('redLED')
                 parent.outbox.put('greenLED')
@@ -681,24 +672,14 @@ class wait_for_correct_button_timed_uncued(gameState):
 
             if event_label == parent.correctButton:
                 if self.logFile:
-                    logData = {
-                        'Label' : 'correct button',
-                        'Time' :  self.timeNow,
-                        'Details': event_label
-                        }
-                    self.logFile.write(logData)
+                    self.logEvent('correct button', event_label)
 
                 if self.printStatements:
                     print("\n%s button pressed correctly!" % event_label)
                 return self.nextState[0] # usually the good state
             else:
                 if self.logFile:
-                    logData = {
-                        'Label' : 'incorrect button',
-                        'Time' :  self.timeNow,
-                        'Details': event_label
-                        }
-                    self.logFile.write(logData)
+                    self.logEvent('incorrect button', event_label)
 
                 if self.printStatements:
                     print("\n%s button pressed incorrectly!" % event_label)
@@ -706,12 +687,7 @@ class wait_for_correct_button_timed_uncued(gameState):
 
         if self.timedOut:
             if self.logFile:
-                logData = {
-                    'Label' : 'button timed out',
-                    'Time' :  self.timeNow,
-                    'Details': self.payload
-                    }
-                self.logFile.write(logData)
+                self.logEvent('button timed out', event_label)
 
             #leaving wait_for_button, turn logging on for next return to this state
             self.enableLog = True
