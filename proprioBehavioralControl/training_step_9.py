@@ -68,11 +68,11 @@ with open(parentDir + '/' + '.dataAnalysisLocation', 'r') as f:
 	dataAnalysisPath = f.read().replace('\n', '')
 
 soundPaths = {
-'Go' : wavePath + "/go_tone.wav",
-'Good' : wavePath + "/good_tone.wav",
-'Bad' : wavePath + "/bad_tone.wav",
-'Wait' : wavePath + "/wait_tone.wav"
-}
+    'Go' : wavePath + "/go_tone.wav",
+    'Good' : wavePath + "/good_tone.wav",
+    'Bad' : wavePath + "/bad_tone.wav",
+    'Wait' : wavePath + "/wait_tone.wav"
+    }
 
 playWelcomeTone = True if args.playWelcomeTone == 'True' else False
 if playWelcomeTone:
@@ -189,15 +189,9 @@ SM.add_state(turnPedalCompound(['chooseNextTrial'], SM, 'turnPedalCompound',
 SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
     logFile = None))
 
-# if in this trial, both buttons will be seen as correct
-#SM.add_state(trial_start(['wait_for_correct_button_timed_uncued'], SM, 'goHard',
-#    logFile = None))
 SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
     'waitHard'], SM, 'waitHard', logFile = thisLog, printStatements = debugging))
 
-#if in this trial, a button will be assigned based on the longer direction
-#SM.add_state(trial_start(['wait_for_correct_button_timed'], SM, 'goEasy',
-#    logFile = None))
 SM.add_state(wait_for_correct_button_timed(['good', 'bad',
     'waitEasy'], SM, 'waitEasy', logFile = thisLog, printStatements = debugging))
 

@@ -325,7 +325,7 @@ class turnPedalCompound(gameState):
         parent.motor.step_size = random.uniform(0.5e4, 1e4) if category == 'small'\
             else random.uniform(5e4, 5.5e4)
 
-        self.payload = {'firstThrow': 0, 'secondThrow' : 0}
+        self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
         if direction == 'forward':
             parent.motor.forward()
             if self.logFile:
@@ -378,6 +378,7 @@ class turnPedalCompound(gameState):
             #pdb.set_trace()
             if 'R' in curStatus:
                 doneMoving = True
+                self.payload['movementOff'] = time.time()
 
         if parent.motor.useEncoder:
             curPos = parent.motor.get_encoder_position()
@@ -542,7 +543,6 @@ class wait_for_correct_button_timed(gameState):
         if self.firstVisit:
             if self.printStatements:
                 print('Started Timed Button')
-
 
             self.logEvent('goEasy', None)
             #obviate the need to stop by trial_start
