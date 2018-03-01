@@ -490,7 +490,7 @@ class turnPedalPhantomCompound(gameState):
         phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)
         #e.g. phantomDuration = 5.5e4 / (5.6 * 25e3) 25e3 is the default steps / rev for MR10
         serialMessage = "WT%2.2f\r" % phantomDuration
-        print('Writing %s to motor' % serialMessage)
+        print('\nWriting %s to motor' % serialMessage)
         parent.motor.serial.write(serialMessage.encode())
 
         self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
