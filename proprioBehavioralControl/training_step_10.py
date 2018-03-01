@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Training Step 8
+Training Step 10
 ========
 The "Go" tone goes off.
 Buttons light up.
@@ -68,11 +68,11 @@ with open(parentDir + '/' + '.dataAnalysisLocation', 'r') as f:
 	dataAnalysisPath = f.read().replace('\n', '')
 
 soundPaths = {
-    'Go' : wavePath + "/go_tone.wav",
-    'Good' : wavePath + "/good_tone.wav",
-    'Bad' : wavePath + "/bad_tone.wav",
-    'Wait' : wavePath + "/wait_tone.wav"
-    'Divider' : wavePath + "/Divider.wav"
+    'Go' : wavePath + "go_tone.wav",
+    'Good' : wavePath + "good_tone.wav",
+    'Bad' : wavePath + "bad_tone.wav",
+    'Wait' : wavePath + "wait_tone.wav",
+    'Divider' : wavePath + "divider_tone.wav"
     }
 
 playWelcomeTone = True if args.playWelcomeTone == 'True' else False
@@ -170,7 +170,7 @@ logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
-        [sessionTime, 'Button Pressing Step 9', '', '',
+        [sessionTime, 'Button Pressing Step 10', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
             SM.trialLength, SM.trialTimeout, argVolume, SM.easyReward, SM.hardReward,
             SM.smallBlocLength, SM.bigBlocLength]
