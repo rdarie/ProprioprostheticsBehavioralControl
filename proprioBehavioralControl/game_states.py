@@ -809,8 +809,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             parent.speaker.play_tone('Go')
             # Turn LED's On
             if lighting:
-                parent.outbox.put('redLED')
-                parent.outbox.put('greenLED')
+                parent.outbox.put(['redLED','greenLED'])
+                #parent.outbox.put('redLED')
+                #parent.outbox.put('greenLED')
 
             self.firstVisit = False
             self.enableLog = False
@@ -834,8 +835,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.timedOut = False
 
             if lighting:
-                parent.outbox.put('redLED')
-                parent.outbox.put('greenLED')
+                parent.outbox.put(['redLED','greenLED'])
+                #parent.outbox.put('redLED')
+                #parent.outbox.put('greenLED')
 
             if self.printStatements:
                 print(' ')
@@ -869,8 +871,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.firstVisit = True
             self.timedOut = False
             if lighting:
-                parent.outbox.put('redLED')
-                parent.outbox.put('greenLED')
+                parent.outbox.put(['redLED','greenLED'])
+                #parent.outbox.put('redLED')
+                #parent.outbox.put('greenLED')
 
             if self.printStatements:
                 print(' ')
