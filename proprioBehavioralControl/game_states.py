@@ -506,6 +506,13 @@ class turnPedalPhantomCompound(gameState):
 
         #wait between movements
         parent.motor.serial.write("WT0.25\r".encode())
+        doneMoving = False
+        while not doneMoving:
+            curStatus = parent.motor.get_status()
+            #print('Current Status = %s' % curStatus)
+            #pdb.set_trace()
+            if 'R' in curStatus:
+                doneMoving = True
         #play movement division tone
         parent.speaker.play_tone('Divider')
 
