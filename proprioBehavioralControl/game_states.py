@@ -514,7 +514,7 @@ class turnPedalPhantomCompound(gameState):
         parent.speaker.play_tone('Divider')
 
         #wait between movements
-        parent.motor.serial.write("WT0.25\r".encode())
+        parent.motor.serial.write("WT0.5\r".encode())
 
         ## Second Movement
         parent.motor.step_size = random.uniform(5e4, 5.5e4) if category == 'small'\
