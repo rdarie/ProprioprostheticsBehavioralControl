@@ -183,9 +183,9 @@ if logToWeb:
 
 debugging = True
 # connect state machine states
-SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
+SM.add_state(strict_fixation(['turnPedalPhantomCompound',  'fixation'], SM, 'fixation',
     thisLog, printStatements = debugging))
-SM.add_state(turnPedalPhantomCompound(['chooseNextTrial'], SM, 'turnPedalCompound',
+SM.add_state(turnPedalPhantomCompound(['chooseNextTrial'], SM, 'turnPedalPhantomCompound',
     logFile = thisLog, printStatements = debugging))
 SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
     logFile = None))
