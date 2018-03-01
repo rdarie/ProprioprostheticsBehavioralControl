@@ -499,7 +499,6 @@ class turnPedalPhantomCompound(gameState):
             if self.logFile:
                 self.payload['firstThrow'] = phantomStepSize
         else:
-            parent.motor.backward()
             if self.logFile:
                 self.payload['firstThrow'] = -phantomStepSize
 
