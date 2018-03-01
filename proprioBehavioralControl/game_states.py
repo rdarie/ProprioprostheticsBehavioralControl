@@ -490,6 +490,7 @@ class turnPedalPhantomCompound(gameState):
         phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)
         #e.g. phantomDuration = 5.5e4 / (5.6 * 25e3) 25e3 is the default steps / rev for MR10
         serialMessage = "WT%2.2f\r" % phantomDuration
+        print('Writing %s to motor' % serialMessage)
         parent.motor.serial.write(serialMessage.encode())
 
         self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
@@ -503,9 +504,6 @@ class turnPedalPhantomCompound(gameState):
                 self.payload['firstThrow'] = -phantomStepSize
 
         parent.magnitudeQueue.append(phantomStepSize)
-
-        #wait between movements
-        parent.motor.serial.write("WT0.25\r".encode())
         doneMoving = False
         while not doneMoving:
             curStatus = parent.motor.get_status()
@@ -515,6 +513,9 @@ class turnPedalPhantomCompound(gameState):
                 doneMoving = True
         #play movement division tone
         parent.speaker.play_tone('Divider')
+
+        #wait between movements
+        parent.motor.serial.write("WT0.25\r".encode())
 
         ## Second Movement
         parent.motor.step_size = random.uniform(5e4, 5.5e4) if category == 'small'\
