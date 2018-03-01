@@ -111,15 +111,15 @@ class motorInterface(object):
         self.idle_current = 3.2
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
+        serial_message = "MR10\r"
+        self.serial.write(serial_message.encode())
+        #Sets, or requests microstep resolution. The MR command should be used before setting the accel and decel rates
+        #and speed, because a change in motor resolution will corrupt these settings. The MR command also
+        #resets the step table, which moves the motor to the nearest pole position. The absolute position register
+        #is not changed.
 
         self.useEncoder = useEncoder
         if useEncoder:
-            serial_message = "MR10\r"
-            self.serial.write(serial_message.encode())
-            #Sets, or requests microstep resolution. The MR command should be used before setting the accel and decel rates
-            #and speed, because a change in motor resolution will corrupt these settings. The MR command also
-            #resets the step table, which moves the motor to the nearest pole position. The absolute position register
-            #is not changed.
             serial_message = "ER6\r"
             self.serial.write(serial_message.encode())
             #On drives supporting encoder feedback, the ER command defines the encoder ratio. This number is

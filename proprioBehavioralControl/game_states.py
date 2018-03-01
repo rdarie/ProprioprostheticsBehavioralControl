@@ -412,6 +412,174 @@ class turnPedalCompound(gameState):
             parent.inputPin.last_data = None
         return self.nextState[0]
 
+class turnPedalPhantomCompound(gameState):
+
+    def operation(self, parent):
+        # should we add time penalties for button presses?
+        enforceWait = True
+
+        if parent.blocsRemaining == 0:
+            #start a new block!
+
+            #switch block category
+            category = 'small' if parent.initBlocType['category'] == 'big' else 'big'
+
+            #set the block category for the rest of the block
+            parent.initBlocType['category'] = category
+
+            #set the block direction for the rest of the block
+            direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+            parent.initBlocType['direction'] = direction
+
+            # re-evaluate the block lengths
+
+            if self.printStatements:
+                print('\ntally of small choices is : %4.2f' % parent.smallTally)
+            smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
+
+            if self.printStatements:
+                print('\nsmall proportion is : %4.2f' % smallProp )
+
+
+            if self.printStatements:
+                print('\ntally of big choices is : %4.2f' % parent.bigTally)
+            bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
+
+            if self.printStatements:
+                print('\nbig proportion is : %4.2f' % bigProp )
+
+            bias = smallProp - 0.5 # positive if biased towards the small, negative otherwise
+
+            smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
+
+            #bounds
+            smallProp = 0 if smallProp < 0 else smallProp
+            smallProp = 1 if smallProp > 1 else smallProp
+
+            bigProp = 1 - smallProp # opposite
+
+            parent.smallBlocLength = round(nominalBlockLength * smallProp) + 1
+
+            if self.printStatements:
+                print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
+            parent.bigBlocLength = round(nominalBlockLength * bigProp) + 1
+
+            if self.printStatements:
+                print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
+
+            smallDraw = round(random.gauss(parent.smallBlocLength, 1.5))
+            if smallDraw <= 0:
+                smallDraw = 1
+
+            bigDraw = round(random.gauss(parent.bigBlocLength, 1.5))
+            if bigDraw <= 0:
+                bigDraw = 1
+
+            parent.blocsRemaining = smallDraw if parent.initBlocType['category'] == 'small' else bigDraw
+
+            if self.printStatements:
+                print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
+        else:
+            # repeat the last block type
+            category = parent.initBlocType['category']
+            direction = parent.initBlocType['direction']
+            parent.blocsRemaining = parent.blocsRemaining - 1
+
+        phantomStepSize = random.uniform(0.5e4, 1e4) if category == 'small'\
+            else random.uniform(5e4, 5.5e4)
+        phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)
+        #e.g. phantomDuration = 5.5e4 / (5.6 * 25e3) 25e3 is the default steps / rev for MR10
+        serialMessage = "WT%2.2f\r" % phantomDuration
+        parent.motor.serial.write(().encode())
+
+        self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
+
+        if direction == 'forward':
+            if self.logFile:
+                self.payload['firstThrow'] = phantomStepSize
+        else:
+            parent.motor.backward()
+            if self.logFile:
+                self.payload['firstThrow'] = -phantomStepSize
+
+        parent.magnitudeQueue.append(phantomStepSize)
+
+        #wait between movements
+        parent.motor.serial.write("WT0.25\r".encode())
+        #play movement division tone
+        parent.speaker.play_tone('Divider')
+
+        ## Second Movement
+        parent.motor.step_size = random.uniform(5e4, 5.5e4) if category == 'small'\
+            else random.uniform(0.5e4, 1e4)
+
+        if direction == 'forward':
+            parent.motor.forward()
+            if self.logFile:
+                self.payload['secondThrow'] = parent.motor.step_size
+        else:
+            parent.motor.backward()
+            if self.logFile:
+                self.payload['secondThrow'] = -parent.motor.step_size
+
+        parent.motor.go_home()
+        parent.magnitudeQueue.append(parent.motor.step_size)
+
+        #Obviate the need to stop by the set_correct state
+        parent.correctButton = 'red'\
+            if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
+            else 'green'
+
+        # empty event queue and start monitoring for aberrant button presses
+        if parent.inputPin.last_data is not None:
+            parent.inputPin.last_data = None
+
+        if self.printStatements:
+            print('  ')
+            print('Correct button set to: %s' % parent.correctButton)
+        parent.magnitudeQueue = []
+
+        doneMoving = False
+        while not doneMoving:
+            curStatus = parent.motor.get_status()
+            #print('Current Status = %s' % curStatus)
+            #pdb.set_trace()
+            if 'R' in curStatus:
+                doneMoving = True
+                self.payload['movementOff'] = time.time()
+
+        if parent.motor.useEncoder:
+            curPos = parent.motor.get_encoder_position()
+            #if curPos is not None:
+            #    print('Current position = %4.4f' % curPos)
+
+        event_label = parent.request_last_touch()
+        if event_label and enforceWait:
+            parent.speaker.play_tone('Wait')
+            sleepTime = 0.05
+        else:
+            sleepTime = 0
+
+        while sleepTime > 0:
+            # Read from inbox
+            time.sleep(0.05)
+            sleepTime = sleepTime - 0.05
+            event_label = parent.request_last_touch()
+
+            if event_label and enforceWait:
+                # if erroneous button press, play bad tone, and penalize with an extra
+                # 500 millisecond wait
+                parent.speaker.play_tone('Wait')
+                sleepTime = sleepTime + 0.5
+                # clear button queue for next iteration
+                if parent.inputPin.last_data is not None:
+                    parent.inputPin.last_data = None
+
+        # obviate the need to go to clear_input_queue
+        if parent.inputPin.last_data is not None:
+            parent.inputPin.last_data = None
+        return self.nextState[0]
+
 class clear_input_queue(gameState):
 
     def operation(self, parent):
