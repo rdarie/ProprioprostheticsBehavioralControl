@@ -304,11 +304,11 @@ class turnPedalCompound(gameState):
             if self.printStatements:
                 print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
 
-            smallDraw = round(random.gauss(parent.smallBlocLength, 1.5))
+            smallDraw = round(random.gauss(parent.smallBlocLength, 1))
             if smallDraw <= 0:
                 smallDraw = 1
 
-            bigDraw = round(random.gauss(parent.bigBlocLength, 1.5))
+            bigDraw = round(random.gauss(parent.bigBlocLength, 1))
             if bigDraw <= 0:
                 bigDraw = 1
 
