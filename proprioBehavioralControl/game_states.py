@@ -420,6 +420,7 @@ class turnPedalPhantomCompound(gameState):
 
         if parent.blocsRemaining == 0:
             #start a new block!
+            parent.jackpot = True
 
             #switch block category
             category = 'small' if parent.initBlocType['category'] == 'big' else 'big'
@@ -481,6 +482,7 @@ class turnPedalPhantomCompound(gameState):
                 print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
         else:
             # repeat the last block type
+            parent.jackpot = False
             category = parent.initBlocType['category']
             direction = parent.initBlocType['direction']
             parent.blocsRemaining = parent.blocsRemaining - 1
@@ -850,7 +852,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             if event_label == parent.correctButton:
                 if self.logFile:
                     self.logEvent('correct button', event_label)
-
+                if parent.jackpotReward is not None and parent.jackpot:
+                    parent.juicePin.instructions =\
+                        ['flip', 'flip', ('pulse', parent.jackpotReward)]
                 if self.printStatements:
                     print("\n%s button pressed correctly!" % event_label)
                 return self.nextState[0] # usually the good state
