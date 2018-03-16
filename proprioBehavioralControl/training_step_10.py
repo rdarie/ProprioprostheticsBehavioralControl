@@ -149,8 +149,8 @@ thisLog = File_Printer(filePath = logFileName, append = True)
 SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
-SM.easyReward = .1
-SM.hardReward = .5
+SM.easyReward = .5
+SM.hardReward = 1
 
 #block structure
 SM.smallBlocLength = 2
