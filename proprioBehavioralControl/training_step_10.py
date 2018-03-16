@@ -43,7 +43,7 @@ parser.add_argument('--trialLength', default = '1')
 parser.add_argument('--trialTimeout', default = '3')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
-parser.add_argument('--playWhiteNoise', default = 'True')
+parser.add_argument('--playWhiteNoise', default = 'True')v
 parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
 parser.add_argument('--volume', default = '0.08')
@@ -149,8 +149,11 @@ thisLog = File_Printer(filePath = logFileName, append = True)
 SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
-SM.easyReward = .5
-SM.hardReward = 1
+
+SM.easyReward = .3
+SM.hardReward = .8
+SM.jackpotReward = 2.5
+SM.jackpot = False
 
 #block structure
 SM.smallBlocLength = 2
