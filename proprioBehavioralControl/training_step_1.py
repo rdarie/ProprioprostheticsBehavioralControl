@@ -50,15 +50,23 @@ argPlayWelcomeTone = args.playWelcomeTone
 argVolume = float(args.volume)
 
 global wavePath
-gitPath = os.path.dirname(os.path.realpath(__file__))
-with open(gitPath + '/' + '.waveLocation', 'r') as wf:
+curfilePath = os.path.abspath(__file__)
+curDir = os.path.abspath(os.path.join(curfilePath,os.pardir)) # this will return current directory in which python file resides.
+parentDir = os.path.abspath(os.path.join(curDir,os.pardir)) # this will return parent directory.
+
+with open(parentDir + '/' + '.waveLocation', 'r') as wf:
     wavePath = wf.read().replace('\n', '')
 
+with open(parentDir + '/' + '.dataAnalysisLocation', 'r') as f:
+	dataAnalysisPath = f.read().replace('\n', '')
+
 soundPaths = {
-'Go' : wavePath + "/go_tone.wav",
-'Good' : wavePath + "/good_tone.wav",
-'Bad' : wavePath + "/bad_tone.wav"
-}
+    'Go' : wavePath + "go_tone.wav",
+    'Good' : wavePath + "good_tone.wav",
+    'Bad' : wavePath + "bad_tone.wav",
+    'Wait' : wavePath + "wait_tone.wav",
+    'Divider' : wavePath + "divider_tone.wav"
+    }
 
 playWelcomeTone = True if args.playWelcomeTone == 'True' else False
 if playWelcomeTone:
