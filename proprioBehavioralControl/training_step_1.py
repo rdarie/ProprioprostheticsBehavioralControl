@@ -222,7 +222,7 @@ finally:
             '--outputFileName \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
-    print('Ending Execution of Training_step_9.py')
+    print('Ending Execution of Training_step_1.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
