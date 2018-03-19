@@ -47,7 +47,7 @@ parser.add_argument('--volume', default = '0.08')
 args = parser.parse_args()
 
 argTrialLength = args.trialLength
-argTrialLimit = args.trialLimit
+argTrialTimeout = args.trialTimeout
 argEnableSound = True if args.enableSound == 'True' else False
 argPlayWelcomeTone = args.playWelcomeTone
 argVolume = float(args.volume)
