@@ -35,11 +35,14 @@ GPIO.output(5,True) ## Turn on GPIO pin 24
 sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--trialLength', default = '7')
-parser.add_argument('--trialLimit', default = '3')
+parser.add_argument('--trialLength', default = '1')
+parser.add_argument('--trialTimeout', default = '3')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
-parser.add_argument('--volume', default = '0.01')
+parser.add_argument('--playWhiteNoise', default = 'True')
+parser.add_argument('--logLocally', default = 'False')
+parser.add_argument('--logToWeb', default = 'False')
+parser.add_argument('--volume', default = '0.08')
 
 args = parser.parse_args()
 
