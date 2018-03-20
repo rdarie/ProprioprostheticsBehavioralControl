@@ -6,10 +6,8 @@
 #__maintainer__ = "Cody Giles"
 #__status__ = "Production"
 
-import subprocess, pdb
-import smtplib
+import subprocess, pdb, smtplib, datetime
 from email.mime.text import MIMEText
-import datetime
 
 def connect_type(word_list):
     """ This function takes a list of words, then, depeding which key word, returns the corresponding
@@ -44,7 +42,7 @@ data = p.communicate()  # Get data from 'p terminal'.
 
 # Split IP text block into three, and divide the two containing IPs into words.
 ip_lines = data[0].splitlines()
-split_line_a = ip_lines[1].split()
+split_line_a = ip_lines[-1].split()
 #split_line_b = ip_lines[2].split()
 
 # con_type variables for the message text. ex) 'ethernet', 'wifi', etc.
