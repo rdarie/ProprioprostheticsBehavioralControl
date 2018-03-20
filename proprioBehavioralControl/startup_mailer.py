@@ -6,8 +6,22 @@
 #__maintainer__ = "Cody Giles"
 #__status__ = "Production"
 
-import subprocess, pdb, smtplib, datetime
+import subprocess, pdb, smtplib, datetime, socket, time
 from email.mime.text import MIMEText
+
+REMOTE_SERVER = "www.google.com"
+def is_connected(hostname):
+  try:
+    # see if we can resolve the host name -- tells us if there is
+    # a DNS listening
+    host = socket.gethostbyname(hostname)
+    # connect to the host -- tells us if the host is actually
+    # reachable
+    s = socket.create_connection((host, 80), 2)
+    return True
+  except:
+     pass
+  return False
 
 def connect_type(word_list):
     """ This function takes a list of words, then, depeding which key word, returns the corresponding
@@ -21,6 +35,10 @@ def connect_type(word_list):
         con_type = 'current'
 
     return con_type
+
+#Check for network before emailing
+while not is_connected(REMOTE_SERVER):
+    time.sleep(1)
 
 # Change to your own account information
 # Account Information
