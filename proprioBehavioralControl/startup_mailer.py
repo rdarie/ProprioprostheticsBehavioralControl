@@ -9,6 +9,7 @@
 import subprocess, pdb, smtplib, datetime, socket, time
 from email.mime.text import MIMEText
 
+time.sleep(30)
 REMOTE_SERVER = "www.google.com"
 def is_connected(hostname):
   try:
