@@ -38,6 +38,7 @@ def connect_type(word_list):
 
 #Check for network before emailing
 while not is_connected(REMOTE_SERVER):
+    print('Waiting for network')
     time.sleep(1)
 
 # Change to your own account information
