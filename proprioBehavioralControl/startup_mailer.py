@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 
+# Based on : https://elinux.org/RPi_Email_IP_On_Boot_Debian
 #__author__ = 'Cody Giles'
 #__license__ = "Creative Commons Attribution-ShareAlike 3.0 Unported License"
 #__version__ = "1.0"
