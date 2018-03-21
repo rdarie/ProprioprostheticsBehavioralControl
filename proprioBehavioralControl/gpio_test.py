@@ -26,14 +26,18 @@ def my_callback(channel):
 
 
 GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
-GPIO.setup(BUT1, GPIO.IN, pull_up_down = GPIO.PUD_UP) # Button pin set as input w/ pull-up
-GPIO.setup(BUT2, GPIO.IN, pull_up_down = GPIO.PUD_UP) # Button pin set as input w/ pull-up
+GPIO.setup(BUT1, GPIO.IN, pull_up_down = GPIO.PUD_DOWN) # Button pin set as input w/ pull-up
+GPIO.setup(BUT2, GPIO.IN, pull_up_down = GPIO.PUD_DOWN) # Button pin set as input w/ pull-up
 GPIO.setup(LED1, GPIO.OUT) # Button pin set as input w/ pull-up
 GPIO.setup(LED2, GPIO.OUT) # Button pin set as input w/ pull-up
 GPIO.setup(LED_BOTH, GPIO.OUT) # Button pin set as input w/ pull-up
 
-GPIO.add_event_detect(BUT1, GPIO.FALLING, callback=my_callback, bouncetime=200)  # add rising edge detection on a channel
-GPIO.add_event_detect(BUT2, GPIO.FALLING, callback=my_callback, bouncetime=200)  # add rising edge detection on a channel
+GPIO.output(LED1, 0)
+GPIO.output(LED2, 0)
+GPIO.output(LED_BOTH, 0)
+
+GPIO.add_event_detect(BUT1, GPIO.RISING, callback=my_callback, bouncetime=200)  # add rising edge detection on a channel
+GPIO.add_event_detect(BUT2, GPIO.RISING, callback=my_callback, bouncetime=200)  # add rising edge detection on a channel
 
 try:
     while 1:
