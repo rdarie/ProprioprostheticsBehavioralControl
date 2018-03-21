@@ -6,10 +6,23 @@
 #__maintainer__ = "Cody Giles"
 #__status__ = "Production"
 
-import subprocess, pdb
-import smtplib
+import subprocess, pdb, smtplib, datetime, socket, time
 from email.mime.text import MIMEText
-import datetime
+
+time.sleep(30)
+REMOTE_SERVER = "www.google.com"
+def is_connected(hostname):
+  try:
+    # see if we can resolve the host name -- tells us if there is
+    # a DNS listening
+    host = socket.gethostbyname(hostname)
+    # connect to the host -- tells us if the host is actually
+    # reachable
+    s = socket.create_connection((host, 80), 2)
+    return True
+  except:
+     pass
+  return False
 
 def connect_type(word_list):
     """ This function takes a list of words, then, depeding which key word, returns the corresponding
@@ -23,6 +36,11 @@ def connect_type(word_list):
         con_type = 'current'
 
     return con_type
+
+#Check for network before emailing
+while not is_connected(REMOTE_SERVER):
+    print('Waiting for network')
+    time.sleep(1)
 
 # Change to your own account information
 # Account Information
@@ -44,7 +62,7 @@ data = p.communicate()  # Get data from 'p terminal'.
 
 # Split IP text block into three, and divide the two containing IPs into words.
 ip_lines = data[0].splitlines()
-split_line_a = ip_lines[1].split()
+split_line_a = ip_lines[-1].split()
 #split_line_b = ip_lines[2].split()
 
 # con_type variables for the message text. ex) 'ethernet', 'wifi', etc.
