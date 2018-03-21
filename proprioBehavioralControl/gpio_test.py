@@ -24,7 +24,6 @@ def my_callback(channel):
     status[channel] = not status[channel]
     GPIO.output(ctrl[channel], status[channel])
 
-
 GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
 GPIO.setup(BUT1, GPIO.IN, pull_up_down = GPIO.PUD_UP) # Button pin set as input w/ pull-up
 GPIO.setup(BUT2, GPIO.IN, pull_up_down = GPIO.PUD_UP) # Button pin set as input w/ pull-up
