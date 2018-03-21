@@ -735,7 +735,7 @@ class wait_for_correct_button_timed(gameState):
 
             if parent.easyReward is not None:
                 parent.juicePin.instructions =\
-                    ['flip', 'flip', ('pulse', parent.easyReward)]
+                    ['flip', 'flip', 'flip', ('pulse', parent.easyReward)]
         # Read from inbox
         event_label = parent.request_last_touch()
 
@@ -811,8 +811,8 @@ class wait_for_correct_button_timed_uncued(gameState):
             parent.speaker.play_tone('Go')
             # Turn LED's On
             if lighting:
-                parent.outbox.put(['redLED','greenLED'])
-                #parent.outbox.put('redLED')
+                #parent.outbox.put(['redLED','greenLED'])
+                parent.outbox.put('bothLED')
                 #parent.outbox.put('greenLED')
 
             self.firstVisit = False
@@ -823,7 +823,7 @@ class wait_for_correct_button_timed_uncued(gameState):
 
             if parent.hardReward is not None:
                 parent.juicePin.instructions =\
-                    ['flip', 'flip', ('pulse', parent.hardReward)]
+                    ['flip', 'flip', 'flip', ('pulse', parent.hardReward)]
         # Read from inbox
         event_label = parent.request_last_touch()
 
@@ -837,8 +837,8 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.timedOut = False
 
             if lighting:
-                parent.outbox.put(['redLED','greenLED'])
-                #parent.outbox.put('redLED')
+                #parent.outbox.put(['redLED','greenLED'])
+                parent.outbox.put('bothLED')
                 #parent.outbox.put('greenLED')
 
             if self.printStatements:
@@ -854,7 +854,7 @@ class wait_for_correct_button_timed_uncued(gameState):
                     self.logEvent('correct button', event_label)
                 if parent.jackpotReward is not None and parent.jackpot:
                     parent.juicePin.instructions =\
-                        ['flip', 'flip', ('pulse', parent.jackpotReward)]
+                        ['flip', 'flip', 'flip', ('pulse', parent.jackpotReward)]
                 if self.printStatements:
                     print("\n%s button pressed correctly!" % event_label)
                 return self.nextState[0] # usually the good state
@@ -875,8 +875,8 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.firstVisit = True
             self.timedOut = False
             if lighting:
-                parent.outbox.put(['redLED','greenLED'])
-                #parent.outbox.put('redLED')
+                #parent.outbox.put(['redLED','greenLED'])
+                parent.outbox.put('bothLED')
                 #parent.outbox.put('greenLED')
 
             if self.printStatements:
