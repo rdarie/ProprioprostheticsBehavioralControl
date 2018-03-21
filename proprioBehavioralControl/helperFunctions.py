@@ -7,10 +7,8 @@ from oauth2client import tools
 from oauth2client.file import Storage
 import sys, os, time, glob
 
-try:
-    import serial
-except:
-    pass
+#from serial import serial
+import serial
 
 def serial_ports():
     """ Lists serial port names
