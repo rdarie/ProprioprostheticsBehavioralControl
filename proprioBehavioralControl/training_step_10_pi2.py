@@ -32,8 +32,9 @@ from helperFunctions import *
 import argparse, os, os.path, shutil, subprocess
 
 # Power indicator
-GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 24 to OUT
-GPIO.output(5,True) ## Turn on GPIO pin 24
+GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 5 to OUT
+GPIO.output(5,True) ## Turn on GPIO pin 5
+
 
 # What time is it?
 sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
@@ -104,6 +105,11 @@ timestamper = Event_Timestamper()
 juicePin = GPIO_Output(pins=[16,6,12,25], labels=['redLED', 'greenLED', 'bothLED', 'Reward'],
     levels = [GPIO.LOW, GPIO.LOW, GPIO.LOW, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
+
+# initialize outputs to movementOff
+GPIO.output(6,False)
+GPIO.output(16,False)
+GPIO.output(12,False)
 
 # Build an arbiter and a state machine
 arbiter = Arbiter()
