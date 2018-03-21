@@ -3,6 +3,6 @@ begin
     remote = adafruitRemote 
     button = KEY_VOLUMEDOWN
     delay = 3
-    config = python3 /home/pi/research/ProprioprostheticsBehavioralControl/proprioBehavioralControl/training_step_8.py --trialLength 1 --trialTimeout 3 --volume 0.08 --logLocally True --logToWeb True  >/home/pi/research/trialLog.txt 2>/home/pi/research/trialError.txt
+    config = python3 /home/pi/research/ProprioprostheticsBehavioralControl/proprioBehavioralControl/training_step_10.py --trialLength 1 --trialTimeout 3 --volume 0.08 --logLocally True --logToWeb True  >/home/pi/research/trialLog.txt 2>/home/pi/research/trialError.txt
     config = echo "Closing application..."
 end
