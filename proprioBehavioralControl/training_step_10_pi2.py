@@ -103,13 +103,13 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
 timestamper = Event_Timestamper()
 
 juicePin = GPIO_Output(pins=[16,6,12,25], labels=['redLED', 'greenLED', 'bothLED', 'Reward'],
-    levels = [GPIO.LOW, GPIO.LOW, GPIO.LOW, GPIO.HIGH],
+    levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
 
 # initialize outputs to movementOff
-GPIO.output(6,False)
-GPIO.output(16,False)
-GPIO.output(12,False)
+#GPIO.output(6,False)
+#GPIO.output(16,False)
+#GPIO.output(12,False)
 
 # Build an arbiter and a state machine
 arbiter = Arbiter()
