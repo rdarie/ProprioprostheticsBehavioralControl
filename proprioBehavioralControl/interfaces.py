@@ -28,6 +28,17 @@ class pedalBLEInterface(object):
         # Initialize the BLE system.  MUST be called before other BLE calls!
         self.ble.initialize()
 
+        # Start the mainloop to process BLE events, and run the provided function in
+        # a background thread.  When the provided main function stops running, returns
+        # an integer status code, or throws an error the program will exit.
+        ble.run_mainloop_with(self.main)
+
+    def disconnect(self):
+        # Make sure device is disconnected on exit.
+        self.device.disconnect()
+
+    def main(self):
+
         # Clear any cached data because both bluez and CoreBluetooth have issues with
         # caching data and it going stale.
         self.ble.clear_cached_data()
@@ -58,30 +69,18 @@ class pedalBLEInterface(object):
         print('Connecting to device...')
         self.device.connect()  # Will time out after 60 seconds, specify timeout_sec parameter
                           # to change the timeout.
-
-        # Wait for service discovery to complete for at least the specified
-        # service and characteristic UUID lists.  Will time out after 60 seconds
-        # (specify timeout_sec parameter to override).
-        print('Discovering services...')
-        self.device.discover([self.TOUCH_SERVICE_UUID, self.MOTOR_SERVICE_UUID], [self.TOUCH_STATE_CHARACTERISTIC_UUID, self.MOTOR_STATE_CHARACTERISTIC_UUID])
-
-        # Find the Touch sensor service and its characteristics.
-        self.touch = self.device.find_service(self.TOUCH_SERVICE_UUID)
-        self.touchState = self.touch.find_characteristic(self.TOUCH_STATE_CHARACTERISTIC_UUID)
-        self.motor = self.device.find_service(self.MOTOR_SERVICE_UUID)
-        self.motorState = self.motor.find_characteristic(self.MOTOR_STATE_CHARACTERISTIC_UUID)
-
-        # Start the mainloop to process BLE events, and run the provided function in
-        # a background thread.  When the provided main function stops running, returns
-        # an integer status code, or throws an error the program will exit.
-        ble.run_mainloop_with(self.main)
-
-    def disconnect(self):
-        # Make sure device is disconnected on exit.
-        self.device.disconnect()
-
-    def main(self):
         try:
+            # Wait for service discovery to complete for at least the specified
+            # service and characteristic UUID lists.  Will time out after 60 seconds
+            # (specify timeout_sec parameter to override).
+            print('Discovering services...')
+            self.device.discover([self.TOUCH_SERVICE_UUID, self.MOTOR_SERVICE_UUID], [self.TOUCH_STATE_CHARACTERISTIC_UUID, self.MOTOR_STATE_CHARACTERISTIC_UUID])
+
+            # Find the Touch sensor service and its characteristics.
+            self.touch = self.device.find_service(self.TOUCH_SERVICE_UUID)
+            self.touchState = self.touch.find_characteristic(self.TOUCH_STATE_CHARACTERISTIC_UUID)
+            self.motor = self.device.find_service(self.MOTOR_SERVICE_UUID)
+            self.motorState = self.motor.find_characteristic(self.MOTOR_STATE_CHARACTERISTIC_UUID)
             while True:
                 time.sleep(.25)
         finally:
