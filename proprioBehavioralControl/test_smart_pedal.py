@@ -17,3 +17,8 @@ def received(data):
 print('Subscribing to RX characteristic changes...')
 pedal.touchState.start_notify(received)
 pdb.set_trace()
+try:
+    while True:
+        pass
+finally:
+    pedal.disconnect()
