@@ -2,6 +2,9 @@ from MonkeyGames.Effectors.Endpoints.pedalBLE import pedalBLE
 import time
 
 pedal = pedalBLE()
+
+while pedal.motorState is None:
+    time.sleep(1)
 print('Finished starting the pedal')
 pedal.motorState.write_value([1])
 time.sleep(1)
