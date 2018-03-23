@@ -83,6 +83,7 @@ class pedalBLEInterface(object):
             self.motor = self.device.find_service(self.MOTOR_SERVICE_UUID)
             self.motorState = self.motor.find_characteristic(self.MOTOR_STATE_CHARACTERISTIC_UUID)
             while True:
+                print('Stuck in loop')
                 time.sleep(.25)
         finally:
             self.disconnect()

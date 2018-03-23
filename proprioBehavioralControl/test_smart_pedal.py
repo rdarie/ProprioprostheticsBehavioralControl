@@ -1,7 +1,7 @@
 from interfaces import pedalBLEInterface
 
 pedal = pedalBLEInterface()
-
+print('Finished starting the pedal')
 pedal.motorState.write_value([1])
 time.sleep(1)
 pedal.motorState.write_value([0])
