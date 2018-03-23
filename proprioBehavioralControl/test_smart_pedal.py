@@ -1,6 +1,7 @@
-from interfaces import pedalBLEInterface
+from MonkeyGames.Effectors.Endpoints.pedalBLE import pedalBLE
+import time
 
-pedal = pedalBLEInterface()
+pedal = pedalBLE()
 print('Finished starting the pedal')
 pedal.motorState.write_value([1])
 time.sleep(1)
@@ -16,9 +17,3 @@ def received(data):
 # Turn on notification of RX characteristics using the callback above.
 print('Subscribing to RX characteristic changes...')
 pedal.touchState.start_notify(received)
-pdb.set_trace()
-try:
-    while True:
-        pass
-finally:
-    pedal.disconnect()
