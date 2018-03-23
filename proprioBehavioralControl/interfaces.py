@@ -17,10 +17,10 @@ class pedalBLEInterface(object):
         Bluetooth_Base_UUID_suffix = '-0000-1000-8000-00805F9B34FB'
         self.BluetoothUUID = lambda x: '0000' + x + Bluetooth_Base_UUID_suffix
 
-        self.TOUCH_SERVICE_UUID              = uuid.UUID(BluetoothUUID('A002'))
-        self.TOUCH_STATE_CHARACTERISTIC_UUID = uuid.UUID(BluetoothUUID('A003'))
-        self.MOTOR_SERVICE_UUID              = uuid.UUID(BluetoothUUID('A000'))
-        self.MOTOR_STATE_CHARACTERISTIC_UUID = uuid.UUID(BluetoothUUID('A001'))
+        self.TOUCH_SERVICE_UUID              = uuid.UUID(self.BluetoothUUID('A002'))
+        self.TOUCH_STATE_CHARACTERISTIC_UUID = uuid.UUID(self.BluetoothUUID('A003'))
+        self.MOTOR_SERVICE_UUID              = uuid.UUID(self.BluetoothUUID('A000'))
+        self.MOTOR_STATE_CHARACTERISTIC_UUID = uuid.UUID(self.BluetoothUUID('A001'))
 
         # Get the BLE provider for the current platform.
         self.ble = Adafruit_BluefruitLE.get_provider()
@@ -40,7 +40,7 @@ class pedalBLEInterface(object):
         # Disconnect any currently connected UART devices.  Good for cleaning up and
         # starting from a fresh state.
         print('Disconnecting any connected Smart Pedal devices...')
-        self.ble.disconnect_devices([TOUCH_SERVICE_UUID, MOTOR_SERVICE_UUID])
+        self.ble.disconnect_devices([self.TOUCH_SERVICE_UUID, self.MOTOR_SERVICE_UUID])
 
         # Scan for UART devices.
         print('Searching for Smart Pedal device...')
@@ -48,7 +48,7 @@ class pedalBLEInterface(object):
             self.adapter.start_scan()
             # Search for the first UART device found (will time out after 60 seconds
             # but you can specify an optional timeout_sec parameter to change it).
-            self.device = self.ble.find_device(service_uuids=[TOUCH_SERVICE_UUID, MOTOR_SERVICE_UUID])
+            self.device = self.ble.find_device(service_uuids=[self.TOUCH_SERVICE_UUID, self.MOTOR_SERVICE_UUID])
             if self.device is None:
                 raise RuntimeError('Failed to find Smart Pedal device!')
         finally:
@@ -63,13 +63,18 @@ class pedalBLEInterface(object):
         # service and characteristic UUID lists.  Will time out after 60 seconds
         # (specify timeout_sec parameter to override).
         print('Discovering services...')
-        self.device.discover([TOUCH_SERVICE_UUID, MOTOR_SERVICE_UUID], [TOUCH_STATE_CHARACTERISTIC_UUID, MOTOR_STATE_CHARACTERISTIC_UUID])
+        self.device.discover([self.TOUCH_SERVICE_UUID, self.MOTOR_SERVICE_UUID], [self.TOUCH_STATE_CHARACTERISTIC_UUID, self.MOTOR_STATE_CHARACTERISTIC_UUID])
 
         # Find the Touch sensor service and its characteristics.
-        self.touch = self.device.find_service(TOUCH_SERVICE_UUID)
-        self.touchState = self.touch.find_characteristic(TOUCH_STATE_CHARACTERISTIC_UUID)
-        self.motor = self.device.find_service(MOTOR_SERVICE_UUID)
-        self.motorState = self.motor.find_characteristic(MOTOR_STATE_CHARACTERISTIC_UUID)
+        self.touch = self.device.find_service(self.TOUCH_SERVICE_UUID)
+        self.touchState = self.touch.find_characteristic(self.TOUCH_STATE_CHARACTERISTIC_UUID)
+        self.motor = self.device.find_service(self.MOTOR_SERVICE_UUID)
+        self.motorState = self.motor.find_characteristic(self.MOTOR_STATE_CHARACTERISTIC_UUID)
+
+        # Start the mainloop to process BLE events, and run the provided function in
+        # a background thread.  When the provided main function stops running, returns
+        # an integer status code, or throws an error the program will exit.
+        ble.run_mainloop_with(self.main)
 
     def disconnect(self):
         # Make sure device is disconnected on exit.
