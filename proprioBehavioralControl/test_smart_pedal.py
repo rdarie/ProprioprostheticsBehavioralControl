@@ -5,6 +5,7 @@ pedal = pedalBLE()
 
 while pedal.motorState is None:
     time.sleep(1)
+
 print('Finished starting the pedal')
 pedal.motorState.write_value([1])
 time.sleep(1)
@@ -20,3 +21,6 @@ def received(data):
 # Turn on notification of RX characteristics using the callback above.
 print('Subscribing to RX characteristic changes...')
 pedal.touchState.start_notify(received)
+
+while True:
+    time.sleep(.5)
