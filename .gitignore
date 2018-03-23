@@ -68,3 +68,7 @@ __pycache__
 # Eagle temporary files
 
 *.b##
+
+*.lck
+
+*.epf

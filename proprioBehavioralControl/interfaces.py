@@ -1,4 +1,5 @@
 import pygame, pdb, lirc, serial, os, os.path
+import logging, time, uuid, pdb, Adafruit_BluefruitLE
 from helperFunctions import serial_ports
 
 global wavePath
@@ -9,6 +10,77 @@ parentDir = os.path.abspath(os.path.join(curDir,os.pardir)) # this will return p
 
 with open(parentDir + '/' + '.waveLocation', 'r') as wf:
     wavePath = wf.read().replace('\n', '')
+
+class pedalBLEInterface(object):
+    def __init__(self):
+        # Define service and characteristic UUIDs used by the UART service.
+        Bluetooth_Base_UUID_suffix = '-0000-1000-8000-00805F9B34FB'
+        self.BluetoothUUID = lambda x: '0000' + x + Bluetooth_Base_UUID_suffix
+
+        self.TOUCH_SERVICE_UUID              = uuid.UUID(BluetoothUUID('A002'))
+        self.TOUCH_STATE_CHARACTERISTIC_UUID = uuid.UUID(BluetoothUUID('A003'))
+        self.MOTOR_SERVICE_UUID              = uuid.UUID(BluetoothUUID('A000'))
+        self.MOTOR_STATE_CHARACTERISTIC_UUID = uuid.UUID(BluetoothUUID('A001'))
+
+        # Get the BLE provider for the current platform.
+        self.ble = Adafruit_BluefruitLE.get_provider()
+
+        # Initialize the BLE system.  MUST be called before other BLE calls!
+        self.ble.initialize()
+
+        # Clear any cached data because both bluez and CoreBluetooth have issues with
+        # caching data and it going stale.
+        self.ble.clear_cached_data()
+
+        # Get the first available BLE network adapter and make sure it's powered on.
+        self.adapter = self.ble.get_default_adapter()
+        self.adapter.power_on()
+        print('Using adapter: {0}'.format(self.adapter.name))
+
+        # Disconnect any currently connected UART devices.  Good for cleaning up and
+        # starting from a fresh state.
+        print('Disconnecting any connected Smart Pedal devices...')
+        self.ble.disconnect_devices([TOUCH_SERVICE_UUID, MOTOR_SERVICE_UUID])
+
+        # Scan for UART devices.
+        print('Searching for Smart Pedal device...')
+        try:
+            self.adapter.start_scan()
+            # Search for the first UART device found (will time out after 60 seconds
+            # but you can specify an optional timeout_sec parameter to change it).
+            self.device = self.ble.find_device(service_uuids=[TOUCH_SERVICE_UUID, MOTOR_SERVICE_UUID])
+            if self.device is None:
+                raise RuntimeError('Failed to find Smart Pedal device!')
+        finally:
+            # Make sure scanning is stopped before exiting.
+            self.adapter.stop_scan()
+
+        print('Connecting to device...')
+        self.device.connect()  # Will time out after 60 seconds, specify timeout_sec parameter
+                          # to change the timeout.
+
+        # Wait for service discovery to complete for at least the specified
+        # service and characteristic UUID lists.  Will time out after 60 seconds
+        # (specify timeout_sec parameter to override).
+        print('Discovering services...')
+        self.device.discover([TOUCH_SERVICE_UUID, MOTOR_SERVICE_UUID], [TOUCH_STATE_CHARACTERISTIC_UUID, MOTOR_STATE_CHARACTERISTIC_UUID])
+
+        # Find the Touch sensor service and its characteristics.
+        self.touch = self.device.find_service(TOUCH_SERVICE_UUID)
+        self.touchState = self.touch.find_characteristic(TOUCH_STATE_CHARACTERISTIC_UUID)
+        self.motor = self.device.find_service(MOTOR_SERVICE_UUID)
+        self.motorState = self.motor.find_characteristic(MOTOR_STATE_CHARACTERISTIC_UUID)
+
+    def disconnect(self):
+        # Make sure device is disconnected on exit.
+        self.device.disconnect()
+
+    def main(self):
+        try:
+            while True:
+                time.sleep(.25)
+        finally:
+            self.disconnect()
 
 class speakerInterface(object):
     def __init__(self, soundPaths, volume = 1,
