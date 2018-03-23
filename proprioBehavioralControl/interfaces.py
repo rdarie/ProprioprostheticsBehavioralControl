@@ -31,14 +31,13 @@ class pedalBLEInterface(object):
         # Start the mainloop to process BLE events, and run the provided function in
         # a background thread.  When the provided main function stops running, returns
         # an integer status code, or throws an error the program will exit.
-        ble.run_mainloop_with(self.main)
+        self.ble.run_mainloop_with(self.main)
 
     def disconnect(self):
         # Make sure device is disconnected on exit.
         self.device.disconnect()
 
     def main(self):
-
         # Clear any cached data because both bluez and CoreBluetooth have issues with
         # caching data and it going stale.
         self.ble.clear_cached_data()
@@ -69,6 +68,8 @@ class pedalBLEInterface(object):
         print('Connecting to device...')
         self.device.connect()  # Will time out after 60 seconds, specify timeout_sec parameter
                           # to change the timeout.
+        # Once connected do everything else in a try/finally to make sure the device
+        # is disconnected when done.
         try:
             # Wait for service discovery to complete for at least the specified
             # service and characteristic UUID lists.  Will time out after 60 seconds
