@@ -162,8 +162,8 @@ SM.jackpotReward = 2.5
 SM.jackpot = False
 
 #block structure
-SM.smallBlocLength = 2
-SM.bigBlocLength = 2
+SM.smallBlocLength = 1
+SM.bigBlocLength = 1
 SM.smallTally = 1
 SM.bigTally = 1
 
