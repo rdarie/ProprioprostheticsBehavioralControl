@@ -28,6 +28,7 @@ import pdb, time, pygame
 from game_states import *
 import interfaces as ifaces
 from helperFunctions import *
+import numpy as np
 
 import argparse, os, os.path, shutil, subprocess
 
@@ -90,13 +91,16 @@ if playWhiteNoise:
     whiteNoise.play(-1)
 
 #
-magnitudes = np.linspace(1,11,11) * 1e4
+nSteps  = 11
+stimDistance = 3
+magnitudes = np.linspace(1,11,nSteps) * 1e4
+
 sets = {
-    'small' : [(0,-2), (1, -1)],
-    'big' :[(-1,1), (-2, 0)]
+    'small' : [(i, i + stimDistance) for i in range(nSteps - stimDistance)],
+    'big' : [(i, i - stimDistance) for i in range(stimDistance, nSteps)]
     }
 
-motor = ifaces.motorInterface(debugging = False, velocity = 6, acceleration = 250, deceleration = 250, useEncoder = False)
+motor = ifaces.motorInterface(debugging = False, velocity = 5.3, acceleration = 250, deceleration = 250, useEncoder = False)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
 

@@ -519,7 +519,7 @@ class turnPedalPhantomCompound(gameState):
         parent.motor.serial.write("WT0.5\r".encode())
 
         ## Second Movement
-        parent.motor.step_size = random.uniform(5e4, 5.5e4) if category == 'small'\
+        parent.motor.step_size = random.uniform(6e4, 6.5e4) if category == 'small'\
             else random.uniform(0.5e4, 1e4)
 
         if direction == 'forward':
