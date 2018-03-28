@@ -343,6 +343,16 @@ class turnPedalCompound(gameState):
         parent.magnitudeQueue.append(parent.motor.step_size)
 
         #play movement division tone
+        doneMoving = False
+        while not doneMoving:
+            curStatus = parent.motor.get_status()
+            #print('Current Status = %s' % curStatus)
+            #pdb.set_trace()
+            if 'R' in curStatus:
+                curStatus = parent.motor.get_status()
+                if 'R' in curStatus:
+                    doneMoving = True
+
         parent.speaker.play_tone('Divider')
 
         #wait between movements
