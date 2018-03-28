@@ -326,7 +326,7 @@ class turnPedalCompound(gameState):
 
         # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
         magnitudeIndex = random.choice(parent.sets[category])
-        parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[0]], 2.5e3)
+        parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[0]], 1e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
@@ -349,7 +349,7 @@ class turnPedalCompound(gameState):
         parent.motor.serial.write("WT0.5\r".encode())
 
         ## Second Movement
-        parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 2.5e3)
+        parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 1e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         if direction == 'forward':
@@ -499,7 +499,7 @@ class turnPedalPhantomCompound(gameState):
 
         # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
         magnitudeIndex = random.choice(parent.sets[category])
-        phantomStepSize = random.gauss( parent.magnitudes[magnitudeIndex[0]], 2.5e3)
+        phantomStepSize = random.gauss( parent.magnitudes[magnitudeIndex[0]], 1e3)
         print('Set phantom movement magnitude to : %4.2f' % phantomStepSize)
         phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)
 
@@ -526,7 +526,7 @@ class turnPedalPhantomCompound(gameState):
         parent.motor.serial.write("WT0.5\r".encode())
 
         ## Second Movement
-        parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 2.5e3)
+        parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 1e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         if direction == 'forward':
