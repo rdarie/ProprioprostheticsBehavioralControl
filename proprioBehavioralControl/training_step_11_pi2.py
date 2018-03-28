@@ -193,7 +193,7 @@ logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
-        [sessionTime, 'Button Pressing Step 10', '', '',
+        [sessionTime, 'Button Pressing Step 11', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
             SM.trialLength, SM.trialTimeout, argVolume, SM.easyReward, SM.hardReward,
             SM.smallBlocLength, SM.bigBlocLength]
