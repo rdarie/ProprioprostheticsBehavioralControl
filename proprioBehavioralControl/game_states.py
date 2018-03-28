@@ -325,7 +325,7 @@ class turnPedalCompound(gameState):
         # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
         magnitudeIndex = random.choice(parent.sets[category])
         parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[0]]
-
+        print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
         self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
         if direction == 'forward':
             parent.motor.forward()
@@ -338,10 +338,16 @@ class turnPedalCompound(gameState):
 
         parent.motor.go_home()
         parent.magnitudeQueue.append(parent.motor.step_size)
-        parent.motor.serial.write("WT0.25\r".encode())
+
+        #play movement division tone
+        parent.speaker.play_tone('Divider')
+
+        #wait between movements
+        parent.motor.serial.write("WT0.5\r".encode())
 
         ## Second Movement
         parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[1]]
+        print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         if direction == 'forward':
             parent.motor.forward()
@@ -491,6 +497,7 @@ class turnPedalPhantomCompound(gameState):
         # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
         magnitudeIndex = random.choice(parent.sets[category])
         parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[0]]
+        print('Set phantom movement magnitude to : %4.2f' % parent.motor.step_size)
         phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)
         #e.g. phantomDuration = 5.5e4 / (5.6 * 25e3) 25e3 is the default steps / rev for MR10
         serialMessage = "WT%2.2f\r" % phantomDuration
@@ -516,6 +523,7 @@ class turnPedalPhantomCompound(gameState):
 
         ## Second Movement
         parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[1]]
+        print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         if direction == 'forward':
             parent.motor.forward()
