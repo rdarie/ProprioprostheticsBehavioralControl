@@ -257,6 +257,7 @@ class turnPedalCompound(gameState):
 
         if parent.blocsRemaining == 0:
             #start a new block!
+            parent.jackpot = True
 
             #switch block category
             category = 'small' if parent.initBlocType['category'] == 'big' else 'big'
@@ -318,14 +319,16 @@ class turnPedalCompound(gameState):
                 print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
         else:
             # repeat the last block type
+            parent.jackpot = False
             category = parent.initBlocType['category']
             direction = parent.initBlocType['direction']
             parent.blocsRemaining = parent.blocsRemaining - 1
 
         # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
         magnitudeIndex = random.choice(parent.sets[category])
-        parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[0]]
+        parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[0]], 2.5e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
+
         self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
         if direction == 'forward':
             parent.motor.forward()
@@ -346,7 +349,7 @@ class turnPedalCompound(gameState):
         parent.motor.serial.write("WT0.5\r".encode())
 
         ## Second Movement
-        parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[1]]
+        parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 2.5e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         if direction == 'forward':
@@ -496,9 +499,10 @@ class turnPedalPhantomCompound(gameState):
 
         # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
         magnitudeIndex = random.choice(parent.sets[category])
-        phantomStepSize = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[0]]
+        phantomStepSize = random.gauss( parent.magnitudes[magnitudeIndex[0]], 2.5e3)
         print('Set phantom movement magnitude to : %4.2f' % phantomStepSize)
         phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)
+
         #e.g. phantomDuration = 5.5e4 / (5.6 * 25e3) 25e3 is the default steps / rev for MR10
         serialMessage = "WT%2.2f\r" % phantomDuration
         print('\n Writing to motor: ' + serialMessage)
@@ -522,7 +526,7 @@ class turnPedalPhantomCompound(gameState):
         parent.motor.serial.write("WT0.5\r".encode())
 
         ## Second Movement
-        parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[1]]
+        parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 2.5e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         if direction == 'forward':
