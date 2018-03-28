@@ -157,9 +157,9 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.easyReward = .3
-SM.hardReward = .8
-SM.jackpotReward = 2.5
+SM.easyReward = .2
+SM.hardReward = .5
+SM.jackpotReward = 1
 SM.jackpot = False
 
 # Set up throw distances

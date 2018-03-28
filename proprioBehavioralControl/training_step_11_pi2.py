@@ -157,8 +157,8 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.easyReward = .3
-SM.hardReward = .8
+SM.easyReward = .5
+SM.hardReward = 1
 SM.jackpotReward = 2.5
 SM.jackpot = False
 
@@ -206,9 +206,9 @@ if logToWeb:
 
 debugging = True
 # connect state machine states
-SM.add_state(strict_fixation(['turnPedalPhantomCompound',  'fixation'], SM, 'fixation',
+SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
     thisLog, printStatements = debugging))
-SM.add_state(turnPedalPhantomCompound(['chooseNextTrial'], SM, 'turnPedalPhantomCompound',
+SM.add_state(turnPedalCompound(['chooseNextTrial'], SM, 'turnPedalCompound',
     logFile = thisLog, printStatements = debugging))
 SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
     logFile = None))
