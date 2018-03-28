@@ -554,8 +554,10 @@ class turnPedalPhantomCompound(gameState):
             #print('Current Status = %s' % curStatus)
             #pdb.set_trace()
             if 'R' in curStatus:
-                doneMoving = True
-                self.payload['movementOff'] = time.time()
+                curStatus = parent.motor.get_status()
+                if 'R' in curStatus:
+                    doneMoving = True
+                    self.payload['movementOff'] = time.time()
 
         if parent.motor.useEncoder:
             curPos = parent.motor.get_encoder_position()
