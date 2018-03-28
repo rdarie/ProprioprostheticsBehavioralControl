@@ -91,13 +91,20 @@ if playWhiteNoise:
     whiteNoise.play(-1)
 
 #
-nSteps  = 11
+nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
+assert nSteps % 2 == 1
+midStep = int((nSteps - 1) / 2)
 stimDistance = 3
 magnitudes = np.linspace(1,11,nSteps) * 1e4
 
-sets = {
+setsComparison = {
     'small' : [(i, i + stimDistance) for i in range(nSteps - stimDistance)],
     'big' : [(i, i - stimDistance) for i in range(stimDistance, nSteps)]
+    }
+
+setsDiscrimination = {
+    'small' : [(midStep, midStep + i) for i in range(1, midStep + 1)] + [(midStep - i, midStep) for i in range(1, midStep + 1)] + [(midStep, midStep)],
+    'big'   : [(midStep + i, midStep) for i in range(1, midStep + 1)] + [(midStep, midStep - i) for i in range(1, midStep + 1)] + [(midStep, midStep)]
     }
 
 motor = ifaces.motorInterface(debugging = False, velocity = 5.3, acceleration = 250, deceleration = 250, useEncoder = False)
