@@ -487,7 +487,7 @@ class turnPedalPhantomCompound(gameState):
             direction = parent.initBlocType['direction']
             parent.blocsRemaining = parent.blocsRemaining - 1
 
-        phantomStepSize = random.uniform(0.5e4, 1e4) if category == 'small'\
+        phantomStepSize = random.uniform(1.5e4, 2e4) if category == 'small'\
             else random.uniform(11e4, 11.5e4)
         phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)
         #e.g. phantomDuration = 5.5e4 / (5.6 * 25e3) 25e3 is the default steps / rev for MR10
@@ -520,7 +520,7 @@ class turnPedalPhantomCompound(gameState):
 
         ## Second Movement
         parent.motor.step_size = random.uniform(11e4, 11.5e4) if category == 'small'\
-            else random.uniform(0.5e4, 1e4)
+            else random.uniform(1.5e4, 2e4)
 
         if direction == 'forward':
             parent.motor.forward()
