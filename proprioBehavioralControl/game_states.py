@@ -488,7 +488,7 @@ class turnPedalPhantomCompound(gameState):
             parent.blocsRemaining = parent.blocsRemaining - 1
 
         phantomStepSize = random.uniform(0.5e4, 1e4) if category == 'small'\
-            else random.uniform(5e4, 5.5e4)
+            else random.uniform(11e4, 11.5e4)
         phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)
         #e.g. phantomDuration = 5.5e4 / (5.6 * 25e3) 25e3 is the default steps / rev for MR10
         serialMessage = "WT%2.2f\r" % phantomDuration
@@ -519,7 +519,7 @@ class turnPedalPhantomCompound(gameState):
         parent.motor.serial.write("WT0.5\r".encode())
 
         ## Second Movement
-        parent.motor.step_size = random.uniform(6e4, 6.5e4) if category == 'small'\
+        parent.motor.step_size = random.uniform(11e4, 11.5e4) if category == 'small'\
             else random.uniform(0.5e4, 1e4)
 
         if direction == 'forward':
