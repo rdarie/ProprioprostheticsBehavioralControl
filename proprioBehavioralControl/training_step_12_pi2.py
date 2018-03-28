@@ -28,6 +28,7 @@ import pdb, time, pygame
 from game_states import *
 import interfaces as ifaces
 from helperFunctions import *
+import numpy as np
 
 import argparse, os, os.path, shutil, subprocess
 
@@ -89,8 +90,24 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
+#
+nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
+assert nSteps % 2 == 1
+midStep = int((nSteps - 1) / 2)
+stimDistance = 3
+magnitudes = np.linspace(1,11,nSteps) * 1e4
 
-motor = ifaces.motorInterface(debugging = False, velocity = 6, acceleration = 250, deceleration = 250, useEncoder = False)
+setsComparison = {
+    'small' : [(i, i + stimDistance) for i in range(nSteps - stimDistance)],
+    'big' : [(i, i - stimDistance) for i in range(stimDistance, nSteps)]
+    }
+
+setsDiscrimination = {
+    'small' : [(midStep, midStep + i) for i in range(1, midStep + 1)] + [(midStep - i, midStep) for i in range(1, midStep + 1)] + [(midStep, midStep)],
+    'big'   : [(midStep + i, midStep) for i in range(1, midStep + 1)] + [(midStep, midStep - i) for i in range(1, midStep + 1)] + [(midStep, midStep)]
+    }
+
+motor = ifaces.motorInterface(debugging = False, velocity = 5.3, acceleration = 250, deceleration = 250, useEncoder = False)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
 
@@ -161,19 +178,6 @@ SM.easyReward = .3
 SM.hardReward = .8
 SM.jackpotReward = 2.5
 SM.jackpot = False
-
-# Set up throw distances
-nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
-assert nSteps % 2 == 1
-midStep = int((nSteps - 1) / 2)
-stimDistance = 3
-magnitudes = np.linspace(1,12,nSteps) * 1e4
-sets = {
-    'small' : [(midStep, nSteps - i - 1) for i in range(2)],
-    'big' : [(midStep, i) for i in range(2)]
-    }
-SM.magnitudes = magnitudes
-SM.sets = sets
 
 #block structure
 SM.smallBlocLength = 1

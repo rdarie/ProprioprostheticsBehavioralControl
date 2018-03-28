@@ -322,8 +322,9 @@ class turnPedalCompound(gameState):
             direction = parent.initBlocType['direction']
             parent.blocsRemaining = parent.blocsRemaining - 1
 
-        parent.motor.step_size = random.uniform(0.5e4, 1e4) if category == 'small'\
-            else random.uniform(5e4, 5.5e4)
+        # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
+        magnitudeIndex = random.choice(parent.sets[category])
+        parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[0]]
 
         self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
         if direction == 'forward':
@@ -340,10 +341,7 @@ class turnPedalCompound(gameState):
         parent.motor.serial.write("WT0.25\r".encode())
 
         ## Second Movement
-        ## TODO: Sleep the parent some number of milliseconds
-        ## TODO: fix logging
-        parent.motor.step_size = random.uniform(5e4, 5.5e4) if category == 'small'\
-            else random.uniform(0.5e4, 1e4)
+        parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[1]]
 
         if direction == 'forward':
             parent.motor.forward()
@@ -377,8 +375,11 @@ class turnPedalCompound(gameState):
             #print('Current Status = %s' % curStatus)
             #pdb.set_trace()
             if 'R' in curStatus:
-                doneMoving = True
-                self.payload['movementOff'] = time.time()
+                #Check again to make sure we are done:
+                curStatus = parent.motor.get_status()
+                if 'R' in curStatus:
+                    doneMoving = True
+                    self.payload['movementOff'] = time.time()
 
         if parent.motor.useEncoder:
             curPos = parent.motor.get_encoder_position()
@@ -487,8 +488,9 @@ class turnPedalPhantomCompound(gameState):
             direction = parent.initBlocType['direction']
             parent.blocsRemaining = parent.blocsRemaining - 1
 
-        phantomStepSize = random.uniform(1.5e4, 2e4) if category == 'small'\
-            else random.uniform(11e4, 11.5e4)
+        # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
+        magnitudeIndex = random.choice(parent.sets[category])
+        parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[0]]
         phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)
         #e.g. phantomDuration = 5.5e4 / (5.6 * 25e3) 25e3 is the default steps / rev for MR10
         serialMessage = "WT%2.2f\r" % phantomDuration
@@ -505,13 +507,7 @@ class turnPedalPhantomCompound(gameState):
                 self.payload['firstThrow'] = -phantomStepSize
 
         parent.magnitudeQueue.append(phantomStepSize)
-        doneMoving = False
-        while not doneMoving:
-            curStatus = parent.motor.get_status()
-            #print('Current Status = %s' % curStatus)
-            #pdb.set_trace()
-            if 'R' in curStatus:
-                doneMoving = True
+
         #play movement division tone
         parent.speaker.play_tone('Divider')
 
@@ -519,8 +515,7 @@ class turnPedalPhantomCompound(gameState):
         parent.motor.serial.write("WT0.5\r".encode())
 
         ## Second Movement
-        parent.motor.step_size = random.uniform(11e4, 11.5e4) if category == 'small'\
-            else random.uniform(1.5e4, 2e4)
+        parent.motor.step_size = random.uniform(0, 5e3) + parent.magnitudes[magnitudeIndex[1]]
 
         if direction == 'forward':
             parent.motor.forward()
