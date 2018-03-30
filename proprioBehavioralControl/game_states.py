@@ -257,7 +257,6 @@ class turnPedalCompound(gameState):
 
         if parent.blocsRemaining == 0:
             #start a new block!
-            parent.jackpot = True
 
             #switch block category
             category = 'small' if parent.initBlocType['category'] == 'big' else 'big'
@@ -319,13 +318,13 @@ class turnPedalCompound(gameState):
                 print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
         else:
             # repeat the last block type
-            parent.jackpot = False
             category = parent.initBlocType['category']
             direction = parent.initBlocType['direction']
             parent.blocsRemaining = parent.blocsRemaining - 1
 
         # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
         magnitudeIndex = random.choice(parent.sets[category])
+        parent.jackpot = magnitudeIndex in parent.jackpotSets
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[0]], 1e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
@@ -439,8 +438,6 @@ class turnPedalPhantomCompound(gameState):
         enforceWait = True
 
         if parent.blocsRemaining == 0:
-            #start a new block!
-            parent.jackpot = True
 
             #switch block category
             category = 'small' if parent.initBlocType['category'] == 'big' else 'big'
@@ -502,13 +499,13 @@ class turnPedalPhantomCompound(gameState):
                 print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
         else:
             # repeat the last block type
-            parent.jackpot = False
             category = parent.initBlocType['category']
             direction = parent.initBlocType['direction']
             parent.blocsRemaining = parent.blocsRemaining - 1
 
         # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
         magnitudeIndex = random.choice(parent.sets[category])
+        parent.jackpot = magnitudeIndex in parent.jackpotSets
         phantomStepSize = random.gauss( parent.magnitudes[magnitudeIndex[0]], 1e3)
         print('Set phantom movement magnitude to : %4.2f' % phantomStepSize)
         phantomDuration = phantomStepSize / (parent.motor.velocity * 25e3)

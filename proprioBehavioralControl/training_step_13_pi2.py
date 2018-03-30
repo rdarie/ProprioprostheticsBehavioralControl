@@ -90,6 +90,23 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
+#
+nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
+assert nSteps % 2 == 1
+midStep = int((nSteps - 1) / 2)
+stimDistance = 3
+magnitudes = np.linspace(1,11,nSteps) * 1e4
+
+setsComparison = {
+    'small' : [(i, i + stimDistance) for i in range(nSteps - stimDistance)],
+    'big' : [(i, i - stimDistance) for i in range(stimDistance, nSteps)]
+    }
+
+setsDiscrimination = {
+    'small' : [(midStep, midStep + i) for i in range(1, midStep + 1)] + [(midStep - i, midStep) for i in range(1, midStep + 1)] + [(midStep, midStep)],
+    'big'   : [(midStep + i, midStep) for i in range(1, midStep + 1)] + [(midStep, midStep - i) for i in range(1, midStep + 1)] + [(midStep, midStep)]
+    }
+
 motor = ifaces.motorInterface(debugging = False, velocity = 5.3, acceleration = 250, deceleration = 250, useEncoder = False)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
@@ -157,29 +174,10 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.easyReward = .25
-SM.hardReward = .5
-SM.jackpotReward = 1
+SM.easyReward = .3
+SM.hardReward = .8
+SM.jackpotReward = 2.5
 SM.jackpot = False
-
-# Set up throw distances
-nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
-assert nSteps % 2 == 1
-midStep = int((nSteps - 1) / 2)
-stimDistance = 3
-magnitudes = np.linspace(1,13,nSteps) * 1e4
-sets = {
-<<<<<<< HEAD
-    'small' : [(midStep, nSteps - i - 1) for i in range(1)],
-    'big' : [(midStep, i) for i in range(1)]
-=======
-    'small' : [(midStep, nSteps - i - 1) for i in range(3)],
-    'big' : [(midStep, i) for i in range(3)]
->>>>>>> a7ef21b0d36dd59b2f060fbfb2f0c7ab434c59d3
-    }
-SM.jackpotSets = [(4,2), (4,6)]
-SM.magnitudes = magnitudes
-SM.sets = sets
 
 #block structure
 SM.smallBlocLength = 1
@@ -199,7 +197,7 @@ logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
-        [sessionTime, 'Button Pressing Step 11', '', '',
+        [sessionTime, 'Button Pressing Step 10', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
             SM.trialLength, SM.trialTimeout, argVolume, SM.easyReward, SM.hardReward,
             SM.smallBlocLength, SM.bigBlocLength]
@@ -212,9 +210,9 @@ if logToWeb:
 
 debugging = True
 # connect state machine states
-SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
+SM.add_state(strict_fixation(['turnPedalPhantomCompound',  'fixation'], SM, 'fixation',
     thisLog, printStatements = debugging))
-SM.add_state(turnPedalCompound(['chooseNextTrial'], SM, 'turnPedalCompound',
+SM.add_state(turnPedalPhantomCompound(['chooseNextTrial'], SM, 'turnPedalPhantomCompound',
     logFile = thisLog, printStatements = debugging))
 SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
     logFile = None))
