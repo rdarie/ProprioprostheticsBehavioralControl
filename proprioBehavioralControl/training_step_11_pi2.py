@@ -169,10 +169,10 @@ midStep = int((nSteps - 1) / 2)
 stimDistance = 3
 magnitudes = np.linspace(1,13,nSteps) * 1e4
 sets = {
-    'small' : [(midStep, nSteps - i - 1) for i in range(3)],
-    'big' : [(midStep, i) for i in range(3)]
+    'small' : [(midStep, nSteps - i - 1) for i in range(4)],
+    'big' : [(midStep, i) for i in range(4)]
     }
-SM.jackpotSets = [(4,2), (4,6)]
+SM.jackpotSets = [(4,3), (4,5)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
