@@ -7,6 +7,8 @@
 #__maintainer__ = "Cody Giles"
 #__status__ = "Production"
 
+
+## MUST BE RUN ON PYTHON 2
 import subprocess, pdb, smtplib, datetime, socket, time
 from email.mime.text import MIMEText
 
@@ -64,6 +66,7 @@ data = p.communicate()  # Get data from 'p terminal'.
 # Split IP text block into three, and divide the two containing IPs into words.
 ip_lines = data[0].splitlines()
 split_line_a = ip_lines[-1].split()
+#print(split_line_a)
 #split_line_b = ip_lines[2].split()
 
 # con_type variables for the message text. ex) 'ethernet', 'wifi', etc.
