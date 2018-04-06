@@ -328,7 +328,7 @@ class turnPedalCompound(gameState):
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[0]], 1e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
-        self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
+        self.payload = {"Stimulus ID Pair": magnitudeIndex, 'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
         if direction == 'forward':
             parent.motor.forward()
             if self.logFile:
@@ -515,7 +515,7 @@ class turnPedalPhantomCompound(gameState):
         print('\n Writing to motor: ' + serialMessage)
         parent.motor.serial.write(serialMessage.encode())
 
-        self.payload = {'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
+        self.payload = {"Stimulus ID Pair": magnitudeIndex, 'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
 
         if direction == 'forward':
             if self.logFile:
