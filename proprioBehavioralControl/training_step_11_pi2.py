@@ -80,13 +80,13 @@ soundPaths = {
 playWelcomeTone = True if args.playWelcomeTone == 'True' else False
 if playWelcomeTone:
     pygame.mixer.init()
-    welcomeChime = pygame.mixer.Sound(wavePath + "/violin_C5.wav")
+    welcomeChime = pygame.mixer.Sound(wavePath + "violin_C5.wav")
     welcomeChime.set_volume(2 * argVolume)
     welcomeChime.play()
 
 playWhiteNoise = True if args.playWhiteNoise == 'True' else False
 if playWhiteNoise:
-    whiteNoise = pygame.mixer.Sound(wavePath + "/whitenoisegaussian.wav")
+    whiteNoise = pygame.mixer.Sound(wavePath + "whitenoisegaussian.wav")
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
@@ -146,9 +146,9 @@ SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
 # set up event logging
 logLocally = True if args.logLocally == 'True' else False
 if logLocally:
-    logFileName = wavePath + '/logs/Log_Murdoc_' + sessionTime + '.txt'
+    logFileName = wavePath + 'logs/Log_Murdoc_' + sessionTime + '.txt'
 else:
-    logFileName = wavePath + '/debugLog.txt'
+    logFileName = wavePath + 'debugLog.txt'
 
 SM.logFileName = logFileName
 thisLog = File_Printer(filePath = logFileName, append = True)
