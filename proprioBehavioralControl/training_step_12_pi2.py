@@ -257,6 +257,7 @@ remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
     default = lambda: None)
 
 welcomeChime.play()
+pdb.set_trace()
 try:
     remoteListener.run()
 
