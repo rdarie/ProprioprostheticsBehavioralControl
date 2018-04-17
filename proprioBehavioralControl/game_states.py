@@ -328,6 +328,10 @@ class turnPedalCompound(gameState):
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[0]], 1e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
+        # if there's a pedal with a vibromotor, actuate the vibromotor
+        if self.parent.smartPedal is not None:
+            self.parent.smartPedal.motorState.write_value([1])
+
         self.payload = {"Stimulus ID Pair": magnitudeIndex, 'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
         if direction == 'forward':
             parent.motor.forward()
@@ -403,6 +407,11 @@ class turnPedalCompound(gameState):
             curPos = parent.motor.get_encoder_position()
             #if curPos is not None:
             #    print('Current position = %4.4f' % curPos)
+
+
+        # if there's a pedal with a vibromotor, actuate the vibromotor
+        if self.parent.smartPedal is not None:
+            self.parent.smartPedal.motorState.write_value([0])
 
         event_label = parent.request_last_touch()
         if event_label and enforceWait:
