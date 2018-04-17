@@ -22,5 +22,5 @@ def received(data):
 print('Subscribing to RX characteristic changes...')
 pedal.touchState.start_notify(received)
 
-while True:
+while not pedal.kill:
     time.sleep(.5)
