@@ -21,6 +21,7 @@ from MonkeyGames.arbiter import Arbiter
 from MonkeyGames.Effectors.Processors.event_timestamper import Event_Timestamper
 from MonkeyGames.Effectors.Endpoints.rpi_gpio import GPIO_Input, GPIO_Output
 from MonkeyGames.Effectors.Endpoints.file_printer import File_Printer
+from MonkeyGames.Effectors.Endpoints.pedalBLE import pedalBLE
 
 import RPi.GPIO as GPIO
 import pdb, time, pygame
