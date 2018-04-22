@@ -106,7 +106,7 @@ timestamper = Event_Timestamper()
 juicePin = GPIO_Output(pins=[16,6,12,25], labels=['redLED', 'greenLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
-
+SM.smartPedal = None
 # initialize outputs to movementOff
 #GPIO.output(6,False)
 #GPIO.output(16,False)
