@@ -106,7 +106,7 @@ timestamper = Event_Timestamper()
 juicePin = GPIO_Output(pins=[16,6,12,25], labels=['redLED', 'greenLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
-SM.smartPedal = None
+
 # initialize outputs to movementOff
 #GPIO.output(6,False)
 #GPIO.output(16,False)
@@ -134,7 +134,7 @@ SM.motor = motor
 SM.inputPin = butPin
 
 SM.juicePin = juicePin
-
+SM.smartPedal = None
 # Add a mode to the state machine
 SM.add_mode('sink', (['main_thread'], SM.inbox))
 SM.add_mode('source', (['distributor'], True))
