@@ -167,7 +167,7 @@ nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 stimDistance = 3
-magnitudes = np.linspace(1,12,nSteps) * 1e4
+magnitudes = np.linspace(1,13,nSteps) * 1e4
 sets = {'big': [(4, 0), (8, 4), (4, 2)], 'small': [(4, 8), (0, 4), (4, 6)]}
 SM.jackpotSets = [(8,4), (0,4)]
 SM.magnitudes = magnitudes
@@ -191,7 +191,7 @@ logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
     SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
-        [sessionTime, 'Button Pressing Step 10', '', '',
+        [sessionTime, 'Button Pressing Step 12', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
             SM.trialLength, SM.trialTimeout, argVolume, SM.easyReward, SM.hardReward,
             SM.smallBlocLength, SM.bigBlocLength]

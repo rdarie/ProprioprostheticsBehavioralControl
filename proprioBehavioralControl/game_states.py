@@ -269,39 +269,27 @@ class turnPedalCompound(gameState):
             parent.initBlocType['direction'] = direction
 
             # re-evaluate the block lengths
-
-            if self.printStatements:
-                print('\ntally of small choices is : %4.2f' % parent.smallTally)
             smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
-
-            if self.printStatements:
-                print('\nsmall proportion is : %4.2f' % smallProp )
-
-
-            if self.printStatements:
-                print('\ntally of big choices is : %4.2f' % parent.bigTally)
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
-
-            if self.printStatements:
-                print('\nbig proportion is : %4.2f' % bigProp )
-
+            # exagerate differences
             bias = smallProp - 0.5 # positive if biased towards the small, negative otherwise
-
             smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
-
             #bounds
             smallProp = 0 if smallProp < 0 else smallProp
             smallProp = 1 if smallProp > 1 else smallProp
-
             bigProp = 1 - smallProp # opposite
 
-            parent.smallBlocLength = round(nominalBlockLength * smallProp) + 1
-
             if self.printStatements:
-                print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
+                print('\nsmall proportion is : %4.2f' % smallProp )
+                print('\ntally of small choices is : %4.2f' % parent.smallTally)
+                print('\ntally of big choices is : %4.2f' % parent.bigTally)
+                print('\nbig proportion is : %4.2f' % bigProp )
+
+            parent.smallBlocLength = round(nominalBlockLength * smallProp) + 1
             parent.bigBlocLength = round(nominalBlockLength * bigProp) + 1
 
             if self.printStatements:
+                print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
                 print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
 
             smallDraw = round(random.gauss(parent.smallBlocLength, 1))
@@ -408,7 +396,6 @@ class turnPedalCompound(gameState):
             #if curPos is not None:
             #    print('Current position = %4.4f' % curPos)
 
-
         # if there's a pedal with a vibromotor, actuate the vibromotor
         if self.parent.smartPedal is not None:
             self.parent.smartPedal.motorState.write_value([0])
@@ -459,39 +446,27 @@ class turnPedalPhantomCompound(gameState):
             parent.initBlocType['direction'] = direction
 
             # re-evaluate the block lengths
-
-            if self.printStatements:
-                print('\ntally of small choices is : %4.2f' % parent.smallTally)
             smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
-
-            if self.printStatements:
-                print('\nsmall proportion is : %4.2f' % smallProp )
-
-
-            if self.printStatements:
-                print('\ntally of big choices is : %4.2f' % parent.bigTally)
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
 
             if self.printStatements:
+                print('\ntally of small choices is : %4.2f' % parent.smallTally)
+                print('\nsmall proportion is : %4.2f' % smallProp )
+                print('\ntally of big choices is : %4.2f' % parent.bigTally)
                 print('\nbig proportion is : %4.2f' % bigProp )
 
             bias = smallProp - 0.5 # positive if biased towards the small, negative otherwise
-
             smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
-
             #bounds
             smallProp = 0 if smallProp < 0 else smallProp
             smallProp = 1 if smallProp > 1 else smallProp
-
             bigProp = 1 - smallProp # opposite
 
             parent.smallBlocLength = round(nominalBlockLength * smallProp) + 1
-
-            if self.printStatements:
-                print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
             parent.bigBlocLength = round(nominalBlockLength * bigProp) + 1
 
             if self.printStatements:
+                print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
                 print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
 
             smallDraw = round(random.gauss(parent.smallBlocLength, 1))
