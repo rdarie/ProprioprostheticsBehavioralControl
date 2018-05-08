@@ -171,7 +171,7 @@ stimDistance = 3
 magnitudes = np.linspace(1,13,nSteps) * 1e4
 sets = {
     'small' : [(midStep, nSteps - i - 1) for i in range(5)],
-    'big' : [(midStep, i) for i in range(5)]
+    'big' : [(midStep, i) for i in range(4)]
     }
 SM.jackpotSets = [(4,3), (4,4), (4,5)]
 SM.magnitudes = magnitudes
