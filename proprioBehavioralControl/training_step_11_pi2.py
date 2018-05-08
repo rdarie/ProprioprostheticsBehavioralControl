@@ -163,16 +163,17 @@ SM.jackpotReward = 1
 SM.jackpot = False
 
 # Set up throw distances
+# import numpy as np
 nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 stimDistance = 3
 magnitudes = np.linspace(1,13,nSteps) * 1e4
 sets = {
-    'small' : [(midStep, nSteps - i - 1) for i in range(4)],
-    'big' : [(midStep, i) for i in range(4)]
+    'small' : [(midStep, nSteps - i - 1) for i in range(5)],
+    'big' : [(midStep, i) for i in range(5)]
     }
-SM.jackpotSets = [(4,3), (4,5)]
+SM.jackpotSets = [(4,3), (4,4), (4,5)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
