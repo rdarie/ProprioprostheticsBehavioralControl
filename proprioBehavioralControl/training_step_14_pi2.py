@@ -137,7 +137,7 @@ SM.inputPin = butPin
 SM.juicePin = juicePin
 
 SM.smartPedal = pedalBLE()
-while pedal.motorState is None:
+while SM.smartPedal.motorState is None:
     time.sleep(1)
 print('Finished starting the pedal')
 
