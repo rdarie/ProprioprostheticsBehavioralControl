@@ -317,8 +317,12 @@ class turnPedalCompound(gameState):
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         # if there's a pedal with a vibromotor, actuate the vibromotor
+
         if self.parent.smartPedal is not None:
-            self.parent.smartPedal.motorState.write_value([1])
+            pedalRunning = False
+            if bool(random.getrandbits(1)):
+                self.parent.smartPedal.motorState.write_value([1])
+                pedalRunning = True
 
         self.payload = {"Stimulus ID Pair": magnitudeIndex, 'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0}
         if direction == 'forward':
@@ -398,7 +402,9 @@ class turnPedalCompound(gameState):
 
         # if there's a pedal with a vibromotor, actuate the vibromotor
         if self.parent.smartPedal is not None:
-            self.parent.smartPedal.motorState.write_value([0])
+            if pedalRunning:
+                self.parent.smartPedal.motorState.write_value([0])
+                pedalRunning = False
 
         event_label = parent.request_last_touch()
         if event_label and enforceWait:
@@ -929,6 +935,17 @@ class good(gameState):
             print('Good job!')
         parent.trialLength = parent.nominalTrialLength
         parent.outbox.put('Reward')
+        parent.speaker.play_tone('Good')
+        return self.nextState[0]
+
+class variableGood(gameState):
+    # TODO: add amount dispensed to log
+    def operation(self, parent):
+        if self.printStatements:
+            print('Good job!')
+        parent.trialLength = parent.nominalTrialLength
+        if bool(random.getrandbits(1)):
+            parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]
 
