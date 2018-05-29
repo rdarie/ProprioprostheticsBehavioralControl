@@ -325,6 +325,8 @@ class turnPedalCompound(gameState):
                 self.parent.smartPedal.motorState.write_value([1])
                 pedalRunning = True
                 self.payload['vibrationOn'] = True
+            else:
+                self.parent.smartPedal.motorState.write_value([0])
 
         if direction == 'forward':
             parent.motor.forward()
