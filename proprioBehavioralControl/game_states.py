@@ -321,12 +321,18 @@ class turnPedalCompound(gameState):
         # if there's a pedal with a vibromotor, actuate the vibromotor
         if self.parent.smartPedal is not None:
             pedalRunning = False
+            self.parent.smartPedal.motorState.write_value([1])
+            pedalRunning = True
+            self.payload['vibrationOn'] = True
+            """
             if bool(random.getrandbits(1)):
                 self.parent.smartPedal.motorState.write_value([1])
                 pedalRunning = True
                 self.payload['vibrationOn'] = True
             else:
                 self.parent.smartPedal.motorState.write_value([0])
+                """
+
 
         if direction == 'forward':
             parent.motor.forward()
