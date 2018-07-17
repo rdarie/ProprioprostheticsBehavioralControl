@@ -58,7 +58,7 @@ class pedalBLEInterface(object):
         print('Connecting to device...')
         self.device.connect()  # Will time out after 60 seconds, specify timeout_sec parameter
                           # to change the timeout.
-        
+
         # Wait for service discovery to complete for at least the specified
         # service and characteristic UUID lists.  Will time out after 60 seconds
         # (specify timeout_sec parameter to override).
@@ -138,8 +138,8 @@ class sparkfunRemoteInterface(object):
 class motorInterface(object):
     # Configure the serial port connection the the Si3540 motor driver
     def __init__(self, serialPortName = '/dev/ttyUSB0',
-        debugging = False, velocity = 3, acceleration = 100,
-        deceleration = 100, useEncoder = False):
+        debugging = False, velocity = 3, acceleration = 30,
+        deceleration = 30, useEncoder = False):
 
         try:
             ser = serial.Serial(
@@ -170,10 +170,10 @@ class motorInterface(object):
         self.serialPortName = serialPortName
         self.serial = ser
 
-        self.current = 3.2
+        self.current = 9.7
         serial_message = "CC" + str(self.current) + "\r"
         self.serial.write(serial_message.encode())
-        self.idle_current = 3.2
+        self.idle_current = 5
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
         serial_message = "MR10\r"
@@ -185,10 +185,12 @@ class motorInterface(object):
 
         self.useEncoder = useEncoder
         if useEncoder:
-            serial_message = "ER6\r"
+            """
+            serial_message = "ER8000\r"
             self.serial.write(serial_message.encode())
             #On drives supporting encoder feedback, the ER command defines the encoder ratio. This number is
             #the motor resolution, in steps/rev, divided by the encoder resolution, in counts/rev.
+
             serial_message = "ED50\r"
             self.serial.write(serial_message.encode())
             #On drives that have the encoder feedback option, this defines the
@@ -197,6 +199,11 @@ class motorInterface(object):
             serial_message = "EF3\r"
             self.serial.write(serial_message.encode())
             #Enables static position maintenance and end of move correction
+
+            serial_message = "ED50\r"
+            self.serial.write(serial_message.encode())
+            #
+            """
             serial_message = "EP0\r"
             self.serial.write(serial_message.encode())
             #For example, if the encoder it at 4500 counts, and you would like to refer to this position

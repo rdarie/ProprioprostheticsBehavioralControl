@@ -54,6 +54,7 @@ dist/
 # Repo specific files
 .waveLocation
 .dataAnalysisLocation
+Resources/
 go_tone.wav
 good_tone.wav
 bad_tone.wav
