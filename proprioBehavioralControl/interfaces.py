@@ -138,7 +138,7 @@ class sparkfunRemoteInterface(object):
 class motorInterface(object):
     # Configure the serial port connection the the Si3540 motor driver
     def __init__(self, serialPortName = '/dev/ttyUSB0',
-        debugging = False, velocity = 3, acceleration = 30,
+        debugging = False, velocity = 2, acceleration = 30,
         deceleration = 30, useEncoder = False):
 
         try:
