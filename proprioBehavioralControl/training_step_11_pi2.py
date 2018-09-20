@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Training Step 10
+Training Step 11
 ========
 The "Go" tone goes off.
 Buttons light up.
@@ -90,7 +90,7 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = False, velocity = 5.3, acceleration = 250, deceleration = 250, useEncoder = False)
+motor = ifaces.motorInterface(debugging = False, velocity = 2, acceleration = 250, deceleration = 250, useEncoder = False)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
 
@@ -162,18 +162,22 @@ SM.hardReward = .5
 SM.jackpotReward = 1
 SM.jackpot = False
 
+# advance motor to starting position
+motor.step_size = 4.5e4
+motor.backward()
+motor.set_home()
 # Set up throw distances
 # import numpy as np
 nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 stimDistance = 3
-magnitudes = np.linspace(1,7,nSteps) * 1e4
+magnitudes = np.linspace(1,8,nSteps) * 1e4
 sets = {
-    'small' : [(midStep, nSteps - i - 1) for i in range(5)],
-    'big' : [(midStep, i) for i in range(4)]
+    'small' : [(midStep, nSteps - i - 1) for i in range(1)],
+    'big' : [(midStep, i) for i in range(1)]
     }
-SM.jackpotSets = [(4,3), (4,4), (4,5)]
+SM.jackpotSets = [(4,0), (4,4), (4,8)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
@@ -268,6 +272,9 @@ except:
     pass
 
 finally:
+    motor.step_size = 4.5e4
+    motor.forward()
+    motor.set_home()
     if logToWeb:
         # mount the shared directory
         subprocess.check_output('sudo mount -a', shell = True)
