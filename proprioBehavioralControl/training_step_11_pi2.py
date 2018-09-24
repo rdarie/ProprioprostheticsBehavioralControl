@@ -157,13 +157,13 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.easyReward = .25
-SM.hardReward = .5
+SM.easyReward = .5
+SM.hardReward = 1
 SM.jackpotReward = 1
 SM.jackpot = False
 
 # advance motor to starting position
-motor.step_size = 4.5e4
+motor.step_size = .5e4
 motor.backward()
 motor.set_home()
 # Set up throw distances
@@ -172,7 +172,7 @@ nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 stimDistance = 3
-magnitudes = np.linspace(1,8,nSteps) * 1e4
+magnitudes = np.linspace(1,7,nSteps) * 1e4
 sets = {
     'small' : [(midStep, nSteps - i - 1) for i in range(1)],
     'big' : [(midStep, i) for i in range(1)]
@@ -272,7 +272,7 @@ except:
     pass
 
 finally:
-    motor.step_size = 4.5e4
+    motor.step_size = .5e4
     motor.forward()
     motor.set_home()
     if logToWeb:
