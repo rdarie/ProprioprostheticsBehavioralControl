@@ -90,7 +90,8 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = False, velocity = 2, acceleration = 250, deceleration = 250, useEncoder = False)
+motor = ifaces.motorInterface(debugging = False, velocity = 2,
+    acceleration = 250, deceleration = 250, useEncoder = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
 
@@ -98,12 +99,12 @@ speaker = ifaces.speakerInterface(soundPaths = soundPaths,
 State Machine
 """
 # Setup IO Pins
-butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
+butPin = GPIO_Input(pins = [4, 17], labels = ['left', 'right'],
     triggers = [GPIO.FALLING, GPIO.FALLING],
     levels = [GPIO.HIGH, GPIO.HIGH], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[16,6,12,25], labels=['redLED', 'greenLED', 'bothLED', 'Reward'],
+juicePin = GPIO_Output(pins=[16,6,12,25], labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
 
@@ -163,12 +164,12 @@ SM.jackpotReward = 1
 SM.jackpot = False
 
 # advance motor to starting position
-motor.step_size = .5e4
+motor.step_size = 1e4
 motor.backward()
 motor.set_home()
 # Set up throw distances
 # import numpy as np
-nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
+nSteps  = 7 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 stimDistance = 3
@@ -177,7 +178,7 @@ sets = {
     'small' : [(midStep, nSteps - i - 1) for i in range(1)],
     'big' : [(midStep, i) for i in range(1)]
     }
-SM.jackpotSets = [(4,0), (4,4), (4,8)]
+SM.jackpotSets = [(4,0), (4,4), (4,6)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
@@ -193,7 +194,7 @@ SM.initBlocType = {
     'category' : 'big',
     'direction' : 'forward'
     }
-SM.correctButton = 'green'
+SM.correctButton = 'left'
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
@@ -272,7 +273,7 @@ except:
     pass
 
 finally:
-    motor.step_size = .5e4
+    motor.step_size = 1e4
     motor.forward()
     motor.set_home()
     if logToWeb:
@@ -292,7 +293,7 @@ finally:
             '--outputFileName \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
-    print('Ending Execution of Training_step_9.py')
+    print('Ending Execution of Training_step_11.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
