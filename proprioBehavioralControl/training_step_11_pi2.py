@@ -41,8 +41,9 @@ GPIO.output(5,True) ## Turn on GPIO pin 5
 sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--trialLength', default = '1')
-parser.add_argument('--trialTimeout', default = '3')
+parser.add_argument('--responseWindow', default = '1')
+parser.add_argument('--interTrialInterval', default = '3')
+parser.add_argument('--wrongTimeout', default = '5')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
@@ -52,8 +53,9 @@ parser.add_argument('--volume', default = '0.08')
 
 args = parser.parse_args()
 
-argTrialLength = args.trialLength
-argTrialTimeout = args.trialTimeout
+argTrialLength = args.interTrialInterval
+argTrialTimeout = args.responseWindow
+argWrongTimeout = args.wrongTimeout
 argEnableSound = True if args.enableSound == 'True' else False
 argPlayWelcomeTone = args.playWelcomeTone
 argVolume = float(args.volume)
@@ -90,7 +92,7 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = False, velocity = 2,
+motor = ifaces.motorInterface(debugging = False, velocity = 2.5,
     acceleration = 250, deceleration = 250, useEncoder = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
@@ -120,7 +122,7 @@ SM = State_Machine()
 # Add attributes to the state machine
 SM.startEnable = False
 SM.nominalTrialLength = float(argTrialLength)
-SM.wrongTimeout = 5
+SM.wrongTimeout = float(argWrongTimeout)
 SM.trialLength = SM.nominalTrialLength
 SM.nextEnableTime = 0
 
@@ -164,7 +166,7 @@ SM.jackpotReward = 1
 SM.jackpot = False
 
 # advance motor to starting position
-motor.step_size = 1e4
+motor.step_size = 4.5e4
 motor.backward()
 motor.set_home()
 # Set up throw distances
@@ -175,10 +177,10 @@ midStep = int((nSteps - 1) / 2)
 stimDistance = 3
 magnitudes = np.linspace(1,7,nSteps) * 1e4
 sets = {
-    'small' : [(midStep, nSteps - i - 1) for i in range(1)],
-    'big' : [(midStep, i) for i in range(1)]
+    'small' : [(midStep, nSteps - i - 1) for i in range(3)],
+    'big' : [(midStep, i) for i in range(3)]
     }
-SM.jackpotSets = [(4,0), (4,4), (4,6)]
+SM.jackpotSets = [(3,2), (3,3), (3,4)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
@@ -273,7 +275,7 @@ except:
     pass
 
 finally:
-    motor.step_size = 1e4
+    motor.step_size = 4.5e4
     motor.forward()
     motor.set_home()
     if logToWeb:
