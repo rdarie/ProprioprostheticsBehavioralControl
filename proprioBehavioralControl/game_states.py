@@ -954,7 +954,7 @@ class variableGood(gameState):
         if self.printStatements:
             print('Good job!')
         parent.trialLength = parent.nominalTrialLength
-        if bool(random.getrandbits(1)):
+        if random.uniform(0,1) > 0.2:
             parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]

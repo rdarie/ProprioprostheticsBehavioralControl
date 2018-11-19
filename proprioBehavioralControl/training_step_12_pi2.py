@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Training Step 10
+Training Step 11
 ========
 The "Go" tone goes off.
 Buttons light up.
@@ -41,8 +41,9 @@ GPIO.output(5,True) ## Turn on GPIO pin 5
 sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--trialLength', default = '1')
-parser.add_argument('--trialTimeout', default = '3')
+parser.add_argument('--responseWindow', default = '1')
+parser.add_argument('--interTrialInterval', default = '3')
+parser.add_argument('--wrongTimeout', default = '5')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
@@ -52,8 +53,9 @@ parser.add_argument('--volume', default = '0.08')
 
 args = parser.parse_args()
 
-argTrialLength = args.trialLength
-argTrialTimeout = args.trialTimeout
+argTrialLength = args.interTrialInterval
+argTrialTimeout = args.responseWindow
+argWrongTimeout = args.wrongTimeout
 argEnableSound = True if args.enableSound == 'True' else False
 argPlayWelcomeTone = args.playWelcomeTone
 argVolume = float(args.volume)
@@ -90,7 +92,8 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = False, velocity = 5.3, acceleration = 250, deceleration = 250, useEncoder = False)
+motor = ifaces.motorInterface(debugging = False, velocity = 2.5,
+    acceleration = 250, deceleration = 250, useEncoder = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
 
@@ -98,12 +101,12 @@ speaker = ifaces.speakerInterface(soundPaths = soundPaths,
 State Machine
 """
 # Setup IO Pins
-butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
+butPin = GPIO_Input(pins = [4, 17], labels = ['left', 'right'],
     triggers = [GPIO.FALLING, GPIO.FALLING],
     levels = [GPIO.HIGH, GPIO.HIGH], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[16,6,12,25], labels=['redLED', 'greenLED', 'bothLED', 'Reward'],
+juicePin = GPIO_Output(pins=[16,6,12,25], labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
 
@@ -119,7 +122,7 @@ SM = State_Machine()
 # Add attributes to the state machine
 SM.startEnable = False
 SM.nominalTrialLength = float(argTrialLength)
-SM.wrongTimeout = 5
+SM.wrongTimeout = float(argWrongTimeout)
 SM.trialLength = SM.nominalTrialLength
 SM.nextEnableTime = 0
 
@@ -157,19 +160,27 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.easyReward = .5
-SM.hardReward = 1
-SM.jackpotReward = 2
-SM.jackpot = False
+SM.easyReward = 1
+SM.hardReward = 2
+SM.jackpotReward = 3
+SM.jackpot = True
 
+# advance motor to starting position
+motor.step_size = 4.5e4
+motor.backward()
+motor.set_home()
 # Set up throw distances
+# import numpy as np
 nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
-stimDistance = 3
-magnitudes = np.linspace(1,13,nSteps) * 1e4
-sets = {'big': [(4, 0), (8, 4), (4, 2)], 'small': [(4, 8), (0, 4), (4, 6)]}
-SM.jackpotSets = [(8,4), (0,4)]
+
+magnitudes = np.linspace(1,7,nSteps) * 1e4
+sets = {
+    'small' : [(4,0),(4,1)],
+    'big' : [(4,7)(4,6)]
+    }
+SM.jackpotSets = [(4,2), (4,3), (4,4)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
@@ -185,13 +196,13 @@ SM.initBlocType = {
     'category' : 'big',
     'direction' : 'forward'
     }
-SM.correctButton = 'green'
+SM.correctButton = 'left'
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
-    SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
+    SM.serverFolder = '/media/browndfs/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
-        [sessionTime, 'Button Pressing Step 12', '', '',
+        [sessionTime, 'Button Pressing Step 11', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
             SM.trialLength, SM.trialTimeout, argVolume, SM.easyReward, SM.hardReward,
             SM.smallBlocLength, SM.bigBlocLength]
@@ -213,11 +224,10 @@ SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
 
 SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
     'waitHard'], SM, 'waitHard', logFile = thisLog, printStatements = debugging))
-
 SM.add_state(wait_for_correct_button_timed(['good', 'bad',
     'waitEasy'], SM, 'waitEasy', logFile = thisLog, printStatements = debugging))
 
-SM.add_state(good(['post_trial'], SM, 'good', logFile = thisLog, printStatements = debugging))
+SM.add_state(variableGood(['post_trial'], SM, 'good', logFile = thisLog, printStatements = debugging))
 SM.add_state(bad(['post_trial'], SM, 'bad', logFile = thisLog, printStatements = debugging))
 SM.add_state(post_trial(['clear_input_queue_2'], SM, 'post_trial',
     logFile = thisLog, printStatements = debugging))
@@ -257,7 +267,6 @@ remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
     default = lambda: None)
 
 welcomeChime.play()
-#pdb.set_trace()
 try:
     remoteListener.run()
 
@@ -265,6 +274,9 @@ except:
     pass
 
 finally:
+    motor.step_size = 4.5e4
+    motor.forward()
+    motor.set_home()
     if logToWeb:
         # mount the shared directory
         subprocess.check_output('sudo mount -a', shell = True)
@@ -275,14 +287,14 @@ finally:
         # move from source to destiantion
         shutil.move(src,dst)
 
-        scriptPath = dataAnalysisPath + '/dataAnalysis/behavioral/evaluatePerformance.py'
+        scriptPath = dataAnalysisPath + '/dataAnalysis/behavioral/evaluatePerformance2.py'
         subprocess.check_output('python3 ' + scriptPath +
             ' --file '  + '\"' + SM.logFileName.split('/')[-1] + '\" ' +
             ' --folder \"' +  SM.serverFolder + '\" ' +
             '--outputFileName \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
-    print('Ending Execution of Training_step_9.py')
+    print('Ending Execution of Training_step_11.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
