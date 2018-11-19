@@ -817,11 +817,9 @@ class wait_for_correct_button_timed_uncued(gameState):
     def operation(self, parent):
 
         lighting = True
-
         if self.firstVisit:
             if self.printStatements:
                 print('Started Timed Button')
-
 
             self.logEvent('goHard', None)
             #obviate the need to stop by trial_start
@@ -841,6 +839,7 @@ class wait_for_correct_button_timed_uncued(gameState):
             if parent.hardReward is not None:
                 parent.juicePin.instructions =\
                     ['flip', 'flip', 'flip', ('pulse', parent.hardReward)]
+
         # Read from inbox
         event_label = parent.request_last_touch()
 

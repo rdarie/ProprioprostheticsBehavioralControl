@@ -171,16 +171,16 @@ motor.backward()
 motor.set_home()
 # Set up throw distances
 # import numpy as np
-nSteps  = 7 # must be odd so that there is an equal # of A > B and B < A trials
+nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
-stimDistance = 3
+
 magnitudes = np.linspace(1,7,nSteps) * 1e4
 sets = {
-    'small' : [(midStep, nSteps - i - 1) for i in range(3)],
-    'big' : [(midStep, i) for i in range(3)]
+    'small' : [(4,0),(4,1)],
+    'big' : [(4,7)(4,6)]
     }
-SM.jackpotSets = [(3,2), (3,3), (3,4)]
+SM.jackpotSets = [(4,2), (4,3), (4,4)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
@@ -224,7 +224,6 @@ SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
 
 SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
     'waitHard'], SM, 'waitHard', logFile = thisLog, printStatements = debugging))
-
 SM.add_state(wait_for_correct_button_timed(['good', 'bad',
     'waitEasy'], SM, 'waitEasy', logFile = thisLog, printStatements = debugging))
 
@@ -288,7 +287,7 @@ finally:
         # move from source to destiantion
         shutil.move(src,dst)
 
-        scriptPath = dataAnalysisPath + '/dataAnalysis/behavioral/evaluatePerformance.py'
+        scriptPath = dataAnalysisPath + '/dataAnalysis/behavioral/evaluatePerformance2.py'
         subprocess.check_output('python3 ' + scriptPath +
             ' --file '  + '\"' + SM.logFileName.split('/')[-1] + '\" ' +
             ' --folder \"' +  SM.serverFolder + '\" ' +
