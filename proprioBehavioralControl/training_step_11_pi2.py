@@ -166,6 +166,7 @@ SM.jackpotReward = 3
 SM.jackpot = True
 
 # advance motor to starting position
+
 motor.step_size = 4.5e4
 motor.backward()
 motor.set_home()
@@ -180,6 +181,7 @@ sets = {
     'small' : [(midStep, nSteps - i - 1) for i in range(3)],
     'big' : [(midStep, i) for i in range(3)]
     }
+
 SM.jackpotSets = [(3,2), (3,3), (3,4)]
 SM.magnitudes = magnitudes
 SM.sets = sets
