@@ -41,8 +41,9 @@ GPIO.output(5,True) ## Turn on GPIO pin 5
 sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--trialLength', default = '1')
-parser.add_argument('--trialTimeout', default = '3')
+parser.add_argument('--responseWindow', default = '1')
+parser.add_argument('--interTrialInterval', default = '3')
+parser.add_argument('--wrongTimeout', default = '5')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
@@ -52,8 +53,9 @@ parser.add_argument('--volume', default = '0.08')
 
 args = parser.parse_args()
 
-argTrialLength = args.trialLength
-argTrialTimeout = args.trialTimeout
+argTrialLength = args.interTrialInterval
+argTrialTimeout = args.responseWindow
+argWrongTimeout = args.wrongTimeout
 argEnableSound = True if args.enableSound == 'True' else False
 argPlayWelcomeTone = args.playWelcomeTone
 argVolume = float(args.volume)
@@ -90,7 +92,8 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = False, velocity = 2, acceleration = 250, deceleration = 250, useEncoder = False)
+motor = ifaces.motorInterface(debugging = False, velocity = 2.5,
+    acceleration = 250, deceleration = 250, useEncoder = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
 
@@ -98,12 +101,12 @@ speaker = ifaces.speakerInterface(soundPaths = soundPaths,
 State Machine
 """
 # Setup IO Pins
-butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
+butPin = GPIO_Input(pins = [4, 17], labels = ['left', 'right'],
     triggers = [GPIO.FALLING, GPIO.FALLING],
     levels = [GPIO.HIGH, GPIO.HIGH], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[16,6,12,25], labels=['redLED', 'greenLED', 'bothLED', 'Reward'],
+juicePin = GPIO_Output(pins=[16,6,12,25], labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
 
@@ -119,7 +122,7 @@ SM = State_Machine()
 # Add attributes to the state machine
 SM.startEnable = False
 SM.nominalTrialLength = float(argTrialLength)
-SM.wrongTimeout = 5
+SM.wrongTimeout = float(argWrongTimeout)
 SM.trialLength = SM.nominalTrialLength
 SM.nextEnableTime = 0
 
@@ -157,27 +160,27 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.easyReward = .5
-SM.hardReward = 1
-SM.jackpotReward = 1
-SM.jackpot = False
+SM.easyReward = 1
+SM.hardReward = 2
+SM.jackpotReward = 3
+SM.jackpot = True
 
 # advance motor to starting position
-motor.step_size = .5e4
+motor.step_size = 4.5e4
 motor.backward()
 motor.set_home()
 # Set up throw distances
 # import numpy as np
-nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
+nSteps  = 7 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 stimDistance = 3
 magnitudes = np.linspace(1,7,nSteps) * 1e4
 sets = {
-    'small' : [(midStep, nSteps - i - 1) for i in range(1)],
-    'big' : [(midStep, i) for i in range(1)]
+    'small' : [(midStep, nSteps - i - 1) for i in range(3)],
+    'big' : [(midStep, i) for i in range(3)]
     }
-SM.jackpotSets = [(4,0), (4,4), (4,8)]
+SM.jackpotSets = [(3,2), (3,3), (3,4)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
@@ -193,7 +196,7 @@ SM.initBlocType = {
     'category' : 'big',
     'direction' : 'forward'
     }
-SM.correctButton = 'green'
+SM.correctButton = 'left'
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
@@ -272,7 +275,7 @@ except:
     pass
 
 finally:
-    motor.step_size = .5e4
+    motor.step_size = 4.5e4
     motor.forward()
     motor.set_home()
     if logToWeb:
@@ -292,7 +295,7 @@ finally:
             '--outputFileName \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
-    print('Ending Execution of Training_step_9.py')
+    print('Ending Execution of Training_step_11.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO

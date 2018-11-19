@@ -316,7 +316,9 @@ class turnPedalCompound(gameState):
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[0]], 1e3)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
-        self.payload = {"Stimulus ID Pair": magnitudeIndex, 'firstThrow': 0, 'secondThrow' : 0, 'movementOnset' : time.time(), 'movementOff' : 0, 'vibrationOn' : False}
+        self.payload = {"Stimulus ID Pair": magnitudeIndex, 'firstThrow': 0,
+            'secondThrow' : 0, 'movementOnset' : time.time(),
+            'movementOff' : 0, 'vibrationOn' : False}
 
         # if there's a pedal with a vibromotor, actuate the vibromotor
         if self.parent.smartPedal is not None:
@@ -379,9 +381,9 @@ class turnPedalCompound(gameState):
         parent.magnitudeQueue.append(parent.motor.step_size)
 
         #Obviate the need to stop by the set_correct state
-        parent.correctButton = 'red'\
+        parent.correctButton = 'left'\
             if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
-            else 'green'
+            else 'right'
 
         # empty event queue and start monitoring for aberrant button presses
         if parent.inputPin.last_data is not None:
@@ -548,9 +550,9 @@ class turnPedalPhantomCompound(gameState):
         parent.magnitudeQueue.append(parent.motor.step_size)
 
         #Obviate the need to stop by the set_correct state
-        parent.correctButton = 'red'\
+        parent.correctButton = 'left'\
             if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
-            else 'green'
+            else 'right'
 
         # empty event queue and start monitoring for aberrant button presses
         if parent.inputPin.last_data is not None:
@@ -623,16 +625,16 @@ class trial_start(gameState):
 class chooseNextTrial(gameState):
 
     def operation(self, parent):
-        bins = [0, 1/8, 1]
+        bins = [0, 1/32, 1]
         draw = random.uniform(0,1)
         return self.nextState[int(np.digitize(draw, bins) - 1)]
 
 class set_correct(gameState):
 
     def operation(self, parent):
-        parent.correctButton = 'red'\
+        parent.correctButton = 'left'\
             if parent.magnitudeQueue[0] < parent.magnitudeQueue[1]\
-            else 'green'
+            else 'right'
 
         if self.printStatements:
             print('  ')
@@ -674,8 +676,8 @@ class wait_for_any_button_timed(gameState):
             if self.printStatements:
                 print('Started Timed Button')
             # Turn LED's On
-            parent.outbox.put('redLED')
-            parent.outbox.put('greenLED')
+            parent.outbox.put('leftLED')
+            parent.outbox.put('rightLED')
 
             self.firstVisit = False
             self.enableLog = False
@@ -698,8 +700,8 @@ class wait_for_any_button_timed(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
-            parent.outbox.put('redLED')
-            parent.outbox.put('greenLED')
+            parent.outbox.put('leftLED')
+            parent.outbox.put('rightLED')
             if self.printStatements:
                 print(' ')
             return self.nextState[0] # usually the good state
@@ -712,8 +714,8 @@ class wait_for_any_button_timed(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
-            parent.outbox.put('redLED')
-            parent.outbox.put('greenLED')
+            parent.outbox.put('leftLED')
+            parent.outbox.put('rightLED')
 
             if self.printStatements:
                 print(' ')
@@ -740,7 +742,7 @@ class wait_for_correct_button_timed(gameState):
             #obviate the need to stop by trial_start
             parent.speaker.play_tone('Go')
             # Turn LED's On
-            parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
+            parent.outbox.put('leftLED' if parent.correctButton == 'left' else 'rightLED')
 
             self.firstVisit = False
             self.enableLog = False
@@ -762,14 +764,14 @@ class wait_for_correct_button_timed(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
-            parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
+            parent.outbox.put('leftLED' if parent.correctButton == 'left' else 'rightLED')
 
             if self.printStatements:
                 print(' ')
 
-            if event_label == 'red':
+            if event_label == 'right':
                 parent.smallTally = parent.smallTally * 0.9 + 1
-            elif  event_label == 'green':
+            elif  event_label == 'left':
                 parent.bigTally = parent.bigTally * 0.9 + 1
 
             if event_label == parent.correctButton:
@@ -795,7 +797,7 @@ class wait_for_correct_button_timed(gameState):
             self.enableLog = True
             self.firstVisit = True
             self.timedOut = False
-            parent.outbox.put('redLED' if parent.correctButton == 'red' else 'greenLED')
+            parent.outbox.put('leftLED' if parent.correctButton == 'left' else 'rightLED')
 
             if self.printStatements:
                 print(' ')
@@ -826,9 +828,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             parent.speaker.play_tone('Go')
             # Turn LED's On
             if lighting:
-                #parent.outbox.put(['redLED','greenLED'])
+                #parent.outbox.put(['leftLED','rightLED'])
                 parent.outbox.put('bothLED')
-                #parent.outbox.put('greenLED')
+                #parent.outbox.put('rightLED')
 
             self.firstVisit = False
             self.enableLog = False
@@ -852,16 +854,16 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.timedOut = False
 
             if lighting:
-                #parent.outbox.put(['redLED','greenLED'])
+                #parent.outbox.put(['leftLED','rightLED'])
                 parent.outbox.put('bothLED')
-                #parent.outbox.put('greenLED')
+                #parent.outbox.put('rightLED')
 
             if self.printStatements:
                 print(' ')
 
-            if event_label == 'red':
+            if event_label == 'right':
                 parent.smallTally = 0.9 * parent.smallTally + 1
-            elif  event_label == 'green':
+            elif  event_label == 'left':
                 parent.bigTally = 0.9 * parent.bigTally + 1
 
             if event_label == parent.correctButton:
@@ -890,9 +892,9 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.firstVisit = True
             self.timedOut = False
             if lighting:
-                #parent.outbox.put(['redLED','greenLED'])
+                #parent.outbox.put(['leftLED','rightLED'])
                 parent.outbox.put('bothLED')
-                #parent.outbox.put('greenLED')
+                #parent.outbox.put('rightLED')
 
             if self.printStatements:
                 print(' ')
