@@ -200,7 +200,7 @@ SM.correctButton = 'left'
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
-    SM.serverFolder = '/media/browndfs/ENG_Neuromotion_Shared/group/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
+    SM.serverFolder = '/media/browndfs/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
         [sessionTime, 'Button Pressing Step 11', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
