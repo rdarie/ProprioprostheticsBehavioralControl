@@ -160,10 +160,10 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.easyReward = .5
-SM.hardReward = 1
-SM.jackpotReward = 1
-SM.jackpot = False
+SM.easyReward = 1
+SM.hardReward = 2
+SM.jackpotReward = 3
+SM.jackpot = True
 
 # advance motor to starting position
 motor.step_size = 4.5e4
