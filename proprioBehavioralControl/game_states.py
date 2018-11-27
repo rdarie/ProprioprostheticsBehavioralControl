@@ -4,10 +4,10 @@ from helperFunctions import overRideAdder
 from collections import OrderedDict
 
 nominalBlockLength  = 2
-def waitUntilDoneMoving(parentSM):
+def waitUntilDoneMoving(motor):
     doneMoving = False
     while not doneMoving:
-        curStatus = parentSM.motor.get_status()
+        curStatus = motor.get_status()
         #print('Current Status = %s' % curStatus)
         if 'R' in curStatus:
             doneMoving = True
@@ -229,6 +229,10 @@ class turnPedalCompound(gameState):
                 self.parent.smartPedal.motorState.write_value([0])
                 """
 
+        if parent.dummyMotor:
+            parent.dummyMotor.step_size = 270e2
+            parent.dummyMotor.forward()
+            parent.dummyMotor.go_home()
 
         if direction == 'forward':
             parent.motor.forward()
@@ -244,7 +248,7 @@ class turnPedalCompound(gameState):
         parent.magnitudeQueue.append(parent.motor.step_size)
 
         #play movement division tone
-        waitUntilDoneMoving(parent)
+        waitUntilDoneMoving(parent.motor)
         parent.speaker.play_tone('Divider')
         #wait between movements
         parent.motor.serial.write("WT0.25\r".encode())
@@ -302,6 +306,8 @@ class turnPedalCompound(gameState):
             if pedalRunning:
                 self.parent.smartPedal.motorState.write_value([0])
                 pedalRunning = False
+        #wait for the dummy movement to be over
+        waitUntilDoneMoving(parent.dummyMotor)
 
         event_label = parent.request_last_touch()
         if event_label and enforceWait:

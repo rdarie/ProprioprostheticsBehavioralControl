@@ -91,7 +91,9 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = True, velocity = 3,
+motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = False, velocity = 3,
+    acceleration = 250, deceleration = 250, useEncoder = True)
+dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = True, velocity = 3,
     acceleration = 250, deceleration = 250, useEncoder = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
@@ -133,6 +135,7 @@ SM.nextButtonTimeout = 0
 
 SM.speaker = speaker
 SM.motor = motor
+SM.dummyMotor = dummyMotor
 SM.inputPin = butPin
 
 SM.juicePin = juicePin
