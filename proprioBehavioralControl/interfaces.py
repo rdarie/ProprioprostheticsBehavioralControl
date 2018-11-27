@@ -193,7 +193,7 @@ class motorInterface(object):
             serial_message = "EF3\r"
             self.serial.write(serial_message.encode())
             #Enables static position maintenance and end of move correction
-            
+
             serial_message = "EP0\r"
             self.serial.write(serial_message.encode())
             #For example, if the encoder it at 4500 counts, and you would like to refer to this position
@@ -234,14 +234,14 @@ class motorInterface(object):
         if self.debugging:
             print("going clockwise")
 
-        serial_message = "DI"+str(int(self.step_size))+"\r"
+        serial_message = "FL"+str(int(self.step_size))+"\r"
 
         self.serial.write(serial_message.encode())
 
         if self.debugging:
             print("sent message: " + serial_message)
 
-        self.serial.write("FL\r".encode())
+        #self.serial.write("FL\r".encode())
 
         self.current_position += self.step_size
 
@@ -252,10 +252,10 @@ class motorInterface(object):
         if self.debugging:
             print("going counter-clockwise")
 
-        serial_message = "DI"+str(-int(self.step_size))+"\r"
+        serial_message = "FL"+str(-int(self.step_size))+"\r"
 
         self.serial.write(serial_message.encode())
-        self.serial.write("FL\r".encode())
+        #self.serial.write("FL\r".encode())
 
         self.current_position -= self.step_size
 
