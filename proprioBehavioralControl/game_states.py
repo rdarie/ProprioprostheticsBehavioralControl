@@ -3,7 +3,7 @@ import numpy as np
 from helperFunctions import overRideAdder
 from collections import OrderedDict
 
-nominalBlockLength  = 1
+nominalBlockLength  = 2
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None, printStatements = False):
@@ -273,7 +273,7 @@ class turnPedalCompound(gameState):
             bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
             # exagerate differences
             bias = smallProp - 0.5 # positive if biased towards the small, negative otherwise
-            smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
+            smallProp = 0.5 - 3 * bias # if biased towards small, give fewer small draws
             #bounds
             smallProp = 0 if smallProp < 0 else smallProp
             smallProp = 1 if smallProp > 1 else smallProp
@@ -362,7 +362,7 @@ class turnPedalCompound(gameState):
         parent.speaker.play_tone('Divider')
 
         #wait between movements
-        parent.motor.serial.write("WT0.5\r".encode())
+        parent.motor.serial.write("WT1\r".encode())
 
         ## Second Movement
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 1e3)
@@ -817,11 +817,9 @@ class wait_for_correct_button_timed_uncued(gameState):
     def operation(self, parent):
 
         lighting = True
-
         if self.firstVisit:
             if self.printStatements:
                 print('Started Timed Button')
-
 
             self.logEvent('goHard', None)
             #obviate the need to stop by trial_start
@@ -841,6 +839,7 @@ class wait_for_correct_button_timed_uncued(gameState):
             if parent.hardReward is not None:
                 parent.juicePin.instructions =\
                     ['flip', 'flip', 'flip', ('pulse', parent.hardReward)]
+
         # Read from inbox
         event_label = parent.request_last_touch()
 
@@ -955,7 +954,7 @@ class variableGood(gameState):
         if self.printStatements:
             print('Good job!')
         parent.trialLength = parent.nominalTrialLength
-        if bool(random.getrandbits(1)):
+        if random.uniform(0,1) > 0.2:
             parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]
