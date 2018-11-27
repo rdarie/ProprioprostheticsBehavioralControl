@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 '''
 Training Step 12
-========
 The "Go" tone goes off.
 Buttons light up.
 
