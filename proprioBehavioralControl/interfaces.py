@@ -166,17 +166,17 @@ class motorInterface(object):
                 )
 
         self.current_position = 0
-        self.step_size = 30e3
+        self.step_size = 5e2
         self.serialPortName = serialPortName
         self.serial = ser
 
-        self.current = 9.7
+        self.current = 5
         serial_message = "CC" + str(self.current) + "\r"
         self.serial.write(serial_message.encode())
-        self.idle_current = 5
+        self.idle_current = 4
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
-        serial_message = "MR10\r"
+        serial_message = "EG7364\r"
         self.serial.write(serial_message.encode())
         #Sets, or requests microstep resolution. The MR command should be used before setting the accel and decel rates
         #and speed, because a change in motor resolution will corrupt these settings. The MR command also
@@ -185,25 +185,15 @@ class motorInterface(object):
 
         self.useEncoder = useEncoder
         if useEncoder:
-            """
             serial_message = "ER8000\r"
             self.serial.write(serial_message.encode())
             #On drives supporting encoder feedback, the ER command defines the encoder ratio. This number is
             #the motor resolution, in steps/rev, divided by the encoder resolution, in counts/rev.
 
-            serial_message = "ED50\r"
-            self.serial.write(serial_message.encode())
-            #On drives that have the encoder feedback option, this defines the
-            #size of the “in position” region. i.e. feedback is engaged if the
-            #actual position is not within ED encoder counts, until it is.
-            serial_message = "EF3\r"
+            serial_message = "EF0\r"
             self.serial.write(serial_message.encode())
             #Enables static position maintenance and end of move correction
 
-            serial_message = "ED50\r"
-            self.serial.write(serial_message.encode())
-            #
-            """
             serial_message = "EP0\r"
             self.serial.write(serial_message.encode())
             #For example, if the encoder it at 4500 counts, and you would like to refer to this position
@@ -223,6 +213,14 @@ class motorInterface(object):
         self.deceleration = deceleration #move speed in rev/sec^2.
         serial_message = "DE" + str(self.deceleration) + "\r"
         self.serial.write(serial_message.encode())
+
+        serial_message = "SA\r"
+        self.serial.write(serial_message.encode())
+        #Saves selected command parameters to non-volatile memory. This command
+        # is useful for setting up the drive configuration with the desired
+        # defaults at power-up. (See which commands are non-volatile in the
+        #CommandSummary section.)
+
 
         # Initialize motor
 

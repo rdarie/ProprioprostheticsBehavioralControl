@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 '''
-Training Step 11
-========
+Training Step 12
 The "Go" tone goes off.
 Buttons light up.
 
@@ -30,7 +29,7 @@ import interfaces as ifaces
 from helperFunctions import *
 import numpy as np
 
-import argparse, os, os.path, shutil, subprocess
+import argparse, os, os.path, shutil, subprocess, time
 
 # Power indicator
 GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 5 to OUT
@@ -92,7 +91,9 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = False, velocity = 2.5,
+motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = False, velocity = 3,
+    acceleration = 250, deceleration = 250, useEncoder = True)
+dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = True, velocity = 3,
     acceleration = 250, deceleration = 250, useEncoder = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
@@ -134,6 +135,7 @@ SM.nextButtonTimeout = 0
 
 SM.speaker = speaker
 SM.motor = motor
+SM.dummyMotor = dummyMotor
 SM.inputPin = butPin
 
 SM.juicePin = juicePin
@@ -166,8 +168,9 @@ SM.jackpotReward = 3
 SM.jackpot = True
 
 # advance motor to starting position
-motor.step_size = 4.5e4
+motor.step_size = 135e2
 motor.backward()
+time.sleep(2)
 motor.set_home()
 # Set up throw distances
 # import numpy as np
@@ -175,12 +178,13 @@ nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 
-magnitudes = np.linspace(1,7,nSteps) * 1e4
+#units of hundredth of a degree
+magnitudes = np.linspace(10,170,nSteps) * 1e2
 sets = {
-    'small' : [(4,0),(4,1)],
-    'big' : [(4,7)(4,6)]
+    'small' : [(4,0),(4,1),(4,0),(4,1),(4,4)],
+    'big' : [(4,7),(4,6),(4,7),(4,6),(4,4)]
     }
-SM.jackpotSets = [(4,2), (4,3), (4,4)]
+SM.jackpotSets = [(4,4)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
@@ -274,12 +278,10 @@ except:
     pass
 
 finally:
-    motor.step_size = 4.5e4
+    motor.step_size = 135e2
     motor.forward()
     motor.set_home()
     if logToWeb:
-        # mount the shared directory
-        subprocess.check_output('sudo mount -a', shell = True)
         # this is the path to the the source file
         src = SM.logFileName
         # this is the path to the the destiantion file
@@ -294,7 +296,7 @@ finally:
             '--outputFileName \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
-    print('Ending Execution of Training_step_11.py')
+    print('Ending Execution of Training_step_12.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO
