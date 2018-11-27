@@ -211,7 +211,8 @@ class motorInterface(object):
             #from the drive.
 
         self.velocity = velocity #move speed in rev/sec. Range is .025 - 50
-        # note that the worm gearbox is 7.5:1 ratioed
+        # note that the worm gearbox is 15:2 ratioed
+        # note that Pedal Rig 2.0 is 44:9 ratioed
         serial_message = "VE" + str(self.velocity) + "\r"
         self.serial.write(serial_message.encode())
 
