@@ -29,7 +29,7 @@ import interfaces as ifaces
 from helperFunctions import *
 import numpy as np
 
-import argparse, os, os.path, shutil, subprocess
+import argparse, os, os.path, shutil, subprocess, time
 
 # Power indicator
 GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 5 to OUT
@@ -91,7 +91,7 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
-motor = ifaces.motorInterface(debugging = False, velocity = 3,
+motor = ifaces.motorInterface(debugging = True, velocity = 3,
     acceleration = 250, deceleration = 250, useEncoder = True)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
@@ -167,6 +167,7 @@ SM.jackpot = True
 # advance motor to starting position
 motor.step_size = 135e2
 motor.backward()
+time.sleep(2)
 motor.set_home()
 # Set up throw distances
 # import numpy as np

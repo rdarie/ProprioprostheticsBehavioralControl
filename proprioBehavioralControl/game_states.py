@@ -4,6 +4,17 @@ from helperFunctions import overRideAdder
 from collections import OrderedDict
 
 nominalBlockLength  = 2
+def waitUntilDoneMoving(parentSM):
+    doneMoving = False
+    while not doneMoving:
+        curStatus = parentSM.motor.get_status()
+        #print('Current Status = %s' % curStatus)
+        if 'R' in curStatus:
+            doneMoving = True
+            #curStatus = parentSM.motor.get_status()
+            #if 'R' in curStatus:
+            #    doneMoving = True
+    return doneMoving
 
 class gameState(object):
     def __init__(self, nextState, parent, stateName, logFile = None, printStatements = False):
@@ -132,123 +143,6 @@ class strict_fixation(gameState):
             self.firstVisit = False
             return self.nextState[1]
 
-class turnPedalRandom(gameState):
-
-    def operation(self, parent):
-        # should we add time penalties for button presses?
-        enforceWait = True if parent.lastCategory is not None else False
-
-        if parent.lastCategory is None:
-            # this is the first throw
-
-            if parent.blocsRemaining == 0:
-                #start a new block!
-
-                #switch block category
-                category = 'small' if parent.initBlocType['category'] == 'big' else 'big'
-
-                #set the block category for the rest of the block
-                parent.initBlocType['category'] = category
-            else:
-                # repeat the last block type
-                category = parent.initBlocType['category']
-
-            parent.lastCategory = category
-        else:
-            # this is the second throw; do the opposite of the first one
-            category = 'big' if parent.lastCategory == 'small' else 'small'
-            parent.lastCategory = None
-
-        parent.motor.step_size = random.uniform(1e4, 1.5e4) if category == 'small'\
-            else random.uniform(6.5e4, 7e4)
-
-        if parent.lastDirection is None:
-            # this is the first throw
-
-            if parent.blocsRemaining == 0:
-                #start a new block!
-
-                #set the block direction for the rest of the block
-                direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
-                parent.initBlocType['direction'] = direction
-
-                # re-evaluate the block lengths
-                smallProp = (parent.smallTally) / (parent.bigTally + parent.smallTally)
-                bigProp = (parent.bigTally) / (parent.bigTally + parent.smallTally)
-
-                bias = smallProp - bigProp # positive if biased towards the small, negative otherwise
-                smallProp = 0.5 - 2 * bias # if biased towards small, give fewer small draws
-                bigProp = 0.5 + 2 * bias # opposite
-
-                parent.smallBlocLength = round(nominalBlockLength * bigProp) + 1
-                if self.printStatements:
-                    print('\nUpdated mean number of small throws to : %d' % parent.smallBlocLength)
-                parent.bigBlocLength = round(nominalBlockLength * smallProp) + 1
-                if self.printStatements:
-                    print('\nUpdated mean number of big throws to : %d' % parent.bigBlocLength)
-
-                smallDraw = round(random.gauss(parent.smallBlocLength, 1.5))
-                if smallDraw <= 0:
-                    smallDraw = 1
-
-                bigDraw = round(random.gauss(parent.bigBlocLength, 1.5))
-                if bigDraw <= 0:
-                    bigDraw = 1
-
-                parent.blocsRemaining = smallDraw if parent.initBlocType['category'] == 'small' else bigDraw
-
-                if self.printStatements:
-                    print('\nUpdated number of throws for next block to : %d' % parent.blocsRemaining)
-            else:
-                direction = parent.initBlocType['direction']
-                parent.blocsRemaining = parent.blocsRemaining - 1
-
-            parent.lastDirection = direction
-        else:
-            direction = 'forward' if parent.lastDirection == 'forward' else 'backward'
-            parent.lastDirection = None
-
-        if direction == 'forward':
-            parent.motor.forward()
-            if self.logFile:
-                self.payload = parent.motor.step_size
-        else:
-            parent.motor.backward()
-            if self.logFile:
-                self.payload = -parent.motor.step_size
-
-        parent.motor.go_home()
-        parent.magnitudeQueue.append(parent.motor.step_size)
-
-        if parent.motor.useEncoder:
-            doneMoving = False
-            while not doneMoving:
-                curPos = parent.motor.get_encoder_position()
-
-                #print('Current position = %4.4f' % curPos)
-                if curPos is not None:
-                    doneMoving = True
-            sleepTime = 0.05
-        else:
-            sleepTime = 2
-
-        while sleepTime > 0:
-            # Read from inbox
-            event_label = parent.request_last_touch()
-            time.sleep(0.05)
-            sleepTime = sleepTime - 0.05
-
-            if event_label and enforceWait:
-                # if erroneous button press, play bad tone, and penalize with an extra
-                # 500 millisecond wait
-                parent.speaker.play_tone('Wait')
-                sleepTime = sleepTime + 0.5
-                # clear button queue for next iteration
-                if parent.inputPin.last_data is not None:
-                    parent.inputPin.last_data = None
-
-        return self.nextState[0]
-
 class turnPedalCompound(gameState):
 
     def operation(self, parent):
@@ -345,24 +239,15 @@ class turnPedalCompound(gameState):
             if self.logFile:
                 self.payload['firstThrow'] = -parent.motor.step_size
 
+        parent.motor.serial.write("WT0.25\r".encode())
         parent.motor.go_home()
         parent.magnitudeQueue.append(parent.motor.step_size)
 
         #play movement division tone
-        doneMoving = False
-        while not doneMoving:
-            curStatus = parent.motor.get_status()
-            #print('Current Status = %s' % curStatus)
-            #pdb.set_trace()
-            if 'R' in curStatus:
-                curStatus = parent.motor.get_status()
-                if 'R' in curStatus:
-                    doneMoving = True
-
+        waitUntilDoneMoving(parent)
         parent.speaker.play_tone('Divider')
-
         #wait between movements
-        parent.motor.serial.write("WT1\r".encode())
+        parent.motor.serial.write("WT0.25\r".encode())
 
         ## Second Movement
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 5e2)
@@ -377,6 +262,7 @@ class turnPedalCompound(gameState):
             if self.logFile:
                 self.payload['secondThrow'] = -parent.motor.step_size
 
+        parent.motor.serial.write("WT0.25\r".encode())
         parent.motor.go_home()
         parent.magnitudeQueue.append(parent.motor.step_size)
 

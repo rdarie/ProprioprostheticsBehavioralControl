@@ -166,7 +166,7 @@ class motorInterface(object):
                 )
 
         self.current_position = 0
-        self.step_size = 30e3
+        self.step_size = 5e2
         self.serialPortName = serialPortName
         self.serial = ser
 
@@ -190,7 +190,7 @@ class motorInterface(object):
             #On drives supporting encoder feedback, the ER command defines the encoder ratio. This number is
             #the motor resolution, in steps/rev, divided by the encoder resolution, in counts/rev.
 
-            serial_message = "EF3\r"
+            serial_message = "EF0\r"
             self.serial.write(serial_message.encode())
             #Enables static position maintenance and end of move correction
 
@@ -234,14 +234,14 @@ class motorInterface(object):
         if self.debugging:
             print("going clockwise")
 
-        serial_message = "FL"+str(int(self.step_size))+"\r"
+        serial_message = "DI"+str(int(self.step_size))+"\r"
 
         self.serial.write(serial_message.encode())
 
         if self.debugging:
             print("sent message: " + serial_message)
 
-        #self.serial.write("FL\r".encode())
+        self.serial.write("FL\r".encode())
 
         self.current_position += self.step_size
 
@@ -252,10 +252,10 @@ class motorInterface(object):
         if self.debugging:
             print("going counter-clockwise")
 
-        serial_message = "FL"+str(-int(self.step_size))+"\r"
+        serial_message = "DI"+str(-int(self.step_size))+"\r"
 
         self.serial.write(serial_message.encode())
-        #self.serial.write("FL\r".encode())
+        self.serial.write("FL\r".encode())
 
         self.current_position -= self.step_size
 
