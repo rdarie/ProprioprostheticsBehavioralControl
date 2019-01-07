@@ -228,7 +228,7 @@ debugging = True
 # connect state machine states
 SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
     thisLog, printStatements = debugging))
-SM.add_state(turnPedalCompound(['chooseNextTrial'], SM, 'turnPedalCompound',
+SM.add_state(turnPedalCompoundWithStim(['chooseNextTrial'], SM, 'turnPedalCompound',
     logFile = thisLog, printStatements = debugging))
 SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
     logFile = None))
