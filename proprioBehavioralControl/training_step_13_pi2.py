@@ -91,12 +91,22 @@ if playWhiteNoise:
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
+
+# Build an arbiter and a state machine
+arbiter = Arbiter()
+SM = State_Machine()
+
 motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = False, velocity = 2,
-    acceleration = 250, deceleration = 250, useEncoder = True
+    acceleration = 250, deceleration = 250, useEncoder = True)
+
+SM.motor = motor
+
 """
 dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = True, velocity = 3,
     acceleration = 250, deceleration = 250, useEncoder = True)
 """
+SM.dummyMotor = False
+
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
 
@@ -118,10 +128,6 @@ juicePin = GPIO_Output(pins=[16,6,12,25], labels=['leftLED', 'rightLED', 'bothLE
 #GPIO.output(16,False)
 #GPIO.output(12,False)
 
-# Build an arbiter and a state machine
-arbiter = Arbiter()
-SM = State_Machine()
-
 # Add attributes to the state machine
 SM.startEnable = False
 SM.nominalTrialLength = float(argTrialLength)
@@ -136,8 +142,6 @@ SM.trialTimeout = float(argTrialTimeout)
 SM.nextButtonTimeout = 0
 
 SM.speaker = speaker
-SM.motor = motor
-SM.dummyMotor = dummyMotor
 SM.inputPin = butPin
 
 SM.juicePin = juicePin
@@ -200,8 +204,8 @@ SM.blocsRemaining = SM.bigBlocLength
 
 motorThreshold = 1 # mA
 SM.stimAmps = [0.3, 0.6, 0.9, 1.2] * motorThreshold
-SM.stimFreqs = [10, 50, 100]
-summit = ifaces.summitInterface()
+SM.stimFreqs = [25, 50, 100]
+summit = ifaces.summitInterface(transmissionDelay =150e-3)
 SM.summit = summit
 SM.initBlocType = {
     'category' : 'big',
