@@ -327,13 +327,14 @@ class motorInterface(object):
 
 import zmq, json
 class summitInterface(object):
-    def __init__(self):
+    def __init__(self, transmissionDelay = 50e-3):
         # Initialize the ZeroMQ context
         self.context = zmq.Context()
         # Configure ZeroMQ to send messages
-        self.zmqSend = self.context.socket(zmq.REQ)
+        self.zmqSend = self.context.socket(zmq.PUB)
         # The communication is made on socket 12345
         self.zmqSend.bind("tcp://eth0:12345")
+        self.transmissionDelay = transmissionDelay
 
     def messageTrans(self, paramDict):
         paramStr = json.dumps(paramDict)
@@ -341,17 +342,30 @@ class summitInterface(object):
         self.zmqSend.send(paramStr.encode(encoding = 'UTF-8'))
         print("Sent transmission...")
         #  Get the reply.
-        message = self.zmqSend.recv()
-        print("Received reply %s " % message)
-        return message
+        # message = self.zmqSend.recv()
+        # print("Received reply %s " % message)
+        return
+
+    def freqChange(self, frequency):
+        stimParams = {
+            'Group' : 0,
+            'Frequency' : int(frequency),
+            'DurationInMilliseconds' : 500,
+            'Amplitude' : [0,0,0,0],
+            'PW' : [250,250,250,250],
+            'ForceQuit' : False,
+            'AddReverse' : False
+            }
+
+        self.messageTrans(stimParams)
 
     def stimOneMovement(self, amplitudes, duration,
         frequency, pws = [250 for i in range(4)]):
 
         stimParams = {
             'Group' : 0,
-            'Frequency' : frequency,
-            'DurationInMilliseconds' : duration,
+            'Frequency' : int(frequency),
+            'DurationInMilliseconds' : int(1000 * duration),
             'Amplitude' : amplitudes,
             'PW' : pws,
             'ForceQuit' : False,

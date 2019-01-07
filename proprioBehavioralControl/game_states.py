@@ -234,13 +234,6 @@ class turnPedalCompound(gameState):
             parent.dummyMotor.forward()
             parent.dummyMotor.go_home()
 
-        if parent.summit:
-            amplitude = random.choice(parent.stimAmps)
-            amplitudes = [amplitude * random.getrandbits(1), amplitude * random.getrandbits(1), 0, 0]
-            frequency = random.choice(parent.stimFreqs)
-            expectedMovementDuration = parent.motor.step_size / (100 * 360) * parent.motor.velocity * (9/44)
-            parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
-
         if direction == 'forward':
             parent.motor.forward()
             if self.logFile:
@@ -313,8 +306,10 @@ class turnPedalCompound(gameState):
             if pedalRunning:
                 self.parent.smartPedal.motorState.write_value([0])
                 pedalRunning = False
-        #wait for the dummy movement to be over
-        waitUntilDoneMoving(parent.dummyMotor)
+
+        if parent.dummyMotor:
+            #wait for the dummy movement to be over
+            waitUntilDoneMoving(parent.dummyMotor)
 
         event_label = parent.request_last_touch()
         if event_label and enforceWait:
@@ -342,6 +337,7 @@ class turnPedalCompound(gameState):
         if parent.inputPin.last_data is not None:
             parent.inputPin.last_data = None
         return self.nextState[0]
+
 class turnPedalCompoundWithStim(gameState):
 
     def operation(self, parent):
@@ -433,6 +429,17 @@ class turnPedalCompoundWithStim(gameState):
             parent.dummyMotor.forward()
             parent.dummyMotor.go_home()
 
+        if parent.summit:
+            frequency = random.choice(parent.stimFreqs)
+            amplitude = random.choice(parent.stimAmps)
+            #parent.summit.freqChange(frequency)
+            #time.sleep(0.25)
+            amplitudes = [amplitude * random.getrandbits(1), amplitude * random.getrandbits(1), 0, 0]
+            expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
+            parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+            time.sleep(parent.summit.transmissionDelay + 2 / frequency)
+            #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
+
         if direction == 'forward':
             parent.motor.forward()
             if self.logFile:
@@ -451,10 +458,21 @@ class turnPedalCompoundWithStim(gameState):
         parent.speaker.play_tone('Divider')
         #wait between movements
         parent.motor.serial.write("WT0.25\r".encode())
-
+        time.sleep(0.75)
         ## Second Movement
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 5e2)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
+
+        if parent.summit:
+            frequency = random.choice(parent.stimFreqs)
+            #parent.summit.freqChange(frequency)
+            #time.sleep(0.5)
+            amplitude = random.choice(parent.stimAmps)
+            amplitudes = [amplitude * random.getrandbits(1), amplitude * random.getrandbits(1), 0, 0]
+            expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
+            parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+            time.sleep(parent.summit.transmissionDelay + 2 / frequency)
+            #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
 
         if direction == 'forward':
             parent.motor.forward()
@@ -506,7 +524,8 @@ class turnPedalCompoundWithStim(gameState):
                 self.parent.smartPedal.motorState.write_value([0])
                 pedalRunning = False
         #wait for the dummy movement to be over
-        waitUntilDoneMoving(parent.dummyMotor)
+        if self.parent.dummyMotor:
+            waitUntilDoneMoving(parent.dummyMotor)
 
         event_label = parent.request_last_touch()
         if event_label and enforceWait:
