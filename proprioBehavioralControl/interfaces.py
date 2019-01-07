@@ -324,3 +324,38 @@ class motorInterface(object):
         self.serial.write(serial_message.encode())
         if self.debugging:
             print("Stopped all and exiting!")
+
+import zmq, json
+class summitInterface(object):
+    def __init__(self):
+        # Initialize the ZeroMQ context
+        self.context = zmq.Context()
+        # Configure ZeroMQ to send messages
+        self.zmqSend = self.context.socket(zmq.REQ)
+        # The communication is made on socket 12345
+        self.zmqSend.bind("tcp://eth0:12345")
+
+    def messageTrans(self, paramDict):
+        paramStr = json.dumps(paramDict)
+        print("Sending %s" % paramStr)
+        self.zmqSend.send(paramStr.encode(encoding = 'UTF-8'))
+        print("Sent transmission...")
+        #  Get the reply.
+        message = self.zmqSend.recv()
+        print("Received reply %s " % message)
+        return message
+
+    def stimOneMovement(self, amplitudes, duration,
+        frequency, pws = [250 for i in range(4)]):
+
+        stimParams = {
+            'Group' : 0,
+            'Frequency' : frequency,
+            'DurationInMilliseconds' : duration,
+            'Amplitude' : amplitudes,
+            'PW' : pws,
+            'ForceQuit' : False,
+            'AddReverse' : True
+            }
+
+        self.messageTrans(stimParams)
