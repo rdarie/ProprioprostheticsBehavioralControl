@@ -143,7 +143,7 @@ class strict_fixation(gameState):
             self.firstVisit = False
             return self.nextState[1]
 
-class turnPedalCompound(gameState):
+class turnPedalCompoundWithStim(gameState):
 
     def operation(self, parent):
         # should we add time penalties for button presses?
@@ -256,6 +256,13 @@ class turnPedalCompound(gameState):
         ## Second Movement
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 5e2)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
+
+        if parent.summit:
+            amplitude = random.choice(parent.stimAmps)
+            amplitudes = [amplitude * random.getrandbits(1), amplitude * random.getrandbits(1), 0, 0]
+            frequency = random.choice(parent.stimFreqs)
+            expectedMovementDuration = parent.motor.step_size / (100 * 360) * parent.motor.velocity * (9/44)
+            parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
 
         if direction == 'forward':
             parent.motor.forward()
