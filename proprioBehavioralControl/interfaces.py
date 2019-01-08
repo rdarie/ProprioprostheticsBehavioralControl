@@ -366,6 +366,7 @@ class summitInterface(object):
             'Group' : 0,
             'Frequency' : int(frequency),
             'DurationInMilliseconds' : int(1000 * duration),
+            #'DurationInMilliseconds' : 250,
             'Amplitude' : amplitudes,
             'PW' : pws,
             'ForceQuit' : False,

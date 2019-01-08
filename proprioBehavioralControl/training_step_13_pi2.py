@@ -41,8 +41,8 @@ sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--responseWindow', default = '1')
-parser.add_argument('--interTrialInterval', default = '3')
-parser.add_argument('--wrongTimeout', default = '5')
+parser.add_argument('--interTrialInterval', default = '1')
+parser.add_argument('--wrongTimeout', default = '1')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
@@ -203,9 +203,9 @@ SM.bigTally = 1
 SM.blocsRemaining = SM.bigBlocLength
 
 motorThreshold = 1 # mA
-SM.stimAmps = [0.3, 0.6, 0.9, 1.2] * motorThreshold
+SM.stimAmps = [0.3, 0.6, 0.9, 1.2]
 SM.stimFreqs = [25, 50, 100]
-summit = ifaces.summitInterface(transmissionDelay =150e-3)
+summit = ifaces.summitInterface(transmissionDelay =160e-3)
 SM.summit = summit
 SM.initBlocType = {
     'category' : 'big',

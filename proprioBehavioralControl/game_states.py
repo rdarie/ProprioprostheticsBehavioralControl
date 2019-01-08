@@ -434,7 +434,7 @@ class turnPedalCompoundWithStim(gameState):
             amplitude = random.choice(parent.stimAmps)
             #parent.summit.freqChange(frequency)
             #time.sleep(0.25)
-            amplitudes = [amplitude * random.getrandbits(1), amplitude * random.getrandbits(1), 0, 0]
+            amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
             expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
             time.sleep(parent.summit.transmissionDelay + 2 / frequency)
@@ -468,7 +468,7 @@ class turnPedalCompoundWithStim(gameState):
             #parent.summit.freqChange(frequency)
             #time.sleep(0.5)
             amplitude = random.choice(parent.stimAmps)
-            amplitudes = [amplitude * random.getrandbits(1), amplitude * random.getrandbits(1), 0, 0]
+            amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
             expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
             time.sleep(parent.summit.transmissionDelay + 2 / frequency)
