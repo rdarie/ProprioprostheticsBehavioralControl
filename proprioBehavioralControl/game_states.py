@@ -436,14 +436,17 @@ class turnPedalCompoundWithStim(gameState):
             parent.dummyMotor.forward()
             parent.dummyMotor.go_home()
 
+        frequency = 100
         if parent.summit:
             frequency = random.choice(parent.stimFreqs)
+            parent.summit.freqChange(frequency)
+            time.sleep(0.5)
+
             amplitude = random.choice(parent.stimAmps)
-            #parent.summit.freqChange(frequency)
-            #time.sleep(0.25)
             amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
-            expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
+            expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+            print('Sleeping for {}'.format(2/frequency))
             time.sleep(parent.summit.transmissionDelay + 2 / frequency)
             #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
 
@@ -464,20 +467,18 @@ class turnPedalCompoundWithStim(gameState):
         waitUntilDoneMoving(parent.motor)
         parent.speaker.play_tone('Divider')
         #wait between movements
-        parent.motor.serial.write("WT0.25\r".encode())
-        time.sleep(0.75)
+        #parent.motor.serial.write("WT0.5\r".encode())
+        time.sleep(1)
         ## Second Movement
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 5e2)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         if parent.summit:
-            frequency = random.choice(parent.stimFreqs)
-            #parent.summit.freqChange(frequency)
-            #time.sleep(0.5)
             amplitude = random.choice(parent.stimAmps)
             amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
-            expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
+            expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+            print('Sleeping for {}'.format(2/frequency))
             time.sleep(parent.summit.transmissionDelay + 2 / frequency)
             #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
 

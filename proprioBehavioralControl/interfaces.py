@@ -350,7 +350,7 @@ class summitInterface(object):
         stimParams = {
             'Group' : 0,
             'Frequency' : int(frequency),
-            'DurationInMilliseconds' : 500,
+            'DurationInMilliseconds' : 300,
             'Amplitude' : [0,0,0,0],
             'PW' : [250,250,250,250],
             'ForceQuit' : False,
@@ -361,16 +361,17 @@ class summitInterface(object):
 
     def stimOneMovement(self, amplitudes, duration,
         frequency, pws = [250 for i in range(4)]):
-
+        durationInMsec = int(1000 * duration)
         stimParams = {
             'Group' : 0,
             'Frequency' : int(frequency),
-            'DurationInMilliseconds' : int(1000 * duration),
+            'DurationInMilliseconds' : durationInMsec,
             #'DurationInMilliseconds' : 250,
             'Amplitude' : amplitudes,
             'PW' : pws,
             'ForceQuit' : False,
-            'AddReverse' : True
+            'AddReverse' : True,
+            #'AddReverse' : False
             }
 
         self.messageTrans(stimParams)

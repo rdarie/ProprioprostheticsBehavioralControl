@@ -203,9 +203,9 @@ SM.bigTally = 1
 SM.blocsRemaining = SM.bigBlocLength
 
 motorThreshold = 1 # mA
-SM.stimAmps = [0.3, 0.6, 0.9, 1.2]
+SM.stimAmps = [0.3, 0.6, 0.9]
 SM.stimFreqs = [25, 50, 100]
-summit = ifaces.summitInterface(transmissionDelay =160e-3)
+summit = ifaces.summitInterface(transmissionDelay =250e-3)
 SM.summit = summit
 SM.initBlocType = {
     'category' : 'big',
