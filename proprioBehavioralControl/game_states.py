@@ -453,7 +453,7 @@ class turnPedalCompoundWithStim(gameState):
             expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
             print('Sleeping for {}'.format(2/frequency))
-            time.sleep(parent.summit.transmissionDelay + 2 / frequency)
+            time.sleep(parent.summit.transmissionDelay + 1 / frequency)
             #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
 
         if direction == 'forward':
@@ -474,7 +474,7 @@ class turnPedalCompoundWithStim(gameState):
         parent.speaker.play_tone('Divider')
         #wait between movements
         #parent.motor.serial.write("WT0.5\r".encode())
-        time.sleep(1)
+        time.sleep(2)
         ## Second Movement
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 5e2)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
@@ -490,7 +490,7 @@ class turnPedalCompoundWithStim(gameState):
             expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
             print('Sleeping for {}'.format(2/frequency))
-            time.sleep(parent.summit.transmissionDelay + 2 / frequency)
+            time.sleep(parent.summit.transmissionDelay + 1 / frequency)
             #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
 
         if direction == 'forward':

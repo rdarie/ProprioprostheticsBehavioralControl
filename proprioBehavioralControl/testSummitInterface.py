@@ -41,7 +41,7 @@ try:
 
         GPIO.output(25,True) ## Turn on GPIO pin 25
         summit.stimOneMovement(amplitudes, .250, frequency)
-        time.sleep(summit.transmissionDelay + 2/frequency)
+        time.sleep(summit.transmissionDelay + 1/frequency)
 
         # advance motor
         motor.backward()
