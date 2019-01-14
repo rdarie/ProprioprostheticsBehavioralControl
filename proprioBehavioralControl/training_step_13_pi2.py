@@ -185,7 +185,7 @@ assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 
 #units of hundredth of a degree
-magnitudes = np.linspace(10,170,nSteps) * 1e2
+magnitudes = np.linspace(30,250,nSteps) * 1e2
 sets = {
     'small' : [(4,0),(4,1),(4,0),(4,1),(4,4)],
     'big' : [(4,7),(4,6),(4,7),(4,6),(4,4)]
@@ -203,9 +203,9 @@ SM.bigTally = 1
 SM.blocsRemaining = SM.bigBlocLength
 
 motorThreshold = 1 # mA
-SM.stimAmps = [0.3, 0.6, 0.9]
+SM.stimAmps = [0.25, 0.5, 0.75]
 SM.stimFreqs = [25, 50, 100]
-summit = ifaces.summitInterface(transmissionDelay =250e-3)
+summit = ifaces.summitInterface(transmissionDelay =100e-3)
 SM.summit = summit
 SM.initBlocType = {
     'category' : 'big',

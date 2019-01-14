@@ -443,7 +443,13 @@ class turnPedalCompoundWithStim(gameState):
             time.sleep(0.5)
 
             amplitude = random.choice(parent.stimAmps)
-            amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
+            #amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
+
+            amplitudes = [0,0,0,0]
+            idx = random.choice([0,1,2,999])
+            if idx < 999:
+                amplitudes[idx] = amplitude
+
             expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
             print('Sleeping for {}'.format(2/frequency))
@@ -475,7 +481,12 @@ class turnPedalCompoundWithStim(gameState):
 
         if parent.summit:
             amplitude = random.choice(parent.stimAmps)
-            amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
+            #amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
+
+            amplitudes = [0,0,0,0]
+            idx = random.choice([0,1,2,999])
+            if idx < 999:
+                amplitudes[idx] = 0.8 * amplitude
             expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
             print('Sleeping for {}'.format(2/frequency))
