@@ -452,8 +452,8 @@ class turnPedalCompoundWithStim(gameState):
 
             expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
-            print('Sleeping for {}'.format(2/frequency))
-            time.sleep(parent.summit.transmissionDelay + 1 / frequency)
+            if parent.summit.transmissionDelay > 0:
+                time.sleep(parent.summit.transmissionDelay + 1 / frequency)
             #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
 
         if direction == 'forward':
@@ -489,8 +489,8 @@ class turnPedalCompoundWithStim(gameState):
                 amplitudes[idx] = 0.8 * amplitude
             expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
-            print('Sleeping for {}'.format(2/frequency))
-            time.sleep(parent.summit.transmissionDelay + 1 / frequency)
+            if parent.summit.transmissionDelay > 0:
+                time.sleep(parent.summit.transmissionDelay + 1 / frequency)
             #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
 
         if direction == 'forward':

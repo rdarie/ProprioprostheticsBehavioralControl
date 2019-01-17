@@ -26,7 +26,7 @@ motor.step_size = 90e2
 # Power indicator
 GPIO.setup(25, GPIO.OUT) ## Setup GPIO Pin 25 to OUT
 
-summit = ifaces.summitInterface(transmissionDelay =100e-3)
+summit = ifaces.summitInterface(transmissionDelay = 25e-3)
 frequencies = [25, 50, 100]
 try:
     for i in range(102):
@@ -41,7 +41,8 @@ try:
 
         GPIO.output(25,True) ## Turn on GPIO pin 25
         summit.stimOneMovement(amplitudes, .250, frequency)
-        time.sleep(summit.transmissionDelay + 1/frequency)
+        if summit.transmissionDelay > 0:
+            time.sleep(summit.transmissionDelay + 1/frequency)
 
         # advance motor
         motor.backward()
