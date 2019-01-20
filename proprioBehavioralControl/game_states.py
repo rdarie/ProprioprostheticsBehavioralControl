@@ -5,15 +5,16 @@ from collections import OrderedDict
 
 nominalBlockLength  = 2
 def waitUntilDoneMoving(motor):
+
     doneMoving = False
     while not doneMoving:
         curStatus = motor.get_status()
         #print('Current Status = %s' % curStatus)
         if 'R' in curStatus:
             doneMoving = True
-            #curStatus = parentSM.motor.get_status()
-            #if 'R' in curStatus:
-            #    doneMoving = True
+            print('Done moving')
+            break
+
     return doneMoving
 
 class gameState(object):
@@ -143,7 +144,7 @@ class strict_fixation(gameState):
             self.firstVisit = False
             return self.nextState[1]
 
-class turnPedalCompoundWithStim(gameState):
+class turnPedalCompound(gameState):
 
     def operation(self, parent):
         # should we add time penalties for button presses?
@@ -416,42 +417,30 @@ class turnPedalCompoundWithStim(gameState):
             'secondThrow' : 0, 'movementOnset' : time.time(),
             'movementOff' : 0, 'vibrationOn' : False}
 
-        # if there's a pedal with a vibromotor, actuate the vibromotor
-        if self.parent.smartPedal is not None:
-            pedalRunning = False
-            self.parent.smartPedal.motorState.write_value([1])
-            pedalRunning = True
-            self.payload['vibrationOn'] = True
-            """
-            if bool(random.getrandbits(1)):
-                self.parent.smartPedal.motorState.write_value([1])
-                pedalRunning = True
-                self.payload['vibrationOn'] = True
-            else:
-                self.parent.smartPedal.motorState.write_value([0])
-                """
-
-        if parent.dummyMotor:
-            parent.dummyMotor.step_size = 270e2
-            parent.dummyMotor.forward()
-            parent.dummyMotor.go_home()
-
         frequency = 100
+        progIdx = 0
+        waitAtPeak = .5
+        expectedMovementDuration = 0
+
         if parent.summit:
             frequency = random.choice(parent.stimFreqs)
             parent.summit.freqChange(frequency)
             time.sleep(0.5)
 
             amplitude = random.choice(parent.stimAmps)
-            #amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
+            progIdx = random.choice([0,1,2,3])
+            # DEBUGGING!!!!
+            # progIdx = random.choice([0,1])
 
             amplitudes = [0,0,0,0]
-            idx = random.choice([0,1,2,999])
-            if idx < 999:
-                amplitudes[idx] = amplitude
+            amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
 
-            expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
+            expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
+            if progIdx == 2:
+                expectedMovementDuration = expectedMovementDuration * 2 + waitAtPeak
+
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+
             if parent.summit.transmissionDelay > 0:
                 time.sleep(parent.summit.transmissionDelay + 1 / frequency)
             #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
@@ -465,30 +454,48 @@ class turnPedalCompoundWithStim(gameState):
             if self.logFile:
                 self.payload['firstThrow'] = -parent.motor.step_size
 
-        parent.motor.serial.write("WT0.25\r".encode())
+        waitUntilDoneMoving(parent.motor)
+        print('Sleeping until return')
+        time.sleep(waitAtPeak)
+
+        if parent.summit and progIdx in [0,1]:
+            amplitudes = [0,0,0,0]
+            amplitudes[1-progIdx] = amplitude * parent.motorThreshold[1-progIdx]
+            parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+
+            if parent.summit.transmissionDelay > 0:
+                time.sleep(parent.summit.transmissionDelay + 1 / frequency)
+
         parent.motor.go_home()
-        parent.magnitudeQueue.append(parent.motor.step_size)
 
         #play movement division tone
         waitUntilDoneMoving(parent.motor)
         parent.speaker.play_tone('Divider')
+
+        parent.magnitudeQueue.append(parent.motor.step_size)
         #wait between movements
         #parent.motor.serial.write("WT0.5\r".encode())
-        time.sleep(2)
+        time.sleep( 3 * waitAtPeak)
+
         ## Second Movement
+        """
+            Second Movement
+        """
+
         parent.motor.step_size = random.gauss( parent.magnitudes[magnitudeIndex[1]], 5e2)
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         if parent.summit:
-            amplitude = random.choice(parent.stimAmps)
-            #amplitudes = [0.8 * amplitude * random.getrandbits(1), 0.8 * amplitude * random.getrandbits(1), 0, 0]
-
             amplitudes = [0,0,0,0]
-            idx = random.choice([0,1,2,999])
-            if idx < 999:
-                amplitudes[idx] = 0.8 * amplitude
-            expectedMovementDuration = .25 + parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
+            amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
+
+            expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
+
+            if progIdx == 2:
+                expectedMovementDuration = expectedMovementDuration * 2 + waitAtPeak
+
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+
             if parent.summit.transmissionDelay > 0:
                 time.sleep(parent.summit.transmissionDelay + 1 / frequency)
             #parent.motor.serial.write("WT{}\r".format(parent.summit.transmissionDelay).encode())
@@ -502,8 +509,21 @@ class turnPedalCompoundWithStim(gameState):
             if self.logFile:
                 self.payload['secondThrow'] = -parent.motor.step_size
 
-        parent.motor.serial.write("WT0.25\r".encode())
+        waitUntilDoneMoving(parent.motor)
+        print('Sleeping until return')
+        time.sleep(waitAtPeak)
+
+        if parent.summit and progIdx in [0,1]:
+            amplitudes = [0,0,0,0]
+            amplitudes[1-progIdx] = amplitude * parent.motorThreshold[1-progIdx]
+            parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+
+            if parent.summit.transmissionDelay > 0:
+                time.sleep(parent.summit.transmissionDelay + 1 / frequency)
+
         parent.motor.go_home()
+        waitUntilDoneMoving(parent.motor)
+        self.payload['movementOff'] = time.time()
         parent.magnitudeQueue.append(parent.motor.step_size)
 
         #Obviate the need to stop by the set_correct state
@@ -520,31 +540,10 @@ class turnPedalCompoundWithStim(gameState):
             print('Correct button set to: %s' % parent.correctButton)
         parent.magnitudeQueue = []
 
-        doneMoving = False
-        while not doneMoving:
-            curStatus = parent.motor.get_status()
-            #print('Current Status = %s' % curStatus)
-            #pdb.set_trace()
-            if 'R' in curStatus:
-                #Check again to make sure we are done:
-                curStatus = parent.motor.get_status()
-                if 'R' in curStatus:
-                    doneMoving = True
-                    self.payload['movementOff'] = time.time()
-
         if parent.motor.useEncoder:
             curPos = parent.motor.get_encoder_position()
             #if curPos is not None:
             #    print('Current position = %4.4f' % curPos)
-
-        # if there's a pedal with a vibromotor, actuate the vibromotor
-        if self.parent.smartPedal is not None:
-            if pedalRunning:
-                self.parent.smartPedal.motorState.write_value([0])
-                pedalRunning = False
-        #wait for the dummy movement to be over
-        if self.parent.dummyMotor:
-            waitUntilDoneMoving(parent.dummyMotor)
 
         event_label = parent.request_last_touch()
         if event_label and enforceWait:

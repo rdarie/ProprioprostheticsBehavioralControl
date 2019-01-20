@@ -41,8 +41,8 @@ sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--responseWindow', default = '1')
-parser.add_argument('--interTrialInterval', default = '1')
-parser.add_argument('--wrongTimeout', default = '1')
+parser.add_argument('--interTrialInterval', default = '3')
+parser.add_argument('--wrongTimeout', default = '5')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
@@ -88,25 +88,12 @@ if playWelcomeTone:
 playWhiteNoise = True if args.playWhiteNoise == 'True' else False
 if playWhiteNoise:
     whiteNoise = pygame.mixer.Sound(wavePath + "whitenoisegaussian.wav")
-    whiteNoise.set_volume(argVolume)
+    whiteNoise.set_volume(argVolume * 2)
     whiteNoise.play(-1)
-
-
-# Build an arbiter and a state machine
-arbiter = Arbiter()
-SM = State_Machine()
 
 motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = False, velocity = 2,
     acceleration = 250, deceleration = 250, useEncoder = True)
-
-SM.motor = motor
-
-"""
-dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = True, velocity = 3,
-    acceleration = 250, deceleration = 250, useEncoder = True)
-"""
-SM.dummyMotor = False
-
+dummyMotor = None
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
 
@@ -128,6 +115,10 @@ juicePin = GPIO_Output(pins=[16,6,12,25], labels=['leftLED', 'rightLED', 'bothLE
 #GPIO.output(16,False)
 #GPIO.output(12,False)
 
+# Build an arbiter and a state machine
+arbiter = Arbiter()
+SM = State_Machine()
+
 # Add attributes to the state machine
 SM.startEnable = False
 SM.nominalTrialLength = float(argTrialLength)
@@ -142,6 +133,8 @@ SM.trialTimeout = float(argTrialTimeout)
 SM.nextButtonTimeout = 0
 
 SM.speaker = speaker
+SM.motor = motor
+SM.dummyMotor = dummyMotor
 SM.inputPin = butPin
 
 SM.juicePin = juicePin
@@ -185,10 +178,10 @@ assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 
 #units of hundredth of a degree
-magnitudes = np.linspace(30,250,nSteps) * 1e2
+magnitudes = np.linspace(10,170,nSteps) * 1e2
 sets = {
-    'small' : [(4,0),(4,1),(4,0),(4,1),(4,4)],
-    'big' : [(4,7),(4,6),(4,7),(4,6),(4,4)]
+    'small' : [(4,0),(4,1),(4,0),(4,1),(4,0),(4,1),(4,0),(4,1),(4,4)],
+    'big' : [(4,7),(4,6),(4,7),(4,6),(4,7),(4,6),(4,7),(4,6),(4,4)]
     }
 SM.jackpotSets = [(4,4)]
 SM.magnitudes = magnitudes
@@ -202,16 +195,6 @@ SM.bigTally = 1
 
 SM.blocsRemaining = SM.bigBlocLength
 
-SM.motorThreshold = [2,1,1,0] # mA
-
-SM.stimAmps = [0.25, 0.5, 0.75]
-# DEBUGGING!!!!
-# SM.stimAmps = [1]
-
-SM.stimFreqs = [25, 50, 100]
-
-summit = ifaces.summitInterface(transmissionDelay =25e-3)
-SM.summit = summit
 SM.initBlocType = {
     'category' : 'big',
     'direction' : 'forward'
@@ -222,7 +205,7 @@ logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
     SM.serverFolder = '/media/browndfs/Proprioprosthetics/Training/Flywheel Logs/Murdoc'
     values = [
-        [sessionTime, 'Button Pressing Step 13', '', '',
+        [sessionTime, 'Button Pressing Step 11', '', '',
             'Log_Murdoc_' + sessionTime + '.txt', '', '', 'Murdoc_' + sessionTime,
             SM.trialLength, SM.trialTimeout, argVolume, SM.easyReward, SM.hardReward,
             SM.smallBlocLength, SM.bigBlocLength]
@@ -235,14 +218,15 @@ if logToWeb:
 
 debugging = True
 # connect state machine states
-SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
+SM.add_state(strict_fixation(['fixation',  'fixation'], SM, 'fixation',
     thisLog, printStatements = debugging))
-SM.add_state(turnPedalCompoundWithStim(['chooseNextTrial'], SM, 'turnPedalCompound',
+"""
+SM.add_state(turnPedalCompound(['chooseNextTrial'], SM, 'turnPedalCompound',
     logFile = thisLog, printStatements = debugging))
 SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
     logFile = None))
 
-SM.add_state(wait_for_correct_button_timed_uncued(['good', 'good',
+SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
     'waitHard'], SM, 'waitHard', logFile = thisLog, printStatements = debugging))
 SM.add_state(wait_for_correct_button_timed(['good', 'bad',
     'waitEasy'], SM, 'waitEasy', logFile = thisLog, printStatements = debugging))
@@ -254,9 +238,9 @@ SM.add_state(post_trial(['clear_input_queue_2'], SM, 'post_trial',
 SM.add_state(clear_input_queue(['fixation'], SM, 'clear_input_queue_2',
     logFile = thisLog, printStatements = debugging))
 SM.add_state(end([False], SM, 'end', logFile = thisLog))
-
+"""
 SM.set_init('fixation')
-time.sleep(1)
+
 # connect reward
 arbiter.connect([(SM, 'source', True), juicePin])
 
@@ -294,19 +278,6 @@ except:
     pass
 
 finally:
-
-    stimParams = {
-        'Group' : 0,
-        'Frequency' : 100,
-        'DurationInMilliseconds' : 1000,
-        'Amplitude' : [0,0,0,0],
-        'PW' : [250,250,250,250],
-        'ForceQuit' : True,
-        'AddReverse' : False
-        }
-
-    summit.messageTrans(stimParams)
-
     motor.step_size = 135e2
     motor.forward()
     motor.set_home()
@@ -325,7 +296,7 @@ finally:
             '--outputFileName \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
-    print('Ending Execution of Training_step_13.py')
+    print('Ending Execution of Training_step_12.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO

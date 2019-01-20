@@ -314,10 +314,13 @@ class motorInterface(object):
         E = servo positioning fault (drive must be reset by interrupting power to clear this fault)
         R = ready (none of the above happening)
         """
+        stStr = b'0'
         self.serial.write("RS\r".encode())
-        stStr = self.serial.read(100)
-        #print(epStr)
-        return stStr.decode().split("=")[-1]
+        while stStr.decode() != '=':
+            stStr = self.serial.read()
+        stStr = self.serial.read()
+        #print("Status returned was: {}".format(stStr))
+        return stStr.decode().split("RS=")[-1].split('/r')[0]
 
     def stop_all(self):
         serial_message = "SK\r"
@@ -336,14 +339,13 @@ class summitInterface(object):
         self.zmqSend.bind("tcp://eth0:12345")
         self.transmissionDelay = transmissionDelay
 
-    def messageTrans(self, paramDict):
+    def messageTrans(self, paramDict, verbose = False):
         paramStr = json.dumps(paramDict)
-        print("Sending %s" % paramStr)
+        if verbose:
+            print("Sending %s" % paramStr)
         self.zmqSend.send(paramStr.encode(encoding = 'UTF-8'))
-        print("Sent transmission...")
-        #  Get the reply.
-        # message = self.zmqSend.recv()
-        # print("Received reply %s " % message)
+        if verbose:
+            print("Sent transmission...")
         return
 
     def freqChange(self, frequency):
@@ -366,12 +368,10 @@ class summitInterface(object):
             'Group' : 0,
             'Frequency' : int(frequency),
             'DurationInMilliseconds' : durationInMsec,
-            #'DurationInMilliseconds' : 250,
             'Amplitude' : amplitudes,
             'PW' : pws,
             'ForceQuit' : False,
-            'AddReverse' : True,
-            #'AddReverse' : False
+            'AddReverse' : False
             }
 
-        self.messageTrans(stimParams)
+        self.messageTrans(stimParams, verbose = False)
