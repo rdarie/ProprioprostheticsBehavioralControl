@@ -363,6 +363,7 @@ class turnPedalCompoundWithStim(gameState):
 
             #set the block direction for the rest of the block
             direction = 'forward' if bool(random.getrandbits(1)) else 'backward'
+            direction = 'forward'
             parent.initBlocType['direction'] = direction
 
             # re-evaluate the block lengths
@@ -428,7 +429,8 @@ class turnPedalCompoundWithStim(gameState):
             time.sleep(0.5)
 
             amplitude = random.choice(parent.stimAmps)
-            progIdx = random.choice([0,1,2,3])
+            progSetIdx = random.choice([0,1,2,3])
+            progIdx = parent.progSets[progSetIdx]
             # DEBUGGING!!!!
             # progIdx = random.choice([0,1])
 
@@ -436,7 +438,7 @@ class turnPedalCompoundWithStim(gameState):
             amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
 
             expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
-            if progIdx == 2:
+            if progSetIdx == 2:
                 expectedMovementDuration = expectedMovementDuration * 2 + waitAtPeak
 
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
@@ -460,7 +462,8 @@ class turnPedalCompoundWithStim(gameState):
 
         if parent.summit and progIdx in [0,1]:
             amplitudes = [0,0,0,0]
-            amplitudes[1-progIdx] = amplitude * parent.motorThreshold[1-progIdx]
+            progIdx = parent.progSets[1-progSetIdx]
+            amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
 
             if parent.summit.transmissionDelay > 0:
@@ -487,11 +490,12 @@ class turnPedalCompoundWithStim(gameState):
 
         if parent.summit:
             amplitudes = [0,0,0,0]
+            progIdx = parent.progSets[progSetIdx]
             amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
 
             expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
 
-            if progIdx == 2:
+            if progSetIdx == 2:
                 expectedMovementDuration = expectedMovementDuration * 2 + waitAtPeak
 
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
@@ -513,9 +517,10 @@ class turnPedalCompoundWithStim(gameState):
         print('Sleeping until return')
         time.sleep(waitAtPeak)
 
-        if parent.summit and progIdx in [0,1]:
+        if parent.summit and progSetIdx in [0,1]:
             amplitudes = [0,0,0,0]
-            amplitudes[1-progIdx] = amplitude * parent.motorThreshold[1-progIdx]
+            progIdx = parent.progSets[1-progSetIdx]
+            amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
 
             if parent.summit.transmissionDelay > 0:
@@ -1082,7 +1087,7 @@ class variableGood(gameState):
         if self.printStatements:
             print('Good job!')
         parent.trialLength = parent.nominalTrialLength
-        if random.uniform(0,1) > 0.2:
+        if random.uniform(0,1) > 0.8:
             parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]

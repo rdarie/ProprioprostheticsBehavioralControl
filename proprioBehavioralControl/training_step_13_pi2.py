@@ -48,7 +48,7 @@ parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
 parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
-parser.add_argument('--volume', default = '0.08')
+parser.add_argument('--volume', default = '0.04')
 
 args = parser.parse_args()
 
@@ -202,15 +202,15 @@ SM.bigTally = 1
 
 SM.blocsRemaining = SM.bigBlocLength
 
-SM.motorThreshold = [2,1,1,0] # mA
-
+SM.motorThreshold = [0.8,1.2,1.6,0] # mA
+SM.progSets = [3,0,1,2]
 SM.stimAmps = [0.25, 0.5, 0.75]
 # DEBUGGING!!!!
 # SM.stimAmps = [1]
 
-SM.stimFreqs = [25, 50, 100]
+SM.stimFreqs = [50, 100]
 
-summit = ifaces.summitInterface(transmissionDelay =25e-3)
+summit = ifaces.summitInterface(transmissionDelay =30e-3)
 SM.summit = summit
 SM.initBlocType = {
     'category' : 'big',
