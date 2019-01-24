@@ -431,7 +431,7 @@ class turnPedalCompoundWithStim(gameState):
 
             # choose a leading electrode for this trial
             #progSetIdx = random.choice([0,1,2,3])
-            progSetIdx = random.choice(list(progLookup.keys()))
+            progSetIdx = random.choice(list(parent.progLookup.keys()))
             #progIdx = parent.progSets[progSetIdx]
             progIdx = parent.progLookup[progSetIdx]
 
@@ -467,7 +467,7 @@ class turnPedalCompoundWithStim(gameState):
         if parent.summit and progSetIdx in ['rostral', 'caudal']:
             amplitudes = [0,0,0,0]
             altProgSetIdx = 'rostral' if progSetIdx == 'caudal' else 'caudal'
-            progIdx = parent.progSets[altProgSetIdx]
+            progIdx = parent.progLookup[altProgSetIdx]
             amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
 
@@ -525,7 +525,7 @@ class turnPedalCompoundWithStim(gameState):
         if parent.summit and progSetIdx in ['rostral', 'caudal']:
             amplitudes = [0,0,0,0]
             altProgSetIdx = 'rostral' if progSetIdx == 'caudal' else 'caudal'
-            progIdx = parent.progSets[altProgSetIdx]
+            progIdx = parent.progLookup[altProgSetIdx]
             amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
 
