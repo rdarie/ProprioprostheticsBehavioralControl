@@ -187,8 +187,8 @@ midStep = int((nSteps - 1) / 2)
 #units of hundredth of a degree
 magnitudes = np.linspace(30,250,nSteps) * 1e2
 sets = {
-    'small' : [(4,0),(4,1),(4,0),(4,1),(4,4)],
-    'big' : [(4,7),(4,6),(4,7),(4,6),(4,4)]
+    'small' : [(4,1),(4,0),(4,4)],
+    'big' : [(4,7),(4,6),(4,4)]
     }
 SM.jackpotSets = [(4,4)]
 SM.magnitudes = magnitudes
@@ -202,8 +202,14 @@ SM.bigTally = 1
 
 SM.blocsRemaining = SM.bigBlocLength
 
-SM.motorThreshold = [0.8,1.2,1.6,0] # mA
-SM.progSets = [3,0,1,2]
+SM.motorThreshold = [1.2, 1.6, 0, ???] # mA
+
+SM.progLookup = {
+    'rostral' : 3,
+    'caudal' : 0,
+    'midline' : 1,
+    'nostim' : 2
+    }
 SM.stimAmps = [0.25, 0.5, 0.75]
 # DEBUGGING!!!!
 # SM.stimAmps = [1]

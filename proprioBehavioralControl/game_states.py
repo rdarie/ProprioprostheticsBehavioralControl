@@ -424,21 +424,25 @@ class turnPedalCompoundWithStim(gameState):
         expectedMovementDuration = 0
 
         if parent.summit:
+            # choose a frequency for this trial
             frequency = random.choice(parent.stimFreqs)
             parent.summit.freqChange(frequency)
             time.sleep(0.5)
 
+            # choose a leading electrode for this trial
+            #progSetIdx = random.choice([0,1,2,3])
+            progSetIdx = random.choice(list(progLookup.keys()))
+            #progIdx = parent.progSets[progSetIdx]
+            progIdx = parent.progLookup[progSetIdx]
+
+            # choose an amplitude
             amplitude = random.choice(parent.stimAmps)
-            progSetIdx = random.choice([0,1,2,3])
-            progIdx = parent.progSets[progSetIdx]
-            # DEBUGGING!!!!
-            # progIdx = random.choice([0,1])
 
             amplitudes = [0,0,0,0]
             amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
 
             expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
-            if progSetIdx == 2:
+            if progSetIdx == 'midline':
                 expectedMovementDuration = expectedMovementDuration * 2 + waitAtPeak
 
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
@@ -460,9 +464,10 @@ class turnPedalCompoundWithStim(gameState):
         print('Sleeping until return')
         time.sleep(waitAtPeak)
 
-        if parent.summit and progIdx in [0,1]:
+        if parent.summit and progSetIdx in ['rostral', 'caudal']:
             amplitudes = [0,0,0,0]
-            progIdx = parent.progSets[1-progSetIdx]
+            altProgSetIdx = 'rostral' if progSetIdx == 'caudal' else 'caudal'
+            progIdx = parent.progSets[altProgSetIdx]
             amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
 
@@ -490,12 +495,12 @@ class turnPedalCompoundWithStim(gameState):
 
         if parent.summit:
             amplitudes = [0,0,0,0]
-            progIdx = parent.progSets[progSetIdx]
+            progIdx = parent.progLookup[progSetIdx]
             amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
 
             expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
 
-            if progSetIdx == 2:
+            if progSetIdx == 'midline':
                 expectedMovementDuration = expectedMovementDuration * 2 + waitAtPeak
 
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
@@ -517,9 +522,10 @@ class turnPedalCompoundWithStim(gameState):
         print('Sleeping until return')
         time.sleep(waitAtPeak)
 
-        if parent.summit and progSetIdx in [0,1]:
+        if parent.summit and progSetIdx in ['rostral', 'caudal']:
             amplitudes = [0,0,0,0]
-            progIdx = parent.progSets[1-progSetIdx]
+            altProgSetIdx = 'rostral' if progSetIdx == 'caudal' else 'caudal'
+            progIdx = parent.progSets[altProgSetIdx]
             amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
 
