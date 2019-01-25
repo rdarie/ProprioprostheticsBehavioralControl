@@ -202,7 +202,7 @@ SM.bigTally = 1
 
 SM.blocsRemaining = SM.bigBlocLength
 
-SM.motorThreshold = [1.2, 1.6, 0, ???] # mA
+SM.motorThreshold = [1.2, 1.6, 0, 1] # mA
 
 SM.progLookup = {
     'rostral' : 3,
