@@ -494,8 +494,13 @@ class turnPedalCompoundWithStim(gameState):
         print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
 
         if parent.summit:
-            amplitudes = [0,0,0,0]
+            progSetIdx = random.choice(list(parent.progLookup.keys()))
+            #progIdx = parent.progSets[progSetIdx]
             progIdx = parent.progLookup[progSetIdx]
+            # choose an amplitude
+            amplitude = random.choice(parent.stimAmps)
+
+            amplitudes = [0,0,0,0]
             amplitudes[progIdx] = amplitude * parent.motorThreshold[progIdx]
 
             expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44))
@@ -518,6 +523,10 @@ class turnPedalCompoundWithStim(gameState):
             if self.logFile:
                 self.payload['secondThrow'] = -parent.motor.step_size
 
+        if parent.dummyMotor:
+            parent.dummyMotor.step_size = 250e2 - parent.motor.step_size
+            parent.dummyMotor.forward()
+
         waitUntilDoneMoving(parent.motor)
         print('Sleeping until return')
         time.sleep(waitAtPeak)
@@ -533,6 +542,9 @@ class turnPedalCompoundWithStim(gameState):
                 time.sleep(parent.summit.transmissionDelay + 1 / frequency)
 
         parent.motor.go_home()
+        if parent.dummyMotor:
+            parent.dummyMotor.go_home()
+
         waitUntilDoneMoving(parent.motor)
         self.payload['movementOff'] = time.time()
         parent.magnitudeQueue.append(parent.motor.step_size)
@@ -764,7 +776,7 @@ class trial_start(gameState):
 class chooseNextTrial(gameState):
 
     def operation(self, parent):
-        bins = [0, 1/32, 1]
+        bins = [0, 1/5, 1]
         draw = random.uniform(0,1)
         return self.nextState[int(np.digitize(draw, bins) - 1)]
 
@@ -1093,7 +1105,7 @@ class variableGood(gameState):
         if self.printStatements:
             print('Good job!')
         parent.trialLength = parent.nominalTrialLength
-        if random.uniform(0,1) > 0.8:
+        if random.uniform(0,1) > 0.1:
             parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]
