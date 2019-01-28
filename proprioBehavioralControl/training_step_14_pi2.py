@@ -101,7 +101,7 @@ motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = False,
 
 SM.motor = motor
 
-dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = True, velocity = 3,
+dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = True, velocity = 2,
     acceleration = 250, deceleration = 250, useEncoder = False)
 
 SM.dummyMotor =dummyMotor
