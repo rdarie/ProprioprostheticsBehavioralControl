@@ -101,11 +101,10 @@ motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = False,
 
 SM.motor = motor
 
-"""
 dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = True, velocity = 3,
-    acceleration = 250, deceleration = 250, useEncoder = True)
-"""
-SM.dummyMotor = False
+    acceleration = 250, deceleration = 250, useEncoder = False)
+
+SM.dummyMotor =dummyMotor
 
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
@@ -187,8 +186,8 @@ midStep = int((nSteps - 1) / 2)
 #units of hundredth of a degree
 magnitudes = np.linspace(30,250,nSteps) * 1e2
 sets = {
-    'small' : [(4,1),(4,0),(4,4)],
-    'big' : [(4,7),(4,6),(4,4)]
+    'small' : [(4,1),(4,2),(4,3)],
+    'big' : [(4,7),(4,6),(4,5)]
     }
 SM.jackpotSets = [(4,4)]
 SM.magnitudes = magnitudes
@@ -210,7 +209,6 @@ SM.progLookup = {
     'midline' : 1,
     'nostim' : 3
     }
-    
 SM.stimAmps = [0.25, 0.5, 0.75]
 # DEBUGGING!!!!
 # SM.stimAmps = [1]
