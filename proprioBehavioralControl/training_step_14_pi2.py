@@ -101,8 +101,8 @@ motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = False,
 
 SM.motor = motor
 
-dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = True, velocity = 2,
-    acceleration = 250, deceleration = 250, useEncoder = False)
+dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = False, velocity = 2,
+    acceleration = 250, deceleration = 250, useEncoder = True)
 
 SM.dummyMotor =dummyMotor
 
@@ -189,7 +189,7 @@ sets = {
     'small' : [(4,1),(4,2),(4,3)],
     'big' : [(4,7),(4,6),(4,5)]
     }
-SM.jackpotSets = [(4,4)]
+SM.jackpotSets = [(4,3), (4,5)]
 SM.magnitudes = magnitudes
 SM.sets = sets
 
@@ -201,7 +201,8 @@ SM.bigTally = 1
 
 SM.blocsRemaining = SM.bigBlocLength
 
-SM.motorThreshold = [0.8, 1.1, 1.4, 0] # mA
+SM.motorThreshold = [1.4,1.4,1.6,0] # mA
+# DEBUGGING # SM.motorThreshold = [0, 0, 0, 0] # mA
 
 SM.progLookup = {
     'rostral' : 0,
