@@ -48,7 +48,7 @@ C = 'z';
 % z assigned to C bank [electrodes 17-24 above 1.5mA]
 if A == 'x' && B == 'y'&& C == 'z'
     Chans_paddle = [1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]; 
-    Chans_paddle_to_ripple = {1, 3, 5, 7, 2, 4, 6, 8,    9, 11, 13, 15, 10, 12, 14, 16,    [17,25], [19, 27], [21, 29], [23, 31], [18, 26], [20, 28], [22,30], [24, 32]};
+    Chans_paddle_to_ripple = {1, 3, 5, 7, 2, 4, 6, 8,    9, 11, 13, 15, 10, 12, 14, 16,    [17; 25], [19; 27], [21; 29], [23; 31], [18; 26], [20; 28], [22; 30], [24; 32]};
 % y assigned to C bank [electrodes 9-16 above 1.5 mA]
 elseif A == 'z' && B == 'x' && C == 'y'
     Chans_paddle = [1, 2, 3, 4, 5 ,6, 7, 8,    9, 10, 11, 12, 13, 14, 15, 16,   17, 18, 19, 20, 21, 22, 23, 24]; 
@@ -56,7 +56,7 @@ elseif A == 'z' && B == 'x' && C == 'y'
 % x assigned to C bank [electrodes 1-8 above 1.5 mA]
 elseif A == 'y' && B == 'z' && C == 'x'
     Chans_paddle = [1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]; 
-    Chans_paddle_to_ripple = [ [17,25] , [19,27] , [21, 29] , [23, 31] , [18, 26] , [20, 28] , [22, 30] , [24, 32] ,     1, 3, 5, 7, 2, 4, 6, 8,       9, 11, 13, 15, 10, 12, 14, 16 ];
+    Chans_paddle_to_ripple = [ [17; 25] , [19; 27] , [21; 29] , [23; 31] , [18; 26] , [20; 28] , [22; 30] , [24; 32] ,     1, 3, 5, 7, 2, 4, 6, 8,       9, 11, 13, 15, 10, 12, 14, 16 ];
 else 
     sprintf('Error in assigning headstages, please change A, B and C assignments')
     return;
@@ -77,8 +77,8 @@ end
 % Cathode/Anode setting
 whichNano = 2;
 % 1 caudal 2 rostral
-cathode_list = [6];
-anode_list = [10, 14];
+cathode_list = [];
+anode_list = [10, 14, 9, 13];
 
 % frequencies_Hz = [30, 50, 100, 200, 300];
 frequencies_Hz = [10, 25, 50, 100];
@@ -88,9 +88,13 @@ frequencies_Hz = [10, 25, 50, 100];
 % values divisible by 6
 % 60   120   180   240   300   360   420   480   540   600   660   720   780   840   900   960
 phaseRatio = 3;
-electrodeRatio = floor(length(anode_list) / length(cathode_list));
+if isempty(anode_list) || isempty(cathode_list)
+    electrodeRatio = 1;
+else
+    electrodeRatio = floor(max(length(anode_list), length(cathode_list)) / min(length(anode_list), length(cathode_list)));
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-nominalAmplitudeSteps_uA = linspace(60, 960, 7);
+nominalAmplitudeSteps_uA = linspace(60, 3960, 7);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 phaseAmplitude_steps  = floor(nominalAmplitudeSteps_uA ./...
     (phaseRatio * electrodeRatio)) * (phaseRatio * electrodeRatio)...
@@ -153,7 +157,7 @@ for i=1:comb_copies
             % Function call to stimulate
             [stimCmd, stimElectrodes] = stim_elec_combination_stimSeq(...
                 cathode_list, anode_list, thisPaddleToRippleLookup,...
-                randomizedParamList);
+                randomizedParamList, stimResLookup(stimRes));
 %             %%%%% RD 04-24-2020 Don't think this is necessary
 %             % Enable stimulation for cathodes and anodes selected previously
 %             try
