@@ -35,19 +35,34 @@ anode_list_ripple = reshape(cat(1, anode_ripple_idx{:}), 1, []);
 % as every channel will be doubled with 2nd C-bank
 
 % Amplitude
-nC = length(cathode_list_ripple);
-nA = length(anode_list_ripple);
-nTotalContacts       = (nC + nA);
-stimElectrodes       = [cathode_list_ripple, anode_list_ripple];
+nC             = length(cathode_list_ripple);
+nA             = length(anode_list_ripple);
+nTotalContacts = (nC + nA);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-phaseAmplitude_steps = [ones(1, nC) * floor(reqAmp / nC), ones(1, nA) * floor(reqAmp / nA)];
+if isempty(cathode_list_ripple) && isempty(anode_list_ripple)
+    error('no stim requested')
+elseif isempty(cathode_list_ripple)
+    stimElectrodes       = anode_list_ripple;
+    phaseAmplitude_steps = ones(1, nA) * floor(reqAmp / (stimStep * nA));
+    polarity  = zeros(1, nA);
+elseif isempty(anode_list_ripple)
+    stimElectrodes       = cathode_list_ripple;
+    phaseAmplitude_steps = ones(1, nC) * floor(reqAmp / (stimStep * nC));
+    polarity  = ones(1, nC);
+else
+    stimElectrodes       = [cathode_list_ripple, anode_list_ripple];
+    phaseAmplitude_steps = [...
+        ones(1, nC) * floor(reqAmp / (stimStep * nC)),...
+        ones(1, nA) * floor(reqAmp / (stimStep * nA))];
+    % Current flows from 1st electrode to 2nd
+    polarity  = [ones(1, nC), zeros(1, nA)];
+end
+
 frequency_Hz         = ones(1, nTotalContacts) * reqFreq;
 trainLength_ms       = ones(1, nTotalContacts) * reqTL;
 phaseDuration_ms     = ones(1, nTotalContacts) * reqPD;
 phaseRatios          = ones(1, nTotalContacts) * reqPR;
 electrodeDelay_ms    = zeros(1, nTotalContacts);
-% Current flows from 1st electrode to 2nd
-polarity  = [ones(1, nC), zeros(1, nA)];
 % Generate stimulation string
 if max(phaseAmplitude_steps) * stimStep > 1500
     error('Request exceeds max current!')
@@ -55,14 +70,14 @@ end
 
 for k=1:length(stimElectrodes)
     cmd(k).elec     = stimElectrodes(k);
-    cmd(k).period   = round(30e3 / frequency_Hz(k));
-    cmd(k).repeats  = round(trainLength_ms(k) * frequency_Hz(k) / 1000);
+    cmd(k).period   = cast(floor(30e3 / frequency_Hz(k)), 'int64');
+    cmd(k).repeats  = cast(floor(trainLength_ms(k) * frequency_Hz(k) / 1000), 'int64');
     cmd(k).action   = 'immed';
     
     % Create the first phase (cathodic) for stimulation.  This has a 
     % duration of 200 us (6 clock cycles at 30 kHz), an amplitude of 
     % 10, and negative polarity.
-    secondPhaseAmplitude = round(phaseAmplitude_steps(k) / phaseRatios(k));
+    secondPhaseAmplitude = floor(phaseAmplitude_steps(k) / phaseRatios(k));
     firstPhaseAmplitude = phaseRatios(k) * secondPhaseAmplitude;
     phaseLength = round(30e3 * (phaseDuration_ms(k) / 1000));
     cmd(k).seq(1) = struct(...
