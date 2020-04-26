@@ -1,8 +1,8 @@
 %% Initializations 
 % Clean the world
 close all; fclose('all'); clc; clear all;
-% folderPath = 'C:\Users\Peep Sheep\Trellis\dataFiles\';
-folderPath = 'C:\Users\Radu\Documents\GitHub\matlabController\';
+folderPath = 'C:\Users\Peep Sheep\Trellis\dataFiles\';
+% folderPath = 'C:\Users\Radu\Documents\GitHub\matlabController\';
 oldLogFileName = '';
 stimResLookup = [1, 2, 5, 10, 20];
 %%
@@ -19,19 +19,31 @@ FE_analog = unique(ceil(Chans_analog/32));
 
 % Get NIP clock time right before turning streams on (30 kHz sampling) recChans
 timeZero = xippmex('time');
+% set stimulation resolution:
+stimRes = 4;
+try
+    xippmex('stim', 'enable', 0);
+    xippmex('stim', 'res', Chans, [stimRes])
+    xippmex('stim', 'enable', Chans);
+catch ME
+    fprintf(ME.message)
+end
 
 %% Change Ripple indices to Paddle 24 indices
 
 dateStr = datestr(now, 'yyyymmdd');
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-blockID = sprintf('Block00%d', 1);
+blockID = sprintf('Block00%d', 8);
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-logFileName = sprintf('%s%s1200-Peep/%s_autoStimLog.json', folderPath, dateStr, blockID);
+logFileName = sprintf('%s%s1400-Benchtop\\%s_autoStimLog.json', folderPath, dateStr, blockID);
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if ~isempty(oldLogFileName)
     oldLogFileID = fopen(oldLogFileName, 'a');
     fprintf(oldLogFileID, '{}]');
     fclose(oldLogFileID);
+end
+if strcmp(oldLogFileName, logFileName)
+    error('log file already exists');
 end
 oldLogFileName = logFileName;
 logFileID = fopen(logFileName, 'a');
@@ -62,23 +74,15 @@ else
     return;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% set stimulation resolution:
-stimRes = 4;
-try
-    xippmex('stim', 'res', Chans, stimRes)
-    xippmex('stim', 'enable');
-catch ME
-    fprintf(ME.message)
-end
 %% Stimulation Settings 
 
 % 1. Stimulation signal settings [variable/randomly chosen]
 
 % Cathode/Anode setting
-whichNano = 2;
+whichNano = 1;
 % 1 caudal 2 rostral
-cathode_list = [];
-anode_list = [10, 14, 9, 13];
+cathode_list = [2];
+anode_list = [10, 14];
 
 % frequencies_Hz = [30, 50, 100, 200, 300];
 frequencies_Hz = [10, 25, 50, 100];
@@ -94,7 +98,7 @@ else
     electrodeRatio = floor(max(length(anode_list), length(cathode_list)) / min(length(anode_list), length(cathode_list)));
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-nominalAmplitudeSteps_uA = linspace(60, 3960, 7);
+nominalAmplitudeSteps_uA = linspace(60, 1000, 7);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 phaseAmplitude_steps  = floor(nominalAmplitudeSteps_uA ./...
     (phaseRatio * electrodeRatio)) * (phaseRatio * electrodeRatio)...
@@ -158,13 +162,13 @@ for i=1:comb_copies
             [stimCmd, stimElectrodes] = stim_elec_combination_stimSeq(...
                 cathode_list, anode_list, thisPaddleToRippleLookup,...
                 randomizedParamList, stimResLookup(stimRes));
-%             %%%%% RD 04-24-2020 Don't think this is necessary
-%             % Enable stimulation for cathodes and anodes selected previously
-%             try
-%                 xippmex('stim', 'enable', stimElectrodes);
-%             catch
-%                 fprintf(ME.message)
-%             end
+            %%%%% RD 04-24-2020 Don't think this is necessary
+            % Enable stimulation for cathodes and anodes selected previously
+            try
+                xippmex('stim', 'enable', stimElectrodes);
+            catch
+                fprintf(ME.message)
+            end
             % Stim time is roughly 0.5 ms -> negligeable
             try
                 stimNIPTime = xippmex('time');
@@ -175,8 +179,8 @@ for i=1:comb_copies
             end
             saveStim = jsonencode(struct(...
                 'stimCmd', stimCmd, 't', cast(stimNIPTime, 'int64')));
-            fprintf(logFileID, '%s, ', saveStim);
-            fprintf('\nExecuting\n%s\n', saveStim);
+            % fprintf(logFileID, '%s, ', saveStim);
+            % fprintf('\nExecuting\n%s\n', saveStim);
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % Train Interval
             pause(TI)
@@ -186,5 +190,6 @@ for i=1:comb_copies
     toc;
 end
 fclose(logFileID);
+fprintf('\nRun complete!\n');
 % toc;
 %%
