@@ -71,7 +71,7 @@ end
 for k=1:length(stimElectrodes)
     cmd(k).elec     = stimElectrodes(k);
     cmd(k).period   = cast(floor(30e3 / frequency_Hz(k)), 'int64');
-    cmd(k).repeats  = cast(floor(trainLength_ms(k) * frequency_Hz(k) / 1000), 'int64');
+    cmd(k).repeats  = cast(ceil(trainLength_ms(k) * frequency_Hz(k) / 1000), 'int64');
     cmd(k).action   = 'immed';
     
     % Create the first phase (cathodic) for stimulation.  This has a 

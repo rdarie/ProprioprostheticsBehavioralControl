@@ -76,7 +76,8 @@ end
 logFileID = fopen(logFileName, 'a');
 fprintf(logFileID, '[');
 fclose(logFileID);
-
+% flag to control json file structure
+firstBlockEntry = 1;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Stimulation Settings
 
@@ -86,24 +87,24 @@ fclose(logFileID);
 whichNano = 1;
 % 1 caudal 2 rostral
 cathode_list = [17];
-anode_list = [];
+anode_list = [18, 23];
 % Sweep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
-% % frequencies_Hz = [100];
-% nominalAmplitudeSteps_uA = linspace(60, 1000, 7);
-% % How many times to repeat the train
-% repetition = 2;
-% % Number of combination array's copy
-% comb_copies = 5;
+frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
+% frequencies_Hz = [100];
+nominalAmplitudeSteps_uA = linspace(60, 660, 7);
+% How many times to repeat the train
+repetition = 2;
+% Number of combination array's copy
+comb_copies = 3;
 % Single
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-frequencies_Hz = [100];
-nominalAmplitudeSteps_uA = [60];
-% How many times to repeat the train
-repetition = 1;
-% Number of combination array's copy
-comb_copies = 1;
+% frequencies_Hz = [1];
+% nominalAmplitudeSteps_uA = [960];
+% % How many times to repeat the train
+% repetition = 1;
+% % Number of combination array's copy
+% comb_copies = 1;
 %
 phaseRatio = 3;
 % 2. Stimulation signal settings [constant]
@@ -197,12 +198,13 @@ try
                 saveStim = jsonencode(struct(...
                     'stimCmd', stimCmd, 't', cast(stimNIPTime, 'int64')));
                 % Save to log
-                if i+j+k > 3
+                if ~firstBlockEntry
                     fprintf(logFileID, ', ');
                 end
+                firstBlockEntry = 0;
                 fprintf(logFileID, '%s', saveStim);
                 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                fprintf('\nExecuting\n%s\n', saveStim);
+                % fprintf('\nExecuting\n%s\n', saveStim);
                 % Train Interval
                 pause(TI)
             end
