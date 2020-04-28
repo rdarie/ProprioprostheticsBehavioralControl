@@ -4,7 +4,7 @@ close all; fclose('all'); clc; clear all;
 folderPath = 'C:\Users\Peep Sheep\Trellis\dataFiles\';
 % folderPath = 'C:\Users\Radu\Documents\GitHub\matlabController\';
 dateStr = datestr(now, 'yyyymmdd');
-subFolderPath = sprintf('%s%s1400-Benchtop', folderPath, dateStr);
+subFolderPath = sprintf('%s%s1200-Peep', folderPath, dateStr);
 if ~isfolder(subFolderPath)
     mkdir(subFolderPath)
 end
@@ -34,7 +34,7 @@ end
 
 %% Change Ripple indices to Paddle 24 indices
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-blockID = 1
+blockID = 3
 % which bank is connected to which headstage determines to what channels
 % correspond each electrode, please set this here :
 A = 'x';
@@ -84,23 +84,23 @@ firstBlockEntry = 1;
 % 1. Stimulation signal settings [variable/randomly chosen]
 
 % Cathode/Anode setting
-whichNano = 1;
+whichNano = 2;
 % 1 caudal 2 rostral
-cathode_list = [17];
-anode_list = [18, 23];
+cathode_list = [23];
+anode_list = [18];
 % Sweep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
 % frequencies_Hz = [100];
-nominalAmplitudeSteps_uA = linspace(60, 660, 7);
+nominalAmplitudeSteps_uA = linspace(60, 1400, 7);
 % How many times to repeat the train
-repetition = 2;
+repetition = 3;
 % Number of combination array's copy
-comb_copies = 3;
+comb_copies = 5;
 % Single
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% frequencies_Hz = [1];
-% nominalAmplitudeSteps_uA = [960];
+% frequencies_Hz = [100];
+% nominalAmplitudeSteps_uA = [1400];
 % % How many times to repeat the train
 % repetition = 1;
 % % Number of combination array's copy
@@ -170,6 +170,7 @@ try
             randomizedParamList = comb_array(rd_idx, :);
             % Add constant parameters
             randomizedParamList = [randomizedParamList, trainLength_ms, phaseDuration_ms, phaseRatio];
+            disp(randomizedParamList);
             % Delete than comb from the list
             comb_array(rd_idx, :) = [];
             % # repetition of each combination; e.g. 3 times
@@ -193,7 +194,7 @@ try
                     xippmex('stimseq', stimCmd);
                 catch ME
                     fprintf(ME.message)
-                    stimNIPTime = cputime;
+                    % stimNIPTime = cputime;
                 end
                 saveStim = jsonencode(struct(...
                     'stimCmd', stimCmd, 't', cast(stimNIPTime, 'int64')));
