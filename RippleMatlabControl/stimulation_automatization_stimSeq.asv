@@ -103,23 +103,19 @@ firstBlockEntry = 1;
 %% Stimulation Settings
 
 % 1. Stimulation signal settings [variable/randomly chosen]
-m = input(sprintf('Writing to log %d Do you want to continue, Y/N [Y]:', blockID),'s');
-if m=='N'
-	error('Trial aborted')
-end
+m = input('Do you want to continue, Y/N [Y]:','s')
 % Cathode/Anode setting
 whichNano = 2;
 % 1 caudal 2 rostral
 cathode_list = [23];
 anode_list = [18];
 
-stimProtocol = 'manual';
-% stimProtocol = 'sweep';
-% % % % % % %
+% stimProtocol = 'manual';
+stimProtocol = 'sweep';
 maxAmp = 230;
-% % % % % % %
 % Sweep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 if strcmp(stimProtocol, 'sweep')
     frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
     % frequencies_Hz = [100];
@@ -146,6 +142,20 @@ phaseDuration_ms = 0.150;
 TI = 0.7 + trainLength_ms / 1000;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% if isempty(anode_list) || isempty(cathode_list)
+%     electrodeRatio = 1;
+% else
+%     electrodeRatio = max(length(anode_list), length(cathode_list)) / min(length(anode_list), length(cathode_list));
+% end
+% phaseAmplitude_steps  = floor(nominalAmplitudeSteps_uA ./...
+%     (phaseRatio * electrodeRatio)) * (phaseRatio * electrodeRatio)...
+%     ./ stimResLookup(stimRes);
+% get balanced freq and amp distribution
+% the only randomized parameter will be the order in which pre-defined
+% combination of freq and amp are executed
+%
+%[Freq, Amp] = meshgrid(frequencies_Hz, phaseAmplitude_steps);
 [Freq, Amp] = meshgrid(frequencies_Hz, nominalAmplitudeSteps_uA);
 c = cat(2, Freq', Amp');
 
@@ -159,6 +169,7 @@ c = cat(2, Freq', Amp');
 % 6. Repeat all the previous steps 5 times to reach 50 repeats
 % per combination randomly ordered in time
 
+%
 thisPaddleToRippleLookup = Chans_paddle_to_ripple;
 for i=1:size(thisPaddleToRippleLookup, 2)
     thisPaddleToRippleLookup{i} = thisPaddleToRippleLookup{i} + (whichNano-1) * 32;
@@ -170,7 +181,6 @@ logFileID = fopen(logFileName, 'a');
 % Turn off any ongoing stim
 try
     xippmex('stim', 'enable', 0);
-    xippmex('stim', 'res', Chans, [stimRes])
 catch ME
     if disableErrors
         fprintf(ME.message);
@@ -242,7 +252,6 @@ try
     end
 catch
     xippmex('stim', 'enable', 0);
-    xippmex('stim', 'res', Chans, [stimRes])
 end
 fclose(logFileID);
 fprintf('\nRun complete!\n');
