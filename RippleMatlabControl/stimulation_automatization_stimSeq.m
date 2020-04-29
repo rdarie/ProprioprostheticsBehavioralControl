@@ -18,7 +18,7 @@ try
     if status ~= 1; error('Xippmex Did Not Initialize');  end
 catch ME
     if disableErrors
-        fprintf(ME.message);
+        disp(ME.message);
     else
         rethrow(ME);
     end
@@ -33,7 +33,7 @@ try
     FE_analog = unique(ceil(Chans_analog/32));
 catch ME
     if disableErrors
-        fprintf(ME.message);
+        disp(ME.message);
     else
         rethrow(ME);
     end
@@ -47,7 +47,7 @@ try
     xippmex('stim', 'enable', Chans);
 catch ME
     if disableErrors
-        fprintf(ME.message);
+        disp(ME.message);
     else
         rethrow(ME);
     end
@@ -113,8 +113,8 @@ whichNano = 2;
 cathode_list = [23];
 anode_list = [18];
 
-stimProtocol = 'manual';
-% stimProtocol = 'sweep';
+% stimProtocol = 'manual';
+stimProtocol = 'sweep';
 % % % % % % %
 maxAmp = 230;
 % % % % % % %
@@ -139,7 +139,6 @@ elseif strcmp(stimProtocol, 'manual')
 end
 phaseRatio = 3;
 % 2. Stimulation signal settings [constant]
-% trainLength_ms  = 30 * 1000;
 trainLength_ms = 300;
 phaseDuration_ms = 0.150;
 % Train interval (s)
@@ -173,7 +172,7 @@ try
     xippmex('stim', 'res', Chans, [stimRes])
 catch ME
     if disableErrors
-        fprintf(ME.message);
+        disp(ME.message);
     else
         rethrow(ME);
     end
@@ -191,7 +190,7 @@ try
             randomizedParamList = comb_array(rd_idx, :);
             % Add constant parameters
             randomizedParamList = [randomizedParamList, trainLength_ms, phaseDuration_ms, phaseRatio];
-            disp(randomizedParamList);
+            fprintf('\nStim: amplitude %4.2f uA, rate %4.2f Hz\n', randomizedParamList(2), randomizedParamList(1));
             % Delete than comb from the list
             comb_array(rd_idx, :) = [];
             % # repetition of each combination; e.g. 3 times
@@ -207,7 +206,7 @@ try
                     xippmex('stim', 'enable', stimElectrodes);
                 catch ME
                     if disableErrors
-                        fprintf(ME.message);
+                        disp(ME.message);
                     else
                         rethrow(ME);
                     end
@@ -226,7 +225,7 @@ try
                     fprintf(logFileID, '%s', saveStim);
                 catch ME
                     if disableErrors
-                        fprintf(ME.message);
+                        disp(ME.message);
                     else
                         rethrow(ME);
                     end
