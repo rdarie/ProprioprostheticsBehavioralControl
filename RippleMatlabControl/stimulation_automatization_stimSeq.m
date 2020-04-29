@@ -55,7 +55,7 @@ end
 
 %% Change Ripple indices to Paddle 24 indices
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-blockID = 4
+blockID = 5
 % which bank is connected to which headstage determines to what channels
 % correspond each electrode, please set this here :
 A = 'x';
@@ -113,8 +113,8 @@ whichNano = 2;
 cathode_list = [23];
 anode_list = [18];
 
-% stimProtocol = 'manual';
-stimProtocol = 'sweep';
+stimProtocol = 'manual';
+% stimProtocol = 'sweep';
 % % % % % % %
 maxAmp = 230;
 % % % % % % %
@@ -240,8 +240,16 @@ try
         toc;
     end
 catch
-    xippmex('stim', 'enable', 0);
-    xippmex('stim', 'res', Chans, [stimRes])
+    try
+        xippmex('stim', 'enable', 0);
+        xippmex('stim', 'res', Chans, [stimRes]);
+    catch ME
+        if disableErrors
+            disp(ME.message);
+        else
+            rethrow(ME);
+        end
+    end
 end
 fclose(logFileID);
 fprintf('\nRun complete!\n');
