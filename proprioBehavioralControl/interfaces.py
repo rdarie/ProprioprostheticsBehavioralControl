@@ -140,6 +140,7 @@ class sparkfunRemoteInterface(object):
         with lirc.LircdConnection(self.remoteProgram, self.confPath, None) as conn:
             while (code != "quit"):
                 code = conn.readline()
+                print(code)
                 funcToRun = self.mapping.get(code, self.default)
                 funcToRun()
 class motorInterface(object):
