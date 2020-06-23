@@ -7,21 +7,21 @@ end
 
 begin
   remote = *
-  button = KEY_1
+  button = KEY_KP1
   prog = training
   config = 1
 end
 
 begin
   remote = *
-  button = KEY_2
+  button = KEY_KP2
   prog = training
   config = 2
 end
 
 begin
   remote = *
-  button = KEY_3
+  button = KEY_KP3
   prog = training
   config = 3
 end
@@ -35,28 +35,28 @@ end
 
 begin
   remote = *
-  button = KEY_PREV
+  button = KEY_UP
   prog = training
-  config = prev
+  config = up
 end
 
 begin
   remote = *
-  button = KEY_NEXT
+  button = KEY_DOWN
   prog = training
-  config = next
+  config = down
 end
 
 begin
   remote = *
-  button = KEY_CHANNELDOWN
+  button = KEY_LEFT
   prog = training
   config = left
 end
 
 begin
   remote = *
-  button = KEY_CHANNELUP
+  button = KEY_RIGHT
   prog = training
   config = right
 end
