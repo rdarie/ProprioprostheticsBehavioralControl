@@ -162,7 +162,7 @@ try:
         "a" : speaker.tone_player('Go'),
         "b" : speaker.tone_player('Good'),
         "c" : speaker.tone_player('Bad'),
-        "up" : triggerJuice
+        "0" : triggerJuice
     }
 
     remoteListener = ifaces.sparkfunRemoteInterface(

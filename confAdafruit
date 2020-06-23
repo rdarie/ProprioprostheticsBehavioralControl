@@ -7,6 +7,13 @@ end
 
 begin
   remote = *
+  button = KEY_KP0
+  prog = training
+  config = 0
+end
+
+begin
+  remote = *
   button = KEY_KP1
   prog = training
   config = 1
