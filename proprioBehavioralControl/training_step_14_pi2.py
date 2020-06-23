@@ -104,7 +104,7 @@ SM.motor = motor
 dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = False, velocity = 2,
     acceleration = 250, deceleration = 250, useEncoder = True)
 
-SM.dummyMotor =dummyMotor
+SM.dummyMotor = dummyMotor
 
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = False, enableSound = argEnableSound)
@@ -118,7 +118,7 @@ butPin = GPIO_Input(pins = [4, 17], labels = ['left', 'right'],
     levels = [GPIO.HIGH, GPIO.HIGH], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[16,6,12,25], labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
+juicePin = GPIO_Output(pins=[13,6,26,25], labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
 
