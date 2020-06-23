@@ -165,8 +165,10 @@ try:
         "up" : triggerJuice
     }
 
-    remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
-        default = lambda: None)
+    remoteListener = ifaces.sparkfunRemoteInterface(
+        mapping = remoteControlMap,
+        default = lambda: None,
+        confPath = wavePath + "/confAdafruit")
     remoteListener.run()
     exitGracefully()
 except KeyboardInterrupt: # If CTRL+C is pressed, exit cleanly:

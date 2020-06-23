@@ -106,35 +106,40 @@ class speakerInterface(object):
         return tone_playerDummyMethod
 
 class sparkfunRemoteInterface(object):
-    def __init__(self, mapping, default):
+    def __init__(self, mapping, default, confPath):
         self.default = default
         self.mapping = mapping
+        self.confPath = confPath
 
     def run(self):
-        #configure and initialize IR remote communication
-        blocking = False
-        code = "start"
-
-        if(lirc.init("training", wavePath + "/confAdafruit", blocking = blocking)):
-
-            while(code != "quit"):
-                # Read next code
-                ir_message = lirc.nextcode()
-
-                # Loop as long as there are more on the queue
-                while(ir_message):
-                    # Run through commands
-                    for code in ir_message:
-                        #pdb.set_trace()
-                        #run the function returned by interpret_command
-                        funcToRun = self.mapping.get(code, self.default)
-                        ir_message.remove(code)
-                        funcToRun()
-                        if code == "quit":
-                            break
-                        #TODO: make this not break the state machine execution
+        '''
+            #configure and initialize IR remote communication
+            blocking = False
+            code = "start"
+            if(lirc.init("training", wavePath + "/confAdafruit", blocking = blocking)):
+                while(code != "quit"):
+                    # Read next code
                     ir_message = lirc.nextcode()
-
+                    # Loop as long as there are more on the queue
+                    while(ir_message):
+                        # Run through commands
+                        for code in ir_message:
+                            #pdb.set_trace()
+                            #run the function returned by interpret_command
+                            funcToRun = self.mapping.get(code, self.default)
+                            ir_message.remove(code)
+                            funcToRun()
+                            if code == "quit":
+                                break
+                            #TODO: make this not break the state machine execution
+                        ir_message = lirc.nextcode()
+            '''
+        blocking = False
+        code = 'start'
+        with lirc.LircdConnection('training', self.confPath, None) as conn:
+            while (code != "quit"):
+                code = conn.readline()
+                print(code)
 class motorInterface(object):
     # Configure the serial port connection the the Si3540 motor driver
     def __init__(self, serialPortName = '/dev/ttyUSB0',
