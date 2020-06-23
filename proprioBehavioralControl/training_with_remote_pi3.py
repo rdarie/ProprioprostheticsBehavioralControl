@@ -48,8 +48,8 @@ soundPaths = {
     'Go' : wavePath + "/go_tone.wav",
     'Good' : wavePath + "/good_tone.wav",
     'Bad' : wavePath + "/bad_tone.wav",
-    'Wait' : wavePath + "wait_tone.wav",
-    'Divider' : wavePath + "divider_tone.wav"
+    'Wait' : wavePath + "/wait_tone.wav",
+    'Divider' : wavePath + "/divider_tone.wav"
     }
 
 playWelcomeTone = True if args.playWelcomeTone == 'True' else False
