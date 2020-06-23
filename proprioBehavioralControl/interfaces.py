@@ -106,10 +106,11 @@ class speakerInterface(object):
         return tone_playerDummyMethod
 
 class sparkfunRemoteInterface(object):
-    def __init__(self, mapping, default, confPath):
+    def __init__(self, mapping, default, confPath, remoteProgram):
         self.default = default
         self.mapping = mapping
         self.confPath = confPath
+        self.remoteProgram = remoteProgram
 
     def run(self):
         '''
@@ -136,10 +137,11 @@ class sparkfunRemoteInterface(object):
             '''
         blocking = False
         code = 'start'
-        with lirc.LircdConnection('training', self.confPath, None) as conn:
+        with lirc.LircdConnection(self.remoteProgram, self.confPath, None) as conn:
             while (code != "quit"):
                 code = conn.readline()
-                print(code)
+                funcToRun = self.mapping.get(code, self.default)
+                funcToRun()
 class motorInterface(object):
     # Configure the serial port connection the the Si3540 motor driver
     def __init__(self, serialPortName = '/dev/ttyUSB0',

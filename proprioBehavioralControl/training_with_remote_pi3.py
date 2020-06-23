@@ -168,7 +168,8 @@ try:
     remoteListener = ifaces.sparkfunRemoteInterface(
         mapping = remoteControlMap,
         default = lambda: None,
-        confPath = wavePath + "/confAdafruit")
+        confPath = wavePath + "/confAdafruit",
+        remoteProgram = 'training')
     remoteListener.run()
     exitGracefully()
 except KeyboardInterrupt: # If CTRL+C is pressed, exit cleanly:
