@@ -58,7 +58,6 @@ if DEBUGGING:
     args.playWhiteNoise = 'False'
 
 argTrialLength = args.interTrialInterval
-argTrialTimeout = args.responseWindow
 argWrongTimeout = args.wrongTimeout
 argEnableSound = True if args.enableSound == 'True' else False
 argPlayWelcomeTone = args.playWelcomeTone
@@ -132,10 +131,10 @@ juicePin = GPIO_Output(
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
 
 # initialize outputs to movementOff
-#GPIO.output(6,False)
-#GPIO.output(16,False)
-#GPIO.output(12,False)
-
+GPIO.output(13,False)
+GPIO.output(6,False)
+GPIO.output(26,False)
+pdb.set_trace()
 # Add attributes to the state machine
 SM.startEnable = False
 SM.nominalTrialLength = float(argTrialLength)
@@ -146,7 +145,7 @@ SM.nextEnableTime = 0
 SM.remoteOverride = None
 
 SM.buttonTimedOut = False
-SM.trialTimeout = float(argTrialTimeout)
+SM.responseWindow = float(args.responseWindow)
 SM.nextButtonTimeout = 0
 
 SM.speaker = speaker
@@ -186,32 +185,42 @@ motor.step_size = 135e2
 motor.backward()
 time.sleep(2)
 motor.set_home()
+
 # Set up throw distances
-# import numpy as np
 nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
 assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
-
 #units of hundredth of a degree
-magnitudes = np.linspace(30,250,nSteps) * 1e2
-sets = {
+SM.jackpotSets = [(4,3), (4,5)]
+SM.movementMagnitudes = np.linspace(30,50,nSteps) * 1e2
+SM.movementSets = {
     'small' : [(4,1),(4,2),(4,3)],
     'big' : [(4,7),(4,6),(4,5)]
     }
-SM.jackpotSets = [(4,3), (4,5)]
-SM.magnitudes = magnitudes
-SM.sets = sets
+SM.leftTally = 1
+SM.rightTally = 1
+SM.correctButton = None
 
-#block structure
-SM.smallBlocLength = 1
-SM.bigBlocLength = 1
-SM.smallTally = 1
-SM.bigTally = 1
-
-SM.blocsRemaining = SM.bigBlocLength
-
-SM.motorThreshold = [1.4,1.4,1.6,0] # mA
+SM.stimMotorThreshold = [
+    1.4,
+    1.4,
+    1.6,
+    0] # mA, per program
 # DEBUGGING # SM.motorThreshold = [0, 0, 0, 0] # mA
+
+SM.progNames = [
+    'rostral',
+    'caudal',
+    'midline',
+    'nostim'
+    ]
+    
+SM.progWeights = [
+    3,
+    3,
+    3,
+    1
+    ]
 
 SM.progLookup = {
     'rostral' : 0,
@@ -219,20 +228,12 @@ SM.progLookup = {
     'midline' : 1,
     'nostim' : 3
     }
-SM.stimAmps = [0.25, 0.5, 0.75]
+SM.stimAmpMultipliers = [0.25, 0.5, 0.75]
 # DEBUGGING!!!!
 # SM.stimAmps = [1]
-
 SM.stimFreqs = [50, 100]
-
 summit = ifaces.summitInterface(transmissionDelay=30e-3, dummy=DEBUGGING)
 SM.summit = summit
-
-SM.initBlocType = {
-    'category' : 'big',
-    'direction' : 'forward'
-    }
-SM.correctButton = 'left'
 
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
@@ -255,15 +256,15 @@ SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
     thisLog, printStatements = DEBUGGING, timePenalty=2))
 #
 SM.add_state(turnPedalCompoundWithStim(['chooseNextTrial'], SM, 'turnPedalCompound',
-    logFile = thisLog, printStatements = DEBUGGING))
+    logFile = thisLog, printStatements = DEBUGGING, phantom=DEBUGGING))
 #
-SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
-    logFile = None))
+SM.add_state(chooseReportDifficulty(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
+    logFile = None, probaBins = [0, 1/10, 1]))
 #
 SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
     'waitHard'], SM, 'waitHard', logFile = thisLog, printStatements = DEBUGGING))
 #
-SM.add_state(wait_for_correct_button_timed(['good', 'good',
+SM.add_state(wait_for_correct_button_timed(['good', 'bad',
     'waitEasy'], SM, 'waitEasy', logFile = thisLog, printStatements = DEBUGGING))
 #
 SM.add_state(variableGood(['post_trial'], SM, 'good', logFile = thisLog, printStatements = DEBUGGING))
