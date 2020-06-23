@@ -152,12 +152,13 @@ class motorInterface(object):
                 )
         except:
             print('Unable to connect to ' + serialPortName)
+            print('Creating dummy serial port')
             # availablePorts = serial_ports()
             # print('defaulting to: ' + availablePorts[-1])
             # serialPortName = availablePorts[-1]
-            import minimalmodbus
-            serialPortName = '/dev/ttyDummyModBus'
-            instrument = minimalmodbus.Instrument(serialPortName, 1)
+            import pty, os
+            master, slave = pty.openpty() #open the pseudoterminal
+            serialPortName = os.ttyname(slave) #translate the slave fd to a filename
             ser = serial.Serial(
                 port=serialPortName,
                 baudrate = 9600,
