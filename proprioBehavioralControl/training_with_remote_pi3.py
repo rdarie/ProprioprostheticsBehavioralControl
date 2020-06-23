@@ -29,6 +29,10 @@ parser.add_argument('--volume', default = '0.01')
 
 args = parser.parse_args()
 
+# Power indicator
+GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 5 to OUT
+GPIO.output(5,True) ## Turn on GPIO pin 5
+
 argEnableSound = True if args.enableSound == 'True' else False
 argPlayWelcomeTone = args.playWelcomeTone
 argVolume = float(args.volume)

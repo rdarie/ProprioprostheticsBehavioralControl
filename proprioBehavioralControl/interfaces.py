@@ -135,7 +135,7 @@ class sparkfunRemoteInterface(object):
                             #TODO: make this not break the state machine execution
                         ir_message = lirc.nextcode()
             '''
-        blocking = False
+        # blocking = False
         code = 'start'
         with lirc.LircdConnection(self.remoteProgram, self.confPath, None) as conn:
             while (code != "quit"):
