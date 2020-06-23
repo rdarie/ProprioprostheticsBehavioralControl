@@ -152,10 +152,12 @@ class motorInterface(object):
                 )
         except:
             print('Unable to connect to ' + serialPortName)
-            availablePorts = serial_ports()
-            print('defaulting to: ' + availablePorts[-1])
-            serialPortName = availablePorts[-1]
-
+            # availablePorts = serial_ports()
+            # print('defaulting to: ' + availablePorts[-1])
+            # serialPortName = availablePorts[-1]
+            import minimalmodbus
+            serialPortName = '/dev/ttyDummyModBus'
+            instrument = minimalmodbus.Instrument(serialPortName, 1)
             ser = serial.Serial(
                 port=availablePorts[-1],
                 baudrate = 9600,
