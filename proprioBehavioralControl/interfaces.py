@@ -159,7 +159,7 @@ class motorInterface(object):
             serialPortName = '/dev/ttyDummyModBus'
             instrument = minimalmodbus.Instrument(serialPortName, 1)
             ser = serial.Serial(
-                port=availablePorts[-1],
+                port=serialPortName,
                 baudrate = 9600,
                 parity=serial.PARITY_NONE,
                 stopbits=serial.STOPBITS_ONE,
