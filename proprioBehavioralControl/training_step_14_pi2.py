@@ -52,6 +52,11 @@ parser.add_argument('--volume', default = '0.04')
 
 args = parser.parse_args()
 
+DEBUGGING = True
+if DEBUGGING:
+    args.volume = '0.2'
+    args.playWhiteNoise = 'False'
+
 argTrialLength = args.interTrialInterval
 argTrialTimeout = args.responseWindow
 argWrongTimeout = args.wrongTimeout
@@ -68,26 +73,26 @@ with open(parentDir + '/' + '.waveLocation', 'r') as wf:
     wavePath = wf.read().replace('\n', '')
 
 with open(parentDir + '/' + '.dataAnalysisLocation', 'r') as f:
-	dataAnalysisPath = f.read().replace('\n', '')
+    dataAnalysisPath = f.read().replace('\n', '')
 
 soundPaths = {
-    'Go' : wavePath + "go_tone.wav",
-    'Good' : wavePath + "good_tone.wav",
-    'Bad' : wavePath + "bad_tone.wav",
-    'Wait' : wavePath + "wait_tone.wav",
-    'Divider' : wavePath + "divider_tone.wav"
+    'Go' : wavePath + "/go_tone.wav",
+    'Good' : wavePath + "/good_tone.wav",
+    'Bad' : wavePath + "/bad_tone.wav",
+    'Wait' : wavePath + "/wait_tone.wav",
+    'Divider' : wavePath + "/divider_tone.wav"
     }
 
 playWelcomeTone = True if args.playWelcomeTone == 'True' else False
 if playWelcomeTone:
     pygame.mixer.init()
-    welcomeChime = pygame.mixer.Sound(wavePath + "violin_C5.wav")
+    welcomeChime = pygame.mixer.Sound(wavePath + "/violin_C5.wav")
     welcomeChime.set_volume(2 * argVolume)
     welcomeChime.play()
 
 playWhiteNoise = True if args.playWhiteNoise == 'True' else False
 if playWhiteNoise:
-    whiteNoise = pygame.mixer.Sound(wavePath + "whitenoisegaussian.wav")
+    whiteNoise = pygame.mixer.Sound(wavePath + "/whitenoisegaussian.wav")
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
 
@@ -96,12 +101,12 @@ if playWhiteNoise:
 arbiter = Arbiter()
 SM = State_Machine()
 
-motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = False, velocity = 2,
+motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = DEBUGGING, velocity = 2,
     acceleration = 250, deceleration = 250, useEncoder = True)
 
 SM.motor = motor
 
-dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = False, velocity = 2,
+dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = DEBUGGING, velocity = 2,
     acceleration = 250, deceleration = 250, useEncoder = True)
 
 SM.dummyMotor = dummyMotor
@@ -216,8 +221,9 @@ SM.stimAmps = [0.25, 0.5, 0.75]
 
 SM.stimFreqs = [50, 100]
 
-summit = ifaces.summitInterface(transmissionDelay =30e-3)
+summit = ifaces.summitInterface(transmissionDelay=30e-3, dummy=DEBUGGING)
 SM.summit = summit
+
 SM.initBlocType = {
     'category' : 'big',
     'direction' : 'forward'
@@ -289,8 +295,11 @@ remoteControlMap = {
     "quit" : overRideAdder(SM, 'end')
 }
 
-remoteListener = ifaces.sparkfunRemoteInterface(mapping = remoteControlMap,
-    default = lambda: None)
+remoteListener = ifaces.sparkfunRemoteInterface(
+    mapping = remoteControlMap,
+    default = lambda: None,
+    confPath = wavePath + "/confAdafruit",
+    remoteProgram = 'training')
 
 welcomeChime.play()
 try:

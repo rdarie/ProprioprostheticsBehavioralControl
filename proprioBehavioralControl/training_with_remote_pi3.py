@@ -29,6 +29,9 @@ parser.add_argument('--volume', default = '0.01')
 
 args = parser.parse_args()
 
+DEBUGGING = True
+if DEBUGGING:
+    args.volume = '0.2'
 # Power indicator
 GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 5 to OUT
 GPIO.output(5,True) ## Turn on GPIO pin 5
@@ -46,7 +49,7 @@ with open(parentDir + '/' + '.waveLocation', 'r') as wf:
     wavePath = wf.read().replace('\n', '')
 
 with open(parentDir + '/' + '.dataAnalysisLocation', 'r') as f:
-	dataAnalysisPath = f.read().replace('\n', '')
+    dataAnalysisPath = f.read().replace('\n', '')
 
 soundPaths = {
     'Go' : wavePath + "/go_tone.wav",

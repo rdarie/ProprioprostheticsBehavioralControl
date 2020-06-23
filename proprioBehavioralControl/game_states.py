@@ -3,7 +3,7 @@ import numpy as np
 from helperFunctions import overRideAdder
 from collections import OrderedDict
 
-nominalBlockLength  = 2
+nominalBlockLength = 2
 def waitUntilDoneMoving(motor):
 
     doneMoving = False
@@ -18,7 +18,9 @@ def waitUntilDoneMoving(motor):
     return doneMoving
 
 class gameState(object):
-    def __init__(self, nextState, parent, stateName, logFile = None, printStatements = False):
+    def __init__(
+            self, nextState, parent, stateName,
+            logFile = None, printStatements = False):
         self.nextState = nextState
 
         self.enableLog = True
@@ -41,7 +43,6 @@ class gameState(object):
 
     def checkTimedOut(self):
         self.timeNow = time.time()
-
         if self.nextTimeOut < self.timeNow:
             self.timedOut = True
 
@@ -99,6 +100,14 @@ class fixation(gameState):
             return self.nextState[1]
 
 class strict_fixation(gameState):
+    def __init__(
+            self, nextState, parent, stateName,
+            logFile=None, printStatements=False, timePenalty=0):
+        super().__init__(
+            nextState, parent, stateName,
+            logFile=logFile, printStatements=printStatements)
+        self.timePenalty = timePenalty
+    
     # IF button presses happen here, give bad feedback
     def operation(self, parent):
         if self.firstVisit:
@@ -120,11 +129,12 @@ class strict_fixation(gameState):
         event_label = parent.request_last_touch()
 
         if event_label:
-            # if erroneous button press, play bad tone, and penalize with an extra
-            # 2 second wait
+            #  if erroneous button press, play wait tone
+            #  and penalize with an extra
+            #  self.timePenalty seconds wait
             parent.speaker.play_tone('Wait')
-            time.sleep(3)
-            self.nextTimeOut = self.nextTimeOut + 3
+            time.sleep(self.timePenalty)
+            self.nextTimeOut = self.nextTimeOut + self.timePenalty
             # clear button queue for next iteration
             if parent.inputPin.last_data is not None:
                 parent.inputPin.last_data = None
