@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Training Step 12
+Training Step 1
 The "Go" tone goes off.
 Buttons light up.
 
@@ -33,7 +33,7 @@ import argparse, os, os.path, shutil, subprocess, time
 
 # Power indicator
 GPIO.setup(5, GPIO.OUT) ## Setup GPIO Pin 5 to OUT
-GPIO.output(5,True) ## Turn on GPIO pin 5
+GPIO.output(5, True) ## Turn on GPIO pin 5
 
 
 # What time is it?
@@ -41,7 +41,7 @@ sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--responseWindow', default = '2')
-parser.add_argument('--interTrialInterval', default = '.5')
+parser.add_argument('--fixationDuration', default = '.5')
 parser.add_argument('--wrongTimeout', default = '1')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
@@ -56,8 +56,8 @@ DEBUGGING = True
 if DEBUGGING:
     args.volume = '0.1'
     args.playWhiteNoise = 'False'
+    args.responseWindow = '5'
 
-argTrialLength = args.interTrialInterval
 argWrongTimeout = args.wrongTimeout
 argEnableSound = True if args.enableSound == 'True' else False
 argPlayWelcomeTone = args.playWelcomeTone
@@ -82,9 +82,11 @@ soundPaths = {
     'Divider' : wavePath + "/divider_tone.wav"
     }
 
+speaker = ifaces.speakerInterface(soundPaths = soundPaths,
+    volume = argVolume, debugging = DEBUGGING, enableSound = argEnableSound, maxtime=250)
+    
 playWelcomeTone = True if args.playWelcomeTone == 'True' else False
 if playWelcomeTone:
-    pygame.mixer.init()
     welcomeChime = pygame.mixer.Sound(wavePath + "/violin_C5.wav")
     welcomeChime.set_volume(2 * argVolume)
     welcomeChime.play()
@@ -94,7 +96,6 @@ if playWhiteNoise:
     whiteNoise = pygame.mixer.Sound(wavePath + "/whitenoisegaussian.wav")
     whiteNoise.set_volume(argVolume)
     whiteNoise.play(-1)
-
 
 # Build an arbiter and a state machine
 arbiter = Arbiter()
@@ -112,9 +113,6 @@ dummyMotor = ifaces.motorInterface(
 
 SM.dummyMotor = dummyMotor
 
-speaker = ifaces.speakerInterface(soundPaths = soundPaths,
-    volume = argVolume, debugging = False, enableSound = argEnableSound)
-
 """
 State Machine
 """
@@ -130,16 +128,11 @@ juicePin = GPIO_Output(
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
 
-# initialize outputs to movementOff
-GPIO.output(13,False)
-GPIO.output(6,False)
-GPIO.output(26,False)
-pdb.set_trace()
 # Add attributes to the state machine
 SM.startEnable = False
-SM.nominalTrialLength = float(argTrialLength)
+SM.nominalFixationDur = float(args.fixationDuration)
 SM.wrongTimeout = float(argWrongTimeout)
-SM.trialLength = SM.nominalTrialLength
+SM.fixationDur = SM.nominalFixationDur
 SM.nextEnableTime = 0
 
 SM.remoteOverride = None
@@ -175,9 +168,10 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.easyReward = 1
-SM.hardReward = 2
-SM.jackpotReward = 3
+SM.cuedRewardDur = 0.5
+SM.uncuedRewardDur = 2
+SM.cuedJackpotRewardDur = 2
+SM.uncuedJackpotRewardDur = 2
 SM.jackpot = True
 
 # advance motor to starting position
@@ -192,7 +186,7 @@ assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 #units of hundredth of a degree
 SM.jackpotSets = [(4,3), (4,5)]
-SM.movementMagnitudes = np.linspace(30,50,nSteps) * 1e2
+SM.movementMagnitudes = np.linspace(10,30,nSteps) * 1e2
 SM.movementSets = {
     'small' : [(4,1),(4,2),(4,3)],
     'big' : [(4,7),(4,6),(4,5)]
@@ -256,10 +250,11 @@ SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
     thisLog, printStatements = DEBUGGING, timePenalty=2))
 #
 SM.add_state(turnPedalCompoundWithStim(['chooseNextTrial'], SM, 'turnPedalCompound',
-    logFile = thisLog, printStatements = DEBUGGING, phantom=DEBUGGING))
+    logFile = thisLog, printStatements = DEBUGGING, phantom=DEBUGGING,
+    smallProba=0.5, cWProba=0.5, angleJitter=5e2, waitAtPeak=0.1))
 #
 SM.add_state(chooseReportDifficulty(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
-    logFile = None, probaBins = [0, 1/10, 1]))
+    logFile = None, probaBins = [0, .99, 1]))
 #
 SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
     'waitHard'], SM, 'waitHard', logFile = thisLog, printStatements = DEBUGGING))
@@ -267,7 +262,10 @@ SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
 SM.add_state(wait_for_correct_button_timed(['good', 'bad',
     'waitEasy'], SM, 'waitEasy', logFile = thisLog, printStatements = DEBUGGING))
 #
-SM.add_state(variableGood(['post_trial'], SM, 'good', logFile = thisLog, printStatements = DEBUGGING))
+SM.add_state(
+    stochasticGood(
+        ['post_trial'], SM, 'good',
+        logFile=thisLog, printStatements=DEBUGGING, threshold=0.1))
 #
 SM.add_state(bad(['post_trial'], SM, 'bad', logFile = thisLog, printStatements = DEBUGGING))
 #
@@ -300,10 +298,10 @@ remoteControlMap = {
     "right" : motor.forward,
     "left" :  motor.backward,
     "enter" : motor.go_home,
-    "a" : speaker.tone_player('Go'),
-    "b" : speaker.tone_player('Good'),
-    "c" : speaker.tone_player('Bad'),
-    "prev" : triggerJuice,
+    "1" : speaker.tone_player('Go'),
+    "2" : speaker.tone_player('Good'),
+    "3" : speaker.tone_player('Bad'),
+    "play" : triggerJuice,
     "quit" : overRideAdder(SM, 'end')
 }
 

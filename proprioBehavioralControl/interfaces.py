@@ -77,11 +77,12 @@ class pedalBLEInterface(object):
 
 class speakerInterface(object):
     def __init__(self, soundPaths, volume = 1,
-        debugging = False, enableSound = True):
-
+        debugging = False, enableSound = True, maxtime=None):
+        pygame.mixer.pre_init(44100, -16, 2, 2048)
         pygame.mixer.init()
         self.volume = volume
         self.enableSound = enableSound
+        self.maxtime = maxtime
 
         # audio, Pygame implementation
         self.sounds = {key : pygame.mixer.Sound(value)
@@ -94,7 +95,7 @@ class speakerInterface(object):
 
     def play_tone(self, key):
         if self.enableSound:
-            self.sounds[key].play()
+            self.sounds[key].play(maxtime=self.maxtime)
 
         if self.debugging:
             print('Played the '+ key + ' tone')

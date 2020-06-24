@@ -76,7 +76,7 @@ class fixation(gameState):
         self.checkTimedOut()
 
         if self.firstVisit:
-            self.nextTimeOut = self.timeNow + parent.trialLength
+            self.nextTimeOut = self.timeNow + parent.fixationDur
 
         sys.stdout.write("At fixation. Time left: %4.4f \r"
          % (self.nextTimeOut - self.timeNow))
@@ -114,7 +114,7 @@ class strict_fixation(gameState):
             if self.printStatements:
                 print('Started strict fixation')
             self.timeNow = time.time()
-            self.nextTimeOut = self.timeNow + parent.trialLength
+            self.nextTimeOut = self.timeNow + parent.fixationDur
             self.enableLog = False
             self.firstVisit = False
 
@@ -390,14 +390,12 @@ class turnPedalCompoundWithStim(gameState):
         direction = 'forward' if dirDraw < self.cWProba else 'backward'
         # re-evaluate the block lengths
         leftProp = (parent.leftTally) / (parent.leftTally + parent.rightTally)
-        rightProp = (parent.rightTally) / (parent.leftTally + parent.rightTally)
-        # exagerate differences
-        # bias = leftProp - 0.5 # positive if biased towards the left, negative otherwise
         self.smallProba = 1 - leftProp
         #
         if self.printStatements:
             print('\ntally of left choices is : %4.2f' % parent.leftTally)
             print('\ntally of right choices is : %4.2f' % parent.rightTally)
+            print('\nprobability to draw small is : %4.2f' % self.smallProba)
         #
         # Draw a pair of indices into SM.magnitudes and set the first throw to the first magnitude
         magnitudeIndex = random.choice(parent.movementSets[category])
@@ -517,7 +515,7 @@ class turnPedalCompoundWithStim(gameState):
             event_label = parent.request_last_touch()
             if event_label and self.timePenalty:
                 # if erroneous button press, play bad tone, and penalize with an extra
-                # 500 millisecond wait
+                # timePenalty millisecond wait
                 parent.speaker.play_tone('Wait')
                 sleepTime = sleepTime + self.timePenalty
                 # clear button queue for next iteration
@@ -680,9 +678,12 @@ class wait_for_correct_button_timed(gameState):
             self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.responseWindow
 
-            if parent.easyReward is not None:
+            if parent.cuedRewardDur is not None:
                 parent.juicePin.instructions =\
-                    ['flip', 'flip', 'flip', ('pulse', parent.easyReward)]
+                    ['flip', 'flip', 'flip', ('pulse', parent.cuedRewardDur)]
+            if (parent.cuedJackpotRewardDur is not None) and (parent.jackpot):
+                    parent.juicePin.instructions =\
+                        ['flip', 'flip', 'flip', ('pulse', parent.cuedJackpotRewardDur)]
         # Read from inbox
         event_label = parent.request_last_touch()
 
@@ -699,9 +700,9 @@ class wait_for_correct_button_timed(gameState):
                 print(' ')
 
             if event_label == 'right':
-                parent.rightTally = parent.smallTally * 0.9 + 1
+                parent.rightTally = parent.rightTally * 0.9 + 1
             elif  event_label == 'left':
-                parent.leftTally = parent.bigTally * 0.9 + 1
+                parent.leftTally = parent.leftTally * 0.9 + 1
 
             if event_label == parent.correctButton:
                 if self.logFile:
@@ -769,9 +770,12 @@ class wait_for_correct_button_timed_uncued(gameState):
             self.timeNow = time.time()
             self.nextTimeOut = self.timeNow + parent.responseWindow
 
-            if parent.hardReward is not None:
+            if parent.uncuedRewardDur is not None:
                 parent.juicePin.instructions =\
-                    ['flip', 'flip', 'flip', ('pulse', parent.hardReward)]
+                    ['flip', 'flip', 'flip', ('pulse', parent.uncuedRewardDur)]
+            if (parent.uncuedJackpotRewardDur is not None) and (parent.jackpot):
+                parent.juicePin.instructions =\
+                    ['flip', 'flip', 'flip', ('pulse', parent.uncuedJackpotRewardDur)]
 
         # Read from inbox
         event_label = parent.request_last_touch()
@@ -791,17 +795,14 @@ class wait_for_correct_button_timed_uncued(gameState):
             if self.printStatements:
                 print(' ')
 
-            if event_label == 'right':
+            if event_label == 'left':
                 parent.leftTally = 0.9 * parent.leftTally + 1
-            elif  event_label == 'left':
+            elif  event_label == 'right':
                 parent.rightTally = 0.9 * parent.rightTally + 1
 
             if event_label == parent.correctButton:
                 if self.logFile:
                     self.logEvent('correct button', event_label)
-                if parent.jackpotReward is not None and parent.jackpot:
-                    parent.juicePin.instructions =\
-                        ['flip', 'flip', 'flip', ('pulse', parent.jackpotReward)]
                 if self.printStatements:
                     print("\n%s button pressed correctly!" % event_label)
                 return self.nextState[0] # usually the good state
@@ -872,18 +873,28 @@ class good(gameState):
     def operation(self, parent):
         if self.printStatements:
             print('Good job!')
-        parent.trialLength = parent.nominalTrialLength
+        parent.fixationDuration = parent.nominalFixationDur
         parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]
 
-class variableGood(gameState):
+class stochasticGood(gameState):
+    def __init__(
+            self, nextState, parent, stateName,
+            logFile=None, printStatements=False,
+            threshold=None):
+        super().__init__(
+            nextState, parent, stateName,
+            logFile=logFile, printStatements=printStatements)
+        self.threshold = threshold
     # TODO: add amount dispensed to log
     def operation(self, parent):
         if self.printStatements:
             print('Good job!')
-        parent.trialLength = parent.nominalTrialLength
-        if random.uniform(0,1) > 0.1:
+            if parent.jackpot:
+                print('JACKPOT!')
+        parent.fixationDuration = parent.nominalFixationDur
+        if random.uniform(0,1) > self.threshold:
             parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')
         return self.nextState[0]
@@ -893,7 +904,7 @@ class bad(gameState):
     def operation(self, parent):
         if self.printStatements:
             print('Wrong! Try again!')
-        parent.trialLength = parent.nominalTrialLength + parent.wrongTimeout
+        parent.fixationDur = parent.nominalFixationDur + parent.wrongTimeout
         parent.speaker.play_tone('Bad')
         return self.nextState[0]
 

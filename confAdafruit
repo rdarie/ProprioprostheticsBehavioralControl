@@ -1,8 +1,36 @@
 begin
   remote = *
-  button = KEY_BACK
+  button = KEY_PLAYPAUSE
+  prog = training
+  config = play
+end
+
+begin
+  remote = *
+  button = KEY_STOP
   prog = training
   config = quit
+end
+
+begin
+  remote = *
+  button = KEY_BACK
+  prog = training
+  config = back
+end
+
+begin
+  remote = *
+  button = KEY_VOLUMEUP
+  prog = training
+  config = volumeup
+end
+
+begin
+  remote = *
+  button = KEY_VOLUMEDOWN
+  prog = training
+  config = volumedown
 end
 
 begin
@@ -64,6 +92,13 @@ end
 begin
   remote = *
   button = KEY_RIGHT
+  prog = training
+  config = right
+end
+
+begin
+  remote = *
+  button = KEY_SETUP
   prog = training
   config = right
 end
