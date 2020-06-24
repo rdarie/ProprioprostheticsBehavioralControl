@@ -117,13 +117,17 @@ SM.dummyMotor = dummyMotor
 State Machine
 """
 # Setup IO Pins
-butPin = GPIO_Input(pins = [12, 16], labels = ['left', 'right'],
+butPin = GPIO_Input(
+    pins = [12, 16],
+    # pins = [4, 11],
+    labels = ['left', 'right'],
     triggers = [GPIO.RISING, GPIO.RISING],
     levels = [GPIO.HIGH, GPIO.HIGH], bouncetime = 200)
 timestamper = Event_Timestamper()
 
 juicePin = GPIO_Output(
     pins=[13,6,26,25],
+    # pins=[16, 6, 12, 25],
     labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
