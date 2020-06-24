@@ -120,8 +120,8 @@ anode_list = [];
 
 % stimProtocol = 'manual';
 % stimProtocol = 'diagnostic';
-% stimProtocol = 'sweep';
-stimProtocol = 'continuous';
+stimProtocol = 'sweep';
+% stimProtocol = 'continuous';
 % % % % % % %
 minAmp = 60;
 maxAmp = 1200;
@@ -145,11 +145,10 @@ if strcmp(stimProtocol, 'sweep')
     phaseDuration_ms = 0.150;
     % Train interval between successive pulse trains (sec)
     TI = 0.7 + trainLength_ms / 1000;
-    CI = 0;
 elseif strcmp(stimProtocol, 'continuous')
     % frequencies_Hz = [50, 100, 1000, 10000];
     frequencies_Hz = [10, 50, 100, 1000];
-    % frequencies_Hz = [1000];
+    frequencies_Hz = [1000];
     % frequencies_Hz = [100.2];
     nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 5);
     % How many times to repeat the train
@@ -160,9 +159,7 @@ elseif strcmp(stimProtocol, 'continuous')
     trainLength_ms = 4000;
     phaseDuration_ms = 0.150;
     % Train interval (s)
-    TI = trainLength_ms / 1000;
-    % Combination interval (s) - extra pause between combinations
-    CI = 120;
+    TI = 60 + trainLength_ms / 1000;
     % Single
 elseif strcmp(stimProtocol, 'diagnostic')
     % frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
@@ -177,7 +174,6 @@ elseif strcmp(stimProtocol, 'diagnostic')
     phaseDuration_ms = 0.150;
     % Train interval (s)
     TI = 2.7 + trainLength_ms / 1000;
-    CI = 0;
     % Single
 elseif strcmp(stimProtocol, 'manual')
     frequencies_Hz = [100];
@@ -192,7 +188,6 @@ elseif strcmp(stimProtocol, 'manual')
     phaseDuration_ms = 0.150;
     % Train interval (s)
     TI = 0.7 + trainLength_ms / 1000;
-    CI = 0;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -293,8 +288,6 @@ try
                 pause(TI)
             end
             % toc;
-            % pause in between combinations
-            pause(CI);
         end
         toc;
     end
