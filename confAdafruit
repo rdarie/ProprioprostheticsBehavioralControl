@@ -63,6 +63,27 @@ end
 
 begin
   remote = *
+  button = KEY_KP4
+  prog = training
+  config = 4
+end
+
+begin
+  remote = *
+  button = KEY_KP5
+  prog = training
+  config = 5
+end
+
+begin
+  remote = *
+  button = KEY_KP6
+  prog = training
+  config = 6
+end
+
+begin
+  remote = *
   button = KEY_ENTER
   prog = training
   config = enter

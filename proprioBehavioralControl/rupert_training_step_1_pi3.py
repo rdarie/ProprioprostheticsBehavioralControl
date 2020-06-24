@@ -42,7 +42,7 @@ sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 parser = argparse.ArgumentParser()
 parser.add_argument('--responseWindow', default = '2')
 parser.add_argument('--fixationDuration', default = '.5')
-parser.add_argument('--wrongTimeout', default = '1')
+parser.add_argument('--wrongTimeout', default = '.5')
 parser.add_argument('--enableSound', default = 'True')
 parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'True')
@@ -186,7 +186,7 @@ assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 #units of hundredth of a degree
 SM.jackpotSets = [(4,3), (4,5)]
-SM.movementMagnitudes = np.linspace(10,30,nSteps) * 1e2
+SM.movementMagnitudes = np.linspace(1,10,nSteps) * 1e2
 SM.movementSets = {
     'small' : [(4,1),(4,2),(4,3)],
     'big' : [(4,7),(4,6),(4,5)]
@@ -247,7 +247,7 @@ if logToWeb:
 
 # connect state machine states
 SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
-    thisLog, printStatements = DEBUGGING, timePenalty=2))
+    thisLog, printStatements = DEBUGGING, timePenalty=0))
 #
 SM.add_state(turnPedalCompoundWithStim(['chooseNextTrial'], SM, 'turnPedalCompound',
     logFile = thisLog, printStatements = DEBUGGING, phantom=DEBUGGING,
@@ -301,6 +301,7 @@ remoteControlMap = {
     "1" : speaker.tone_player('Go'),
     "2" : speaker.tone_player('Good'),
     "3" : speaker.tone_player('Bad'),
+    "5": motor.toggle_jogging,
     "play" : triggerJuice,
     "quit" : overRideAdder(SM, 'end')
 }
@@ -331,7 +332,8 @@ finally:
         }
 
     summit.messageTrans(stimParams)
-
+    motor.stop_all()
+    dummyMotor.stop_all()
     motor.step_size = 135e2
     motor.forward()
     motor.set_home()

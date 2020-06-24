@@ -127,8 +127,10 @@ class motorInterface(object):
     # Configure the serial port connection the the Si3540 motor driver
     def __init__(
             self, serialPortName='/dev/ttyUSB0',
-            debugging=False, velocity=1, acceleration=30,
-            deceleration=30, useEncoder=False, dummy=False):
+            debugging=False,
+            velocity=1, acceleration=30, deceleration=30,
+            jogVelocity=1, jogAcceleration=30,
+            useEncoder=False, dummy=False):
         self.dummy = dummy
         try:
             if self.dummy:
@@ -159,6 +161,7 @@ class motorInterface(object):
                 timeout=1
                 )
 
+        self.nowJogging = False
         self.current_position = 0
         self.step_size = 5e2
         self.serialPortName = serialPortName
@@ -206,6 +209,17 @@ class motorInterface(object):
 
         self.deceleration = deceleration #move speed in rev/sec^2.
         serial_message = "DE" + str(self.deceleration) + "\r"
+        self.serial.write(serial_message.encode())
+        
+        serial_message = "JE\r"
+        self.serial.write(serial_message.encode())
+        
+        self.jogVelocity = jogVelocity
+        serial_message = "JS" + str(self.jogVelocity) + "\r"
+        self.serial.write(serial_message.encode())
+
+        self.jogAcceleration = jogAcceleration #move speed in rev/sec^2.
+        serial_message = "JA" + str(self.jogAcceleration) + "\r"
         self.serial.write(serial_message.encode())
 
         serial_message = "SA\r"
@@ -326,6 +340,20 @@ class motorInterface(object):
         self.serial.write(serial_message.encode())
         if self.debugging:
             print("Stopped all and exiting!")
+
+    def toggle_jogging(self):
+        if self.nowJogging:
+            serial_message = "SJ\r"
+            self.serial.write(serial_message.encode())
+            self.nowJogging = False
+            if self.debugging:
+                print("Ending jog!")
+        elif not self.nowJogging:
+            serial_message = "CJ\r"
+            self.serial.write(serial_message.encode())
+            self.nowJogging = True
+            if self.debugging:
+                print("Starting to jog!")
 
 import zmq, json
 class summitInterface(object):
