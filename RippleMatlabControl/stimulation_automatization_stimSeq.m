@@ -4,13 +4,13 @@ close all; fclose('all'); clc; clear all;
 folderPath = 'C:\Users\Peep Sheep\Trellis\dataFiles\';
 % folderPath = 'C:\Users\Radu\Documents\GitHub\matlabController\';
 dateStr = datestr(now, 'yyyymmdd');
-subFolderPath = sprintf('%s%s1200-Benchtop', folderPath, dateStr);
+subFolderPath = sprintf('%s%s1300-Peep', folderPath, dateStr);
 if ~isfolder(subFolderPath)
     mkdir(subFolderPath)
 end
 stimResLookup = [1, 2, 5, 10, 20];
-stimRes = 4;
-disableErrors = 1;
+stimRes = 5;
+disableErrors = 0;
 %%
 % Initialize xippmex
 status = xippmex;
@@ -41,21 +41,21 @@ end
 
 % Get NIP clock time right before turning streams on (30 kHz sampling) recChans
 % set stimulation resolution:
-try
-    xippmex('stim', 'enable', 0);
-    xippmex('stim', 'res', Chans, [stimRes])
-    xippmex('stim', 'enable', Chans);
-catch ME
-    if disableErrors
-        disp(ME.message);
-    else
-        rethrow(ME);
-    end
-end
+% try
+%     xippmex('stim', 'enable', 0);
+%     xippmex('stim', 'res', Chans, [stimRes]);
+%     xippmex('stim', 'enable', Chans);
+% catch ME
+%     if disableErrors
+%         disp(ME.message);
+%     else
+%         rethrow(ME);
+%     end
+% end
 
 %% Change Ripple indices to Paddle 24 indices
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-blockID = 5
+blockID = 1
 % which bank is connected to which headstage determines to what channels
 % correspond each electrode, please set this here :
 A = 'x';
@@ -108,26 +108,61 @@ if m=='N'
 	error('Trial aborted')
 end
 % Cathode/Anode setting
-whichNano = 2;
+whichNano = 1;
 % 1 caudal 2 rostral
-cathode_list = [23];
-anode_list = [18];
+cathode_list = [11];
+anode_list = [];
 
-stimProtocol = 'manual';
+% stimProtocol = 'manual';
+% stimProtocol = 'diagnostic';
 % stimProtocol = 'sweep';
+stimProtocol = 'continuous';
 % % % % % % %
-maxAmp = 230;
+minAmp = 60;
+maxAmp = 240;
+% phaseRatio = 3;
+phaseRatio = 1;
+% 2. Stimulation signal settings [constant]
+% trainLength_ms = 300;
+trainLength_ms = 12000;
+% phaseDuration_ms = 0.150;
+phaseDuration_ms = 0.035;
 % % % % % % %
 % Sweep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(stimProtocol, 'sweep')
     frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
-    % frequencies_Hz = [100];
-    nominalAmplitudeSteps_uA = linspace(60, maxAmp, 7);
+    % frequencies_Hz = [100.2];
+    nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 7);
     % How many times to repeat the train
     repetition = 3;
     % Number of combination array's copy
     comb_copies = 5;
+    % Train interval (s)
+    TI = 0.7 + trainLength_ms / 1000;
+elseif strcmp(stimProtocol, 'continuous')
+    % frequencies_Hz = [50, 100, 1000, 10000];
+    frequencies_Hz = [10, 50, 100, 1000];
+    frequencies_Hz = [1000];
+    % frequencies_Hz = [100.2];
+    nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 5);
+    % How many times to repeat the train
+    repetition = 1;
+    % Number of combination array's copy
+    comb_copies = 1;
+    % Train interval (s)
+    TI = 60 + trainLength_ms / 1000;
+    % Single
+elseif strcmp(stimProtocol, 'diagnostic')
+    % frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
+    frequencies_Hz = [100.2];
+    nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 3);
+    % How many times to repeat the train
+    repetition = 1;
+    % Number of combination array's copy
+    comb_copies = 3;
+    % Train interval (s)
+    TI = 2.7 + trainLength_ms / 1000;
     % Single
 elseif strcmp(stimProtocol, 'manual')
     frequencies_Hz = [100];
@@ -135,14 +170,10 @@ elseif strcmp(stimProtocol, 'manual')
     % How many times to repeat the train
     repetition = 1;
     % Number of combination array's copy
-    comb_copies = 1;
+    comb_copies = 5;
+    % Train interval (s)
+    TI = 0.7 + trainLength_ms / 1000;
 end
-phaseRatio = 3;
-% 2. Stimulation signal settings [constant]
-trainLength_ms = 300;
-phaseDuration_ms = 0.150;
-% Train interval (s)
-TI = 0.7 + trainLength_ms / 1000;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [Freq, Amp] = meshgrid(frequencies_Hz, nominalAmplitudeSteps_uA);
@@ -167,16 +198,17 @@ end
 clc
 logFileID = fopen(logFileName, 'a');
 % Turn off any ongoing stim
-try
-    xippmex('stim', 'enable', 0);
-    xippmex('stim', 'res', Chans, [stimRes])
-catch ME
-    if disableErrors
-        disp(ME.message);
-    else
-        rethrow(ME);
-    end
-end
+% try
+%     xippmex('stim', 'enable', 0);
+%     xippmex('stim', 'res', Chans, [stimRes]);
+%     xippmex('stim', 'enable', stimElectrodes);
+% catch ME
+%     if disableErrors
+%         disp(ME.message);
+%     else
+%         rethrow(ME);
+%     end
+% end
 try
     for i=1:comb_copies
         comb_array = reshape(c, [], 2);
@@ -203,7 +235,10 @@ try
                 %%%%% RD 04-24-2020 Don't think this is necessary
                 % Enable stimulation for cathodes and anodes selected previously
                 try
-                    xippmex('stim', 'enable', stimElectrodes);
+                    xippmex('stim', 'enable', 0);
+                    % xippmex('stim', 'res', stimElectrodes, [3]);
+                    % xippmex('stim', 'enable', stimElectrodes);
+                    % m = input(sprintf('Writing to log %d Do you want to continue, Y/N [Y]:', blockID),'s');
                 catch ME
                     if disableErrors
                         disp(ME.message);
@@ -214,9 +249,11 @@ try
                 % Stim time is roughly 0.5 ms -> negligeable
                 try
                     stimNIPTime = xippmex('time');
+                    currStimRes = xippmex('stim', 'res', stimElectrodes);
                     xippmex('stimseq', stimCmd);
                     saveStim = jsonencode(struct(...
-                        'stimCmd', stimCmd, 't', cast(stimNIPTime, 'int64')));
+                        'stimCmd', stimCmd, 't', cast(stimNIPTime, 'int64'),...
+                        'stimRes', currStimRes));
                     % Save to log
                     if ~firstBlockEntry
                         fprintf(logFileID, ', ');
@@ -240,16 +277,16 @@ try
         toc;
     end
 catch
-    try
-        xippmex('stim', 'enable', 0);
-        xippmex('stim', 'res', Chans, [stimRes]);
-    catch ME
-        if disableErrors
-            disp(ME.message);
-        else
-            rethrow(ME);
-        end
-    end
+%     try
+%         xippmex('stim', 'enable', 0);
+%         xippmex('stim', 'res', Chans, [stimRes]);
+%     catch ME
+%         if disableErrors
+%             disp(ME.message);
+%         else
+%             rethrow(ME);
+%         end
+%     end
 end
 fclose(logFileID);
 fprintf('\nRun complete!\n');

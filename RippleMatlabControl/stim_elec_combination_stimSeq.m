@@ -44,18 +44,18 @@ if isempty(cathode_list_ripple) && isempty(anode_list_ripple)
 elseif isempty(cathode_list_ripple)
     stimElectrodes       = anode_list_ripple;
     phaseAmplitude_steps = ones(1, nA) * floor(reqAmp / (stimStep * nA));
-    polarity  = zeros(1, nA);
+    polarity  = ones(1, nA);
 elseif isempty(anode_list_ripple)
     stimElectrodes       = cathode_list_ripple;
     phaseAmplitude_steps = ones(1, nC) * floor(reqAmp / (stimStep * nC));
-    polarity  = ones(1, nC);
+    polarity  = zeros(1, nC);
 else
     stimElectrodes       = [cathode_list_ripple, anode_list_ripple];
     phaseAmplitude_steps = [...
         ones(1, nC) * floor(reqAmp / (stimStep * nC)),...
         ones(1, nA) * floor(reqAmp / (stimStep * nA))];
     % Current flows from 1st electrode to 2nd
-    polarity  = [ones(1, nC), zeros(1, nA)];
+    polarity  = [zeros(1, nC), ones(1, nA)];
 end
 
 frequency_Hz         = ones(1, nTotalContacts) * reqFreq;
