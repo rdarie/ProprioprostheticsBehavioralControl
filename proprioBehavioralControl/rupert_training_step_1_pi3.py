@@ -118,7 +118,7 @@ State Machine
 """
 # Setup IO Pins
 butPin = GPIO_Input(
-    pins = [12, 16],
+    pins = [16, 12],
     # pins = [4, 11],
     labels = ['left', 'right'],
     triggers = [GPIO.RISING, GPIO.RISING],
@@ -126,7 +126,7 @@ butPin = GPIO_Input(
 timestamper = Event_Timestamper()
 
 juicePin = GPIO_Output(
-    pins=[13,6,26,25],
+    pins=[13, 6, 26, 25],
     # pins=[16, 6, 12, 25],
     labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
@@ -155,8 +155,10 @@ SM.add_mode('sink', (['main_thread'], SM.inbox))
 SM.add_mode('source', (['distributor'], True))
 
 # send button presses to the state machine inbox
-SM.request_last_touch = arbiter.connect([(butPin, 'read_last', True), SM],
-    ['polled'])
+SM.request_last_touch = arbiter.connect(
+    [(butPin, 'read_last', True), SM],
+    ['polled']
+    )
 
 # set up event logging
 logLocally = True if args.logLocally == 'True' else False
