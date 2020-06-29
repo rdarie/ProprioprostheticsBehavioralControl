@@ -233,7 +233,8 @@ class turnPedalCompoundWithStim(gameState):
                         parent.dummyMotor.backward()
                 waitUntilDoneMoving(parent.motor)
             else:
-                time.sleep(expectedMovementDuration)
+                if expectedMovementDuration > 0:
+                    time.sleep(expectedMovementDuration)
             print('Sleeping until return')
             time.sleep(self.waitAtPeak)
             # return phase of first movement
@@ -251,7 +252,8 @@ class turnPedalCompoundWithStim(gameState):
                     parent.dummyMotor.go_home()
                 waitUntilDoneMoving(parent.motor)
             else:
-                time.sleep(expectedMovementDuration)
+                if expectedMovementDuration > 0:
+                    time.sleep(expectedMovementDuration)
             return
 
         self.payload = {"Stimulus ID Pair": magnitudeIndex,
