@@ -103,7 +103,7 @@ SM = State_Machine()
 
 motor = ifaces.motorInterface(
     serialPortName = '/dev/ttyUSB0',debugging = DEBUGGING, velocity = 2,
-    jogVelocity=2, jogAcceleration=30,
+    jogVelocity=1.5, jogAcceleration=10,
     acceleration = 250, deceleration = 250, useEncoder = True,
     dummy=DEBUGGING)
 
@@ -184,11 +184,12 @@ SM.cuedJackpotRewardDur = 2
 SM.uncuedJackpotRewardDur = 2
 SM.jackpot = True
 
-# advance motor to starting position
-motor.step_size = 135e2
-motor.backward()
-time.sleep(2)
-motor.set_home()
+#  advance motor to starting position
+
+# motor.step_size = 135e2
+# motor.backward()
+# time.sleep(2)
+# motor.set_home()
 
 # Set up throw distances
 nSteps  = 9 # must be odd so that there is an equal # of A > B and B < A trials
@@ -342,11 +343,11 @@ finally:
         }
 
     summit.messageTrans(stimParams)
-    motor.stop_all()
-    dummyMotor.stop_all()
-    motor.step_size = 135e2
-    motor.forward()
-    motor.set_home()
+    # motor.stop_all()
+    # dummyMotor.stop_all()
+    # motor.step_size = 135e2
+    # motor.forward()
+    # motor.set_home()
     if logToWeb:
         # this is the path to the the source file
         src = SM.logFileName

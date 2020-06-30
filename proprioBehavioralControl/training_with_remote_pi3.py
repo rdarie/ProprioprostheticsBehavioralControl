@@ -25,11 +25,11 @@ parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'False')
 parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
-parser.add_argument('--volume', default = '0.01')
+parser.add_argument('--volume', default = '0.2')
 
 args = parser.parse_args()
 
-DEBUGGING = True
+DEBUGGING = False
 if DEBUGGING:
     args.volume = '0.2'
 # Power indicator
@@ -71,11 +71,14 @@ if playWhiteNoise:
     whiteNoise = pygame.mixer.Sound(wavePath + "/whitenoisegaussian.wav")
     whiteNoise.set_volume(argVolume/2)
     whiteNoise.play(-1)
-
-motor = ifaces.motorInterface(debugging = True)
+motor = ifaces.motorInterface(
+    serialPortName = '/dev/ttyUSB0',debugging = DEBUGGING, velocity = 1.5,
+    jogVelocity=2, jogAcceleration=50, acceleration = 7, deceleration = 7, useEncoder = True,
+    dummy=DEBUGGING)
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
-    volume = argVolume, debugging = True, enableSound = argEnableSound)
+    volume = argVolume, debugging = DEBUGGING, enableSound = argEnableSound, maxtime=250)
 
+motor.step_size = 1500
 # Setup IO Pins
 butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
     triggers = [GPIO.FALLING, GPIO.FALLING],
@@ -166,10 +169,12 @@ try:
         "right" : motor.forward,
         "left" :  motor.backward,
         "enter" : motor.go_home,
-        "a" : speaker.tone_player('Go'),
-        "b" : speaker.tone_player('Good'),
-        "c" : speaker.tone_player('Bad'),
-        "0" : triggerJuice
+        "1" : speaker.tone_player('Go'),
+        "2" : speaker.tone_player('Good'),
+        "3" : speaker.tone_player('Bad'),
+        "5": motor.toggle_jogging,
+        "play" : triggerJuice,
+        "quit" : overRideAdder(SM, 'end')
     }
 
     remoteListener = ifaces.sparkfunRemoteInterface(
