@@ -54,7 +54,7 @@ args = parser.parse_args()
 
 DEBUGGING = True
 if DEBUGGING:
-    args.volume = '0.1'
+    args.volume = '0.05'
     args.playWhiteNoise = 'False'
     args.responseWindow = '5'
 
@@ -174,10 +174,10 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.cuedRewardDur = 0.5
+SM.cuedRewardDur = 1
 SM.uncuedRewardDur = 2
-SM.cuedJackpotRewardDur = 2
-SM.uncuedJackpotRewardDur = 2
+SM.cuedJackpotRewardDur = 3
+SM.uncuedJackpotRewardDur = 3
 SM.jackpot = True
 
 # advance motor to starting position

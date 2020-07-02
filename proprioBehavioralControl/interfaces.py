@@ -271,14 +271,28 @@ class motorInterface(object):
             print("Currently at %d steps" % self.current_position)
 
     def shorten(self):
-        self.step_size -= 100
+        self.step_size -= 500
         if self.debugging:
             print("Shortened step size to: %d steps" % self.step_size)
 
     def lengthen(self):
-        self.step_size += 100
+        self.step_size += 500
         if self.debugging:
             print("Lengthened step size to: %d steps" % self.step_size)
+    
+    def release_holding(self):
+        self.idle_current = 0.1
+        serial_message = "CI" + str(self.idle_current) + "\r"
+        self.serial.write(serial_message.encode())
+        if self.debugging:
+            print("Disabled holding torque")
+    
+    def enable_holding(self):
+        self.idle_current = 7
+        serial_message = "CI" + str(self.idle_current) + "\r"
+        self.serial.write(serial_message.encode())
+        if self.debugging:
+            print("Enabled holding torque")
 
     def default(self):
         print("Default ")

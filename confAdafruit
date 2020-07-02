@@ -84,6 +84,27 @@ end
 
 begin
   remote = *
+  button = KEY_KP7
+  prog = training
+  config = 7
+end
+
+begin
+  remote = *
+  button = KEY_KP8
+  prog = training
+  config = 8
+end
+
+begin
+  remote = *
+  button = KEY_KP9
+  prog = training
+  config = 9
+end
+
+begin
+  remote = *
   button = KEY_ENTER
   prog = training
   config = enter

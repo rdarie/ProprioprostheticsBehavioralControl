@@ -173,6 +173,10 @@ try:
         "2" : speaker.tone_player('Good'),
         "3" : speaker.tone_player('Bad'),
         "5": motor.toggle_jogging,
+        "4": motor.release_holding,
+        "6": motor.enable_holding,
+        "7": motor.shorten,
+        "9": motor.lengthen,
         "play" : triggerJuice,
         "quit" : overRideAdder(SM, 'end')
     }
