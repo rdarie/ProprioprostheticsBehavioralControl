@@ -78,7 +78,7 @@ motor = ifaces.motorInterface(
 speaker = ifaces.speakerInterface(soundPaths = soundPaths,
     volume = argVolume, debugging = DEBUGGING, enableSound = argEnableSound, maxtime=250)
 
-motor.step_size = 1500
+motor.step_size = 2000
 # Setup IO Pins
 butPin = GPIO_Input(pins = [4, 17], labels = ['red', 'green'],
     triggers = [GPIO.FALLING, GPIO.FALLING],

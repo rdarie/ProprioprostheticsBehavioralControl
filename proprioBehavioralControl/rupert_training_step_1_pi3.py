@@ -256,7 +256,8 @@ SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
     thisLog, printStatements = DEBUGGING, timePenalty=0))
 #
 SM.add_state(turnPedalCompoundWithStim(['chooseNextTrial'], SM, 'turnPedalCompound',
-    logFile = thisLog, printStatements = DEBUGGING, phantom=DEBUGGING,
+    logFile = thisLog, printStatements = DEBUGGING,
+    # phantom=DEBUGGING,
     smallProba=0.5, cWProba=0.5, angleJitter=5e2, waitAtPeak=0.1))
 #
 SM.add_state(chooseReportDifficulty(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',

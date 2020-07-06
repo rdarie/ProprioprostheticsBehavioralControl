@@ -102,7 +102,7 @@ arbiter = Arbiter()
 SM = State_Machine()
 
 motor = ifaces.motorInterface(
-    serialPortName = '/dev/ttyUSB0',debugging = DEBUGGING, velocity = 2,
+    serialPortName = '/dev/ttyUSB0',debugging = DEBUGGING, velocity = 1.5,
     jogVelocity=1.5, jogAcceleration=10,
     acceleration = 250, deceleration = 250, useEncoder = True,
     dummy=DEBUGGING)
@@ -110,7 +110,7 @@ motor = ifaces.motorInterface(
 SM.motor = motor
 
 dummyMotor = ifaces.motorInterface(
-    serialPortName = '/dev/ttyUSB1',debugging = DEBUGGING, velocity = 2,
+    serialPortName = '/dev/ttyUSB1',debugging = DEBUGGING, velocity = 1.5,
     jogVelocity=2, jogAcceleration=30,
     acceleration = 250, deceleration = 250, useEncoder = True,
     dummy=DEBUGGING)
@@ -178,10 +178,10 @@ SM.magnitudeQueue = []
 SM.lastCategory = None
 SM.lastDirection = None
 
-SM.cuedRewardDur = 0.5
-SM.uncuedRewardDur = 2
-SM.cuedJackpotRewardDur = 2
-SM.uncuedJackpotRewardDur = 2
+SM.cuedRewardDur = 1
+SM.uncuedRewardDur = 3
+SM.cuedJackpotRewardDur = 3
+SM.uncuedJackpotRewardDur = 3
 SM.jackpot = True
 
 #  advance motor to starting position
@@ -197,7 +197,7 @@ assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 #units of hundredth of a degree
 SM.jackpotSets = [(4,3), (4,5)]
-SM.movementMagnitudes = np.linspace(1,10,nSteps) * 1e2
+SM.movementMagnitudes = np.linspace(5,20,nSteps) * 1e2
 SM.movementSets = {
     'small' : [(4,1),(4,2),(4,3)],
     'big' : [(4,7),(4,6),(4,5)]
@@ -239,6 +239,7 @@ SM.stimAmpMultipliers = [0.25, 0.5, 0.75]
 SM.stimFreqs = [50, 100]
 summit = ifaces.summitInterface(transmissionDelay=30e-3, dummy=True)
 SM.summit = summit
+SM.phantomMotor = True
 
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
@@ -259,9 +260,9 @@ if logToWeb:
 # connect state machine states
 SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
     thisLog, printStatements = DEBUGGING, timePenalty=0))
-#
+
 SM.add_state(turnPedalCompoundWithStim(['chooseNextTrial'], SM, 'turnPedalCompound',
-    logFile = thisLog, printStatements = DEBUGGING, phantom=True,
+    logFile = thisLog, printStatements = DEBUGGING,
     smallProba=0.5, cWProba=0.5, angleJitter=5e2, waitAtPeak=0.1))
 #
 SM.add_state(chooseReportDifficulty(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
@@ -297,6 +298,13 @@ arbiter.connect([(SM, 'source', True), juicePin])
 def triggerJuice():
     speaker.tone_player('Good')()
     SM.outbox.put('Reward')
+    
+# motor override
+def toggleMotor():
+    if SM.phantomMotor:
+        SM.phantomMotor = False
+    else:
+        SM.phantomMotor = True
 
 # separately log all button presses
 arbiter.connect([butPin, timestamper, thisLog])
@@ -314,6 +322,7 @@ remoteControlMap = {
     "3" : speaker.tone_player('Bad'),
     "5": motor.toggle_jogging,
     "play" : triggerJuice,
+    "enter": toggleMotor,
     "quit" : overRideAdder(SM, 'end')
 }
 
