@@ -81,5 +81,7 @@ __pycache__
 
 .ftpconfig
 
+*.asv
+
 .vscode*
 RippleMatlabControl/202004241200-Peep/Block001_autoStimLog.json

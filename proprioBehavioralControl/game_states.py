@@ -158,13 +158,14 @@ class turnPedalCompoundWithStim(gameState):
     def __init__(
             self, nextState, parent, stateName,
             logFile=None, printStatements=False,
-            phantom=False, timePenalty=0,
+            # phantom=False, 
+            timePenalty=0,
             smallProba=0.5, cWProba=0.5,
             angleJitter=5e2, waitAtPeak=0.5):
         super().__init__(
             nextState, parent, stateName,
             logFile=logFile, printStatements=printStatements)
-        self.phantom = phantom
+        # self.phantom = phantom
         self.timePenalty = timePenalty
         self.smallProba = smallProba
         self.cWProba = cWProba
@@ -222,7 +223,7 @@ class turnPedalCompoundWithStim(gameState):
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
             if parent.summit.transmissionDelay > 0:
                 time.sleep(parent.summit.transmissionDelay + 1 / frequency)
-            if not self.phantom:
+            if not parent.phantomMotor:
                 if direction == 'forward':
                     parent.motor.forward()
                     if parent.dummyMotor:
@@ -233,7 +234,8 @@ class turnPedalCompoundWithStim(gameState):
                         parent.dummyMotor.backward()
                 waitUntilDoneMoving(parent.motor)
             else:
-                time.sleep(expectedMovementDuration)
+                if expectedMovementDuration > 0:
+                    time.sleep(expectedMovementDuration)
             print('Sleeping until return')
             time.sleep(self.waitAtPeak)
             # return phase of first movement
@@ -245,13 +247,14 @@ class turnPedalCompoundWithStim(gameState):
             parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
             if parent.summit.transmissionDelay > 0:
                 time.sleep(parent.summit.transmissionDelay + 1 / frequency)
-            if not self.phantom:
+            if not parent.phantomMotor:
                 parent.motor.go_home()
                 if parent.dummyMotor:
                     parent.dummyMotor.go_home()
                 waitUntilDoneMoving(parent.motor)
             else:
-                time.sleep(expectedMovementDuration)
+                if expectedMovementDuration > 0:
+                    time.sleep(expectedMovementDuration)
             return
 
         self.payload = {"Stimulus ID Pair": magnitudeIndex,
