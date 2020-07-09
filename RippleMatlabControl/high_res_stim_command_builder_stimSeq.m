@@ -78,38 +78,52 @@ end
 
 for k=1:length(stimElectrodes)
     cmd(k).elec     = stimElectrodes(k);
-    cmd(k).period   = cast(floor(30e3 / frequency_Hz(k)), 'int64');
+    periodInClockCycles = cast(floor(30e3 / frequency_Hz(k)), 'int64');
+    phaseLength = round(30e3 * (phaseDuration_ms(k) / 1000));
+    interWaveformPeriod = floor(periodInClockCycles / frequencyMultiplier) - (phaseLength * phaseRatios(k) + 1);
+    cmd(k).period   = periodInClockCycles;
     cmd(k).repeats  = cast(ceil(trainLength_ms(k) * frequency_Hz(k) / 1000), 'int64');
-    cmd(k).action   = 'immed';
+    cmd(k).action   = 'allcyc';
     
     % Create the first phase (cathodic) for stimulation.  This has a 
     % duration of 200 us (6 clock cycles at 30 kHz), an amplitude of 
     % 10, and negative polarity.
     secondPhaseAmplitude = floor(phaseAmplitude_steps(k) / phaseRatios(k));
     firstPhaseAmplitude = phaseRatios(k) * secondPhaseAmplitude;
-    phaseLength = round(30e3 * (phaseDuration_ms(k) / 1000));
-    cmd(k).seq(1) = struct(...
-        'length', phaseLength, 'ampl', firstPhaseAmplitude,...
-        'pol', polarity(k), ...
-        'fs', 0, 'enable', 1, 'delay', 0, 'ampSelect', 1);
-    % Create the inter-phase interval.  This has a duration of 100 us
-    % (3 clock cycles at 30 kHz).  The amplitude is zero.  The 
-    % stimulation amp is still used so that the stim markers send by 
-    % the NIP will properly contain this phase.
-    cmd(k).seq(2) = struct(...
-        'length', 1, 'ampl', 0,...
-        'pol', 0, 'fs', 0, ...
-        'enable', 0, 'delay', 0, 'ampSelect', 1);
-    % Create the second, anodic phase.  This has a duration of 200 us 
-    % (6 cycles at 30 kHz), and amplitude of 10, and positive polarity.
     if polarity(k)
         invPolarity = 0;
     else
         invPolarity = 1;
     end
-    cmd(k).seq(3) = struct(...
-        'length', phaseRatios(k) * phaseLength, 'ampl', secondPhaseAmplitude,...
-        'pol', invPolarity, ...
-        'fs', 0, 'enable', 1, 'delay', 0, 'ampSelect', 1);
+    for extraIdx = 1:frequencyMultiplier
+        cmd(k).seq((extraIdx - 1) * 3 + 1) = struct(...
+            'length', phaseLength, 'ampl', firstPhaseAmplitude,...
+            'pol', polarity(k), ...
+            'fs', 0, 'enable', 1, 'delay', 0, 'ampSelect', 1);
+        
+%         % Create the inter-phase interval.  This has a duration of 100 us
+%         % (3 clock cycles at 30 kHz).  The amplitude is zero.  The
+%         % stimulation amp is still used so that the stim markers send by
+%         % the NIP will properly contain this phase.
+%         cmd(k).seq((extraIdx - 1) * 4 + 2) = struct(...
+%             'length', 1, 'ampl', 0,...
+%             'pol', 0, 'fs', 0, ...
+%             'enable', 0, 'delay', 0, 'ampSelect', 1);
+        
+        % Create the second, anodic phase.  This has a duration of 200 us
+        % (6 cycles at 30 kHz), and amplitude of 10, and positive polarity.
+        cmd(k).seq((extraIdx - 1) * 3 + 2) = struct(...
+            'length', phaseRatios(k) * phaseLength, 'ampl', secondPhaseAmplitude,...
+            'pol', invPolarity, ...
+            'fs', 0, 'enable', 1, 'delay', 0, 'ampSelect', 1);
+        % Create the inter-biphasic waveform interval.  
+        % The amplitude is zero.  The
+        % stimulation amp is still used so that the stim markers send by
+        % the NIP will properly contain this phase.
+        cmd(k).seq((extraIdx - 1) * 3 + 3) = struct(...
+            'length', 1, 'ampl', 0,...
+            'pol', 0, 'fs', 0, ...
+            'enable', 0, 'delay', 0, 'ampSelect', 1);
+    end
 end
 stimCmd = cmd;

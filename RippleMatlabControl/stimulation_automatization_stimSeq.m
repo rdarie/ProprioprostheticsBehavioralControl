@@ -15,7 +15,7 @@ stimResLookup = [1, 2, 5, 10, 20];
 stimRes = 5;
 
 % set to true if ripple system is disconnected, to dry run code
-disableErrors = 1;
+disableErrors = 0;
 %%
 % Initialize xippmex
 status = xippmex;
@@ -60,7 +60,7 @@ end
 
 %% Change Ripple indices to Paddle 24 indices
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-blockID = 1
+blockID = 3
 % which bank is connected to which headstage determines to what channels
 % correspond each electrode, please set this here :
 A = 'x';
@@ -113,18 +113,18 @@ if m=='N'
 	error('Trial aborted')
 end
 % Cathode/Anode setting
-whichNano = 1;
+whichNano = 2;
 % 1 caudal 2 rostral
-cathode_list = [11];
-anode_list = [];
+cathode_list = [10, 14];
+anode_list = [6, 17];
 
 % stimProtocol = 'manual';
 % stimProtocol = 'diagnostic';
-% stimProtocol = 'sweep';
-stimProtocol = 'continuous';
+stimProtocol = 'sweep';
+% stimProtocol = 'continuous';
 % % % % % % %
-minAmp = 60;
-maxAmp = 1200;
+minAmp = 240;
+maxAmp = 900;
 % % % % % % %
 % Sweep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -148,7 +148,7 @@ if strcmp(stimProtocol, 'sweep')
     CI = 0;
 elseif strcmp(stimProtocol, 'continuous')
     % frequencies_Hz = [50, 100, 1000, 10000];
-    frequencies_Hz = [10, 50, 100, 1000];
+    frequencies_Hz = [50, 1000];
     % frequencies_Hz = [1000];
     % frequencies_Hz = [100.2];
     nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 5);
@@ -157,10 +157,11 @@ elseif strcmp(stimProtocol, 'continuous')
     % Number of combination array's copy
     comb_copies = 1;
     phaseRatio = 1;
+    % TODO: use "allcyc" to queue up these things
     trainLength_ms = 4000;
-    phaseDuration_ms = 0.150;
+    phaseDuration_ms = 0.033;
     % Train interval (s)
-    TI = trainLength_ms / 1000;
+    TI = 0.1 + trainLength_ms / 1000;
     % Combination interval (s) - extra pause between combinations
     CI = 120;
     % Single
@@ -309,6 +310,11 @@ catch
 %             rethrow(ME);
 %         end
 %     end
+if disableErrors
+    disp(ME.message);
+else
+    rethrow(ME);
+end
 end
 fclose(logFileID);
 fprintf('\nRun complete!\n');
