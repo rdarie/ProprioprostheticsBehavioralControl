@@ -180,7 +180,8 @@ class turnPedalCompoundWithStim(gameState):
         direction = 'forward' if dirDraw < self.cWProba else 'backward'
         # re-evaluate the block lengths
         leftProp = (parent.leftTally) / (parent.leftTally + parent.rightTally)
-        self.smallProba = 1 - leftProp
+        # self.smallProba = 1 - leftProp
+        self.smallProba = leftProp
         #
         if self.printStatements:
             print('\ntally of left choices is : %4.2f' % parent.leftTally)

@@ -40,7 +40,7 @@ GPIO.output(5, True) ## Turn on GPIO pin 5
 sessionTime = time.strftime("%Y_%m_%d_%H_%M_%S")
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--responseWindow', default = '5')
+parser.add_argument('--responseWindow', default = '2')
 parser.add_argument('--fixationDuration', default = '.5')
 parser.add_argument('--wrongTimeout', default = '.5')
 parser.add_argument('--enableSound', default = 'True')
@@ -48,7 +48,7 @@ parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'False')
 parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
-parser.add_argument('--volume', default = '0.05')
+parser.add_argument('--volume', default = '0.1')
 
 args = parser.parse_args()
 
@@ -122,8 +122,8 @@ State Machine
 """
 # Setup IO Pins
 butPin = GPIO_Input(
-    pins = [12, 16],
-    # pins = [16, 12],
+    # pins = [12, 16],
+    pins = [16, 12],
     # pins = [4, 11],
     labels = ['left', 'right'],
     triggers = [GPIO.RISING, GPIO.RISING],
@@ -131,8 +131,8 @@ butPin = GPIO_Input(
 timestamper = Event_Timestamper()
 
 juicePin = GPIO_Output(
-    pins=[6, 13, 26, 25],
-    # pins=[13, 6, 26, 25],
+    # pins=[6, 13, 26, 25],
+    pins=[13, 6, 26, 25],
     # pins=[16, 6, 12, 25],
     labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
@@ -260,10 +260,10 @@ if logToWeb:
 
 # connect state machine states
 SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
-    thisLog, printStatements = DEBUGGING, timePenalty=0))
+    thisLog, printStatements = DEBUGGING, timePenalty=0.3))
 
 SM.add_state(turnPedalCompoundWithStim(['chooseNextTrial'], SM, 'turnPedalCompound',
-    logFile = thisLog, printStatements = DEBUGGING,
+    logFile = thisLog, printStatements = True,
     smallProba=0.5, cWProba=0.5, angleJitter=5e2, waitAtPeak=0.1))
 #
 SM.add_state(chooseReportDifficulty(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
