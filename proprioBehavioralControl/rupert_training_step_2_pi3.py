@@ -112,7 +112,7 @@ SM.motor = motor
 dummyMotor = ifaces.motorInterface(
     serialPortName = '/dev/ttyUSB1',debugging = DEBUGGING, velocity = 1.5,
     jogVelocity=2, jogAcceleration=30,
-    acceleration = 10, deceleration = 10, useEncoder = True,
+    acceleration = 15, deceleration = 15, useEncoder = True,
     dummy=DEBUGGING)
 
 SM.dummyMotor = dummyMotor
@@ -199,7 +199,7 @@ assert nSteps % 2 == 1
 midStep = int((nSteps - 1) / 2)
 #units of hundredth of a degree
 SM.jackpotSets = [(4,3), (4,5)]
-SM.movementMagnitudes = np.linspace(5,20,nSteps) * 1e2
+SM.movementMagnitudes = np.linspace(10,100,nSteps) * 1e2
 SM.movementSets = {
     'small' : [(4,1),(4,2),(4,3)],
     'big' : [(4,7),(4,6),(4,5)]

@@ -493,9 +493,11 @@ class wait_for_correct_button_timed(gameState):
                 print(' ')
 
             if event_label == 'right':
-                parent.rightTally = parent.rightTally * 0.9 + 1
+                parent.rightTally = parent.rightTally * 0.7 + 1
+                parent.leftTally = parent.leftTally * 0.7
             elif  event_label == 'left':
-                parent.leftTally = parent.leftTally * 0.9 + 1
+                parent.leftTally = parent.leftTally * 0.7 + 1
+                parent.rightTally = parent.rightTally * 0.7
 
             if event_label == parent.correctButton:
                 if self.logFile:
@@ -589,9 +591,11 @@ class wait_for_correct_button_timed_uncued(gameState):
                 print(' ')
 
             if event_label == 'left':
-                parent.leftTally = 0.9 * parent.leftTally + 1
+                parent.leftTally = 0.7 * parent.leftTally + 1
+                parent.rightTally = 0.7 * parent.rightTally
             elif  event_label == 'right':
-                parent.rightTally = 0.9 * parent.rightTally + 1
+                parent.leftTally = 0.7 * parent.leftTally
+                parent.rightTally = 0.7 * parent.rightTally + 1
 
             if event_label == parent.correctButton:
                 if self.logFile:
@@ -686,7 +690,7 @@ class stochasticGood(gameState):
             print('Good job!')
             if parent.jackpot:
                 print('JACKPOT!')
-        parent.fixationDuration = parent.nominalFixationDur
+        parent.fixationDur = parent.nominalFixationDur
         if random.uniform(0,1) > self.threshold:
             parent.outbox.put('Reward')
         parent.speaker.play_tone('Good')

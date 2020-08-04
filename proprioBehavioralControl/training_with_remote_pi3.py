@@ -21,7 +21,7 @@ from helperFunctions import serial_ports
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--enableSound', default = 'True')
-parser.add_argument('--playWelcomeTone', default = 'True')
+parser.add_argument('--playWelcomeTone', default = 'False')
 parser.add_argument('--playWhiteNoise', default = 'False')
 parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
