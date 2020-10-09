@@ -2,19 +2,16 @@
 % Clean the world
 close all; fclose('all'); clc; clear all;
 % folderPath = 'C:\Users\Peep Sheep\Trellis\dataFiles\';
-folderPath = 'F:\Trellis\';
-
-% folderPath = 'C:\Users\Radu\Desktop\';
+folderPath = 'F:\Trellis\raw\';
+% folderPath = 'C:\Users\Radu\Documents\GitHub\matlabController\';
 dateStr = datestr(now, 'yyyymmdd');
-subFolderPath = sprintf('%s%s1300-Peep', folderPath, dateStr);
+% CHANGE ME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subFolderPath = sprintf('%s%s1400-Peep', folderPath, dateStr);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if ~isfolder(subFolderPath)
     mkdir(subFolderPath)
 end
 stimResLookup = [1, 2, 5, 10, 20];
-% Manually set stimRes to the index of the current active stim resolution,
-% from Trellis
-% TODO: automate based on amplitude bounds
-stimRes = 5;
 
 % set to true if ripple system is disconnected, to dry run code
 disableErrors = 0;
@@ -62,7 +59,13 @@ end
 
 %% Change Ripple indices to Paddle 24 indices
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-blockID = 1
+% CHANGE ME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+blockID = 2
+% Manually set stimRes to the index of the current active stim resolution,
+% from Trellis
+% TODO: automate based on amplitude bounds
+stimRes = 5;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % which bank is connected to which headstage determines to what channels
 % correspond each electrode, please set this here :
 A = 'x';
@@ -74,20 +77,16 @@ C = 'z';
 % z assigned to C bank [electrodes 17-24 above 1.5mA]
 if A == 'x' && B == 'y'&& C == 'z'
     Chans_paddle = [1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
-    % do not use double channels
     Chans_paddle_to_ripple = {1, 3, 5, 7, 2, 4, 6, 8,    9, 11, 13, 15, 10, 12, 14, 16,    17, 19, 21, 23, 18, 20, 22, 24};
-    % use double channels
     % Chans_paddle_to_ripple = {1, 3, 5, 7, 2, 4, 6, 8,    9, 11, 13, 15, 10, 12, 14, 16,    [17; 25], [19; 27], [21; 29], [23; 31], [18; 26], [20; 28], [22; 30], [24; 32]};
     % y assigned to C bank [electrodes 9-16 above 1.5 mA]
 elseif A == 'z' && B == 'x' && C == 'y'
     Chans_paddle = [1, 2, 3, 4, 5 ,6, 7, 8,    9, 10, 11, 12, 13, 14, 15, 16,   17, 18, 19, 20, 21, 22, 23, 24];
     Chans_paddle_to_ripple = [9,11,13,15,10,12,14,16,  [17,25] , [19,27] , [21, 29] , [23, 31] , [18, 26] , [20, 28] , [22, 30] , [24, 32] , 1, 3, 5, 7, 2, 4, 6, 8];
-    % Chans_paddle_to_ripple = [9,11,13,15,10,12,14,16,  [17,25] , [19,27] , [21, 29] , [23, 31] , [18, 26] , [20, 28] , [22, 30] , [24, 32] , 1, 3, 5, 7, 2, 4, 6, 8];
     % x assigned to C bank [electrodes 1-8 above 1.5 mA]
 elseif A == 'y' && B == 'z' && C == 'x'
     Chans_paddle = [1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
     Chans_paddle_to_ripple = [ [17; 25] , [19; 27] , [21; 29] , [23; 31] , [18; 26] , [20; 28] , [22; 30] , [24; 32] ,     1, 3, 5, 7, 2, 4, 6, 8,       9, 11, 13, 15, 10, 12, 14, 16 ];
-    % Chans_paddle_to_ripple = [ [17; 25] , [19; 27] , [21; 29] , [23; 31] , [18; 26] , [20; 28] , [22; 30] , [24; 32] ,     1, 3, 5, 7, 2, 4, 6, 8,       9, 11, 13, 15, 10, 12, 14, 16 ];
 else
     sprintf('Error in assigning headstages, please change A, B and C assignments')
     return;
@@ -120,68 +119,89 @@ if m=='N'
 	error('Trial aborted')
 end
 % Cathode/Anode setting
-whichNanoProbe = 1;
-% 1 caudal 2 rostral
+
+whichNano = 1; % 1 caudal 2 rostral
+
 cathode_list = [21];
 anode_list = [];
-%
-whichNanoBlock = 2;
-block_cathode_list = [1, 9, 13, 20];
-block_anode_list = [];
-block_FR = 50;
-block_amp = 900;
-block_TL = 2000;
-block_PD = 0.033;
-block_PR = 1;
-block_params = [block_FR, block_amp, block_TL, block_PD, block_PR];
-blockFreqMultiplier = 1;
-nBlockBurnIn = 60;
-% 
+jsonRowIdx = 7;
+
 % stimProtocol = 'manual';
-stimProtocol = 'sweep';
+stimProtocol = 'diagnostic';
+% stimProtocol = 'sweep';
+% stimProtocol = 'continuous';
 % % % % % % %
-minAmp = 60;
-maxAmp = 900;
+minAmp = 480;
+maxAmp = 1500;
+ampStepSizeUA = 120;
 % % % % % % %
 % Sweep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(stimProtocol, 'sweep')
-    frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
-    nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 7);
+    parameter_list = [10.2, 960];
+    % nominalAmplitudeSteps_uA = minAmp:ampStepSizeUA:maxAmp;
     % How many times to repeat the train
-    repetition = 5;
+    repetition = 10;
     % Number of combination array's copy
-    comb_copies = 3;
+    comb_copies = 1;
+    % phase raatio is the aspect ratio of biphasic pulses, where 1 is the
+    % phaseDuration (in msec) of the first phase, and the second phase is
+    % phaseRatio times longer.
     phaseRatio = 3;
-    % repeat the waveform frequencyMultiplier times to achieve
-    % rates higher than 1000 Hz
-    frequencyMultiplier = 1;
+    % duration of the train of pulses
+    trainLength_ms = 300;
+    % duration of the first phase of the biphasic waveform
+    phaseDuration_ms = 0.150;
+    % Train interval between successive pulse trains (sec)
+    TI = 0.7 + trainLength_ms / 1000;
+    CI = 0;
+elseif strcmp(stimProtocol, 'diagnostic')
+    % frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
+    jsonData = jsondecode(fileread('emg_parameters2.json'));
+    parameter_list = [];
+    for i = 1:5
+        columnName = sprintf('proposed_EES_%d', i);
+        stringsToSearch = jsonData(jsonRowIdx).(columnName);
+        [expr,res] = regexp(stringsToSearch, ' Hz, ', 'match', 'split');
+        freq = str2double(res{1});
+        if freq<3
+            freq=3;
+        end
+        amp = str2double(res{2}(1: end-3));
+        parameter_list = [parameter_list; [freq, -2 * amp]];
+    end
+    % frequencies_Hz = [100.2];
+    % nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 3);
+    % How many times to repeat the train
+    repetition = 10;
+    % Number of combination array's copy
+    comb_copies = 1;
+    phaseRatio = 3;
     trainLength_ms = 300;
     phaseDuration_ms = 0.150;
     % Train interval (s)
-    TI = block_TL / 1000 + .15;
-    % Combination interval (s) - extra pause between combinations
+    TI = 0.7 + trainLength_ms / 1000;
     CI = 0;
+    % Single
 elseif strcmp(stimProtocol, 'manual')
     frequencies_Hz = [100];
     nominalAmplitudeSteps_uA = [maxAmp];
-    frequencyMultiplier = 1;
     % How many times to repeat the train
     repetition = 1;
     % Number of combination array's copy
     comb_copies = 1;
     %
-    phaseRatio = 3;
+    phaseRatio = 1;
     trainLength_ms = 300;
     phaseDuration_ms = 0.150;
     % Train interval (s)
-    TI = block_TL / 1000;
+    TI = 0.7 + trainLength_ms / 1000;
     CI = 0;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[Freq, Amp] = meshgrid(frequencies_Hz, nominalAmplitudeSteps_uA);
-c = cat(2, Freq', Amp');
+% [Freq, Amp] = meshgrid(frequencies_Hz, nominalAmplitudeSteps_uA);
+% c = cat(2, Freq', Amp');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % To reach 50 repetition per combination, one way is to :
@@ -193,13 +213,9 @@ c = cat(2, Freq', Amp');
 % 6. Repeat all the previous steps 5 times to reach 50 repeats
 % per combination randomly ordered in time
 
-thisPaddleToRippleLookupProbe = Chans_paddle_to_ripple;
-for i=1:size(thisPaddleToRippleLookupProbe, 2)
-    thisPaddleToRippleLookupProbe{i} = thisPaddleToRippleLookupProbe{i} + (whichNanoProbe-1) * 32;
-end
-thisPaddleToRippleLookupBlock = Chans_paddle_to_ripple;
-for i=1:size(thisPaddleToRippleLookupBlock, 2)
-    thisPaddleToRippleLookupBlock{i} = thisPaddleToRippleLookupBlock{i} + (whichNanoBlock-1) * 32;
+thisPaddleToRippleLookup = Chans_paddle_to_ripple;
+for i=1:size(thisPaddleToRippleLookup, 2)
+    thisPaddleToRippleLookup{i} = thisPaddleToRippleLookup{i} + (whichNano-1) * 32;
 end
 % Execute Stim
 % Iterates over combination array copies
@@ -217,52 +233,11 @@ logFileID = fopen(logFileName, 'a');
 %         rethrow(ME);
 %     end
 % end
-for co=1:nBlockBurnIn
-    % Function call to stimulate
-    [blockCmd, blockElectrodes] = high_res_stim_command_builder_stimSeq(...
-        block_cathode_list, block_anode_list, thisPaddleToRippleLookupBlock,...
-        block_params, stimResLookup(stimRes), blockFreqMultiplier);
-    try
-        stimNIPTime = xippmex('time');
-        currStimRes = xippmex('stim', 'res', blockElectrodes);
-        xippmex('stimseq', blockCmd);
-        saveStim = jsonencode(struct(...
-            'stimCmd', blockCmd, 't', cast(stimNIPTime, 'int64'),...
-            'stimRes', currStimRes, 'frequencyMultiplier', frequencyMultiplier, 'blockFreqMultiplier', blockFreqMultiplier));
-        % Save to log
-        if ~firstBlockEntry
-            fprintf(logFileID, ', ');
-        end
-        firstBlockEntry = 0;
-        fprintf(logFileID, '%s', saveStim);
-    catch ME
-        if disableErrors
-            disp(ME.message);
-        else
-            rethrow(ME);
-        end
-      end
-    pause(TI);
-%     % Train Interval
-%     refT = tic;
-%     elapsedT = toc(refT);
-%     while elapsedT < TI
-%         % disp(elapsedT);
-%         elapsedT = toc(refT);
-%         if xippmex('stim', 'enable') == 0
-%             break
-%         end
-%     end
-end
-
 try
-    [blockCmd, blockElectrodes] = high_res_stim_command_builder_stimSeq(...
-        block_cathode_list, block_anode_list, thisPaddleToRippleLookupBlock,...
-        block_params, stimResLookup(stimRes), blockFreqMultiplier);
     for i=1:comb_copies
-        comb_array = reshape(c, [], 2);
+        comb_array = parameter_list;
         comb_array_length = size(comb_array, 1);
-        % tic;
+        tic;
         % Iterate over each combination inside the i-th combination array
         for j=1:comb_array_length
             % fprintf('Combination %d / %d\n', [(i-1)*comb_array_length + j,comb_array_length*comb_copies])
@@ -278,43 +253,9 @@ try
             % tic;
             for k=1:repetition
                 % Function call to stimulate
-                [stimCmd, stimElectrodes] = high_res_stim_command_builder_stimSeq(...
-                    cathode_list, anode_list, thisPaddleToRippleLookupProbe,...
-                    randomizedParamList, stimResLookup(stimRes), frequencyMultiplier);
-                % Stim time is roughly 0.5 ms -> negligeable
-                concatenatedCmd = [blockCmd, stimCmd];
-                allActiveElectrodes = [blockElectrodes, stimElectrodes];
-                try
-                    stimNIPTime = xippmex('time');
-                    currStimRes = xippmex('stim', 'res', allActiveElectrodes);
-                    xippmex('stimseq', concatenatedCmd);
-                    saveStim = jsonencode(struct(...
-                        'stimCmd', concatenatedCmd, 't', cast(stimNIPTime, 'int64'),...
-                        'stimRes', currStimRes, 'frequencyMultiplier', frequencyMultiplier, 'blockFreqMultiplier', blockFreqMultiplier));
-                    % Save to log
-                    if ~firstBlockEntry
-                        fprintf(logFileID, ', ');
-                    end
-                    firstBlockEntry = 0;
-                    fprintf(logFileID, '%s', saveStim);
-                catch ME
-                    if disableErrors
-                        disp(ME.message);
-                    else
-                        rethrow(ME);
-                    end
-                end
-%                 % Train Interval
-%                 refT = tic;
-%                 elapsedT = toc(refT);
-%                 while elapsedT < TI
-%                     % disp(elapsedT);
-%                     elapsedT = toc(refT);
-%                     if xippmex('stim', 'enable') == 0
-%                         break
-%                     end
-%                 end
-                pause(TI)
+                [stimCmd, stimElectrodes] = stim_elec_combination_stimSeq(...
+                    cathode_list, anode_list, thisPaddleToRippleLookup,...
+                    randomizedParamList, stimResLookup(stimRes));
                 %%%%% RD 04-24-2020 Don't think this is necessary
                 % Enable stimulation for cathodes and anodes selected previously
                 try
@@ -329,14 +270,37 @@ try
                         rethrow(ME);
                     end
                 end
+                % Stim time is roughly 0.5 ms -> negligeable
+                try
+                    stimNIPTime = xippmex('time');
+                    currStimRes = xippmex('stim', 'res', stimElectrodes);
+                    xippmex('stimseq', stimCmd);
+                    saveStim = jsonencode(struct(...
+                        'stimCmd', stimCmd, 't', cast(stimNIPTime, 'int64'),...
+                        'stimRes', currStimRes));
+                    % Save to log
+                    if ~firstBlockEntry
+                        fprintf(logFileID, ', ');
+                    end
+                    firstBlockEntry = 0;
+                    fprintf(logFileID, '%s', saveStim);
+                catch ME
+                    if disableErrors
+                        disp(ME.message);
+                    else
+                        rethrow(ME);
+                    end
+                end
                 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 % fprintf('\nExecuting\n%s\n', saveStim);
+                % Train Interval
+                pause(TI)
             end
             % toc;
             % pause in between combinations
             pause(CI);
         end
-        % toc;
+        toc;
     end
 catch ME
 %     try
