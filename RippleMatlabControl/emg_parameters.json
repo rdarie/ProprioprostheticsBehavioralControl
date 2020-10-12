@@ -7,6 +7,7 @@
             0.11769447618078889,
             0.4010164964171103
         ],
+        "stimRes": 4,
         "groudtruth_EES": [
             "50.29999669790268 Hz, -360.00001430511475 uA",
             0,
@@ -26,6 +27,10 @@
         "proposed_electrode_config": [
             "rostralZ_e24"
         ],
+        "whichNano": 2,
+        "cathode_list": [23],
+        "anode_list": [],
+        "ampl_multiplier": 2,
         "proposed_EES_1": "87.73797607421875 Hz, -257.7652282714844 uA",
         "proposed_EES_2": "88.21931457519531 Hz, -254.21368408203125 uA",
         "proposed_EES_3": "91.40005493164062 Hz, -236.14260864257812 uA",
@@ -40,6 +45,7 @@
             0.11769447618078889,
             0.4010164964171103
         ],
+        "stimRes": 4,
         "groudtruth_EES": [
             "50.29999669790268 Hz, -360.00001430511475 uA",
             0,
@@ -59,6 +65,10 @@
         "proposed_electrode_config": [
             "rostralZ_e21"
         ],
+        "whichNano": 2,
+        "cathode_list": [21],
+        "anode_list": [],
+        "ampl_multiplier": 2,
         "proposed_EES_1": "44.198333740234375 Hz, -307.876708984375 uA",
         "proposed_EES_2": "64.77278137207031 Hz, -252.30850219726562 uA",
         "proposed_EES_3": "48.36016082763672 Hz, -289.9068908691406 uA",
@@ -73,6 +83,7 @@
             0.11769447618078889,
             0.4010164964171103
         ],
+        "stimRes": 4,
         "groudtruth_EES": [
             "50.29999669790268 Hz, -360.00001430511475 uA",
             0,
@@ -92,6 +103,10 @@
         "proposed_electrode_config": [
             "rostralZ_e20"
         ],
+        "whichNano": 2,
+        "cathode_list": [20],
+        "anode_list": [],
+        "ampl_multiplier": 2,
         "proposed_EES_1": "61.36466598510742 Hz, -245.6441650390625 uA",
         "proposed_EES_2": "62.115779876708984 Hz, -239.10169982910156 uA",
         "proposed_EES_3": "73.07701873779297 Hz, -41.681819915771484 uA",
@@ -106,6 +121,7 @@
             0.11769447618078889,
             0.4010164964171103
         ],
+        "stimRes": 4,
         "groudtruth_EES": [
             "50.29999669790268 Hz, -360.00001430511475 uA",
             0,
@@ -125,6 +141,10 @@
         "proposed_electrode_config": [
             "rostralX_e05"
         ],
+        "whichNano": 1,
+        "cathode_list": [5],
+        "anode_list": [],
+        "ampl_multiplier": 1,
         "proposed_EES_1": "71.9048080444336 Hz, -422.1693420410156 uA",
         "proposed_EES_2": "79.55632019042969 Hz, -422.4664306640625 uA",
         "proposed_EES_3": "84.91620635986328 Hz, -418.314208984375 uA",

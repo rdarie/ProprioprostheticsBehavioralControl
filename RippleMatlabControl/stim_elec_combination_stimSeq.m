@@ -1,11 +1,11 @@
-function [stimCmd, stimElectrodes] = stim_elec_combination_stimSeq(...
+function [stimCmd, stimElectrodes, achievedParams] = stim_elec_combination_stimSeq(...
     cathode_list, anode_list, Chans_paddle_to_ripple, randomizedParamList, stimStep)
 
 % This function is randomizing combinations of stim parameters for a given
 % combination of anode(s) and cathode(s), it returns a stimString that is
 % further used to trigger the defined stimulation
 
-verbose = false;
+verbose = true;
 
 % Anode = anodic pulse first (current > 0)
 % Cathode = cathodic pulse first (current < 0)
@@ -101,15 +101,15 @@ if max(phaseAmplitude_steps) * stimStep > 1500
     error('Request exceeds max current!')
 end
 
-if verbose
-    totalASteps = 0;
-    totalCSteps = 0;
-end
+totalASteps = 0;
+totalCSteps = 0;
+
 for k=1:length(stimElectrodes)
     cmd(k).elec     = stimElectrodes(k);
     cmd(k).period   = cast(floor(30e3 / frequency_Hz(k)), 'int64');
+    nearestFreq = 30e3 / cast(cmd(k).period, 'double');
     if verbose
-        fprintf('nearest available frequency is %4.2f Hz\n', 30e3 / cmd(k).period)
+        fprintf('nearest available frequency is %4.2f Hz\n', nearestFreq)
     end
     cmd(k).repeats  = cast(ceil(trainLength_ms(k) * frequency_Hz(k) / 1000), 'int64');
     cmd(k).action   = 'immed';
@@ -144,14 +144,10 @@ for k=1:length(stimElectrodes)
     % (6 cycles at 30 kHz), and amplitude of 10, and positive polarity.
     if polarity(k)
         invPolarity = 0;
-        if verbose
-            totalCSteps = totalCSteps + firstPhaseAmplitude;
-        end
+        totalASteps = totalASteps + firstPhaseAmplitude;
     else
         invPolarity = 1;
-        if verbose
-            totalASteps = totalASteps + firstPhaseAmplitude;
-        end
+        totalCSteps = totalCSteps + firstPhaseAmplitude;
     end
     cmd(k).seq(2) = struct(...
         'length', phaseRatios(k) * phaseLength, 'ampl', secondPhaseAmplitude,...
@@ -159,9 +155,10 @@ for k=1:length(stimElectrodes)
         'fs', 0, 'enable', 1, 'delay', 0, 'ampSelect', 1);
 end
 
+achievedParams = [nearestFreq, -1 * totalCSteps * stimStep];
 if verbose
     fprintf('total achieved cathodic current is %d steps (%4.2f uA)\n',...
-        totalCSteps, totalCSteps * stimStep)
+        totalCSteps, achievedParams(2))
     fprintf('total achieved anodic current is %d steps (%4.2f uA)\n',...
         totalASteps, totalASteps * stimStep)
 end

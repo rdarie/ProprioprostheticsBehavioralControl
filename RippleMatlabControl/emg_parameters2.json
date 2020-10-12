@@ -6,6 +6,7 @@
   0.11769447618078889,
   0.4010164964171103
  ],
+ "stimRes": 5,
  "groudtruth_EES": [
   "50.29999669790268 Hz, -360.00001430511475 uA",
   0.0,
@@ -25,6 +26,10 @@
  "proposed_electrode_config": [
   "rostralZ_e24"
  ],
+ "whichNano": 2,
+ "cathode_list": [24],
+ "anode_list": [],
+ "ampl_multiplier": 2,
  "proposed_EES_1": "61.113494873046875 Hz, -344.4027404785156 uA",
  "proposed_EES_2": "61.3541145324707 Hz, -342.85589599609375 uA",
  "proposed_EES_3": "61.67426300048828 Hz, -340.8108825683594 uA",
@@ -40,6 +45,7 @@
   0.11769447618078889,
   0.4010164964171103
  ],
+ "stimRes": 5,
  "groudtruth_EES": [
   "50.29999669790268 Hz, -360.00001430511475 uA",
   0.0,
@@ -59,6 +65,10 @@
  "proposed_electrode_config": [
   "rostralX_e05"
  ],
+ "whichNano": 2,
+ "cathode_list": [5],
+ "anode_list": [],
+ "ampl_multiplier": 1,
  "proposed_EES_1": "109.890625 Hz, -1302.0438232421875 uA",
  "proposed_EES_2": "110.2720718383789 Hz, -1300.7354736328125 uA",
  "proposed_EES_3": "110.17707824707031 Hz, -1300.0748291015625 uA",
@@ -74,6 +84,7 @@
   0.11769447618078889,
   0.4010164964171103
  ],
+ "stimRes": 5,
  "groudtruth_EES": [
   "50.29999669790268 Hz, -360.00001430511475 uA",
   0.0,
@@ -93,6 +104,10 @@
  "proposed_electrode_config": [
   "rostralZ_e21"
  ],
+ "whichNano": 2,
+ "cathode_list": [21],
+ "anode_list": [],
+ "ampl_multiplier": 2,
  "proposed_EES_1": "105.17594146728516 Hz, -329.7093200683594 uA",
  "proposed_EES_2": "104.0070571899414 Hz, -333.5106506347656 uA",
  "proposed_EES_3": "104.46749877929688 Hz, -331.9678955078125 uA",
@@ -108,6 +123,7 @@
   0.11769447618078889,
   0.4010164964171103
  ],
+ "stimRes": 5,
  "groudtruth_EES": [
   "50.29999669790268 Hz, -360.00001430511475 uA",
   0.0,
@@ -127,6 +143,10 @@
  "proposed_electrode_config": [
   "rostralZ_e20"
  ],
+ "whichNano": 2,
+ "cathode_list": [20],
+ "anode_list": [],
+ "ampl_multiplier": 2,
  "proposed_EES_1": "108.63059997558594 Hz, 118.47932434082031 uA",
  "proposed_EES_2": "108.73326110839844 Hz, 117.8296890258789 uA",
  "proposed_EES_3": "108.97509765625 Hz, 118.04338073730469 uA",
@@ -142,6 +162,7 @@
   0.11769447618078889,
   0.4010164964171103
  ],
+ "stimRes": 5,
  "groudtruth_EES": [
   "50.29999669790268 Hz, -360.00001430511475 uA",
   0.0,
@@ -161,6 +182,10 @@
  "proposed_electrode_config": [
   "caudalZ_e20"
  ],
+ "whichNano": 1,
+ "cathode_list": [20],
+ "anode_list": [],
+ "ampl_multiplier": 2,
  "proposed_EES_1": "30.480121612548828 Hz, -1223.5999755859375 uA",
  "proposed_EES_2": "31.45832061767578 Hz, -1214.6600341796875 uA",
  "proposed_EES_3": "30.848121643066406 Hz, -1214.5421142578125 uA",
@@ -177,6 +202,7 @@
   0.16529998866994305,
   0.06996548138255596
  ],
+ "stimRes": 5,
  "groudtruth_EES": [
   "10.199999645352364 Hz, -480.0000071525574 uA",
   0.0,
@@ -196,6 +222,10 @@
  "proposed_electrode_config": [
   "caudalZ_e20"
  ],
+ "whichNano": 1,
+ "cathode_list": [20],
+ "anode_list": [],
+ "ampl_multiplier": 2,
  "proposed_EES_1": "45.582008361816406 Hz, -680.0904541015625 uA",
  "proposed_EES_2": "46.804840087890625 Hz, -679.0462646484375 uA",
  "proposed_EES_3": "45.90067672729492 Hz, -680.540283203125 uA",
@@ -211,6 +241,7 @@
   0.16529998866994305,
   0.06996548138255596
  ],
+ "stimRes": 5,
  "groudtruth_EES": [
   "10.199999645352364 Hz, -480.0000071525574 uA",
   0.0,
@@ -230,6 +261,10 @@
  "proposed_electrode_config": [
   "caudalZ_e21"
  ],
+ "whichNano": 1,
+ "cathode_list": [21],
+ "anode_list": [],
+ "ampl_multiplier": 2,
  "proposed_EES_1": "36.36449432373047 Hz, -649.1514282226562 uA",
  "proposed_EES_2": "36.73350143432617 Hz, -647.2460327148438 uA",
  "proposed_EES_3": "37.50273895263672 Hz, -643.535400390625 uA",
@@ -245,6 +280,7 @@
   0.16529998866994305,
   0.06996548138255596
  ],
+ "stimRes": 5,
  "groudtruth_EES": [
   "10.199999645352364 Hz, -480.0000071525574 uA",
   0.0,
@@ -264,6 +300,10 @@
  "proposed_electrode_config": [
   "caudalZ_e24"
  ],
+ "whichNano": 1,
+ "cathode_list": [24],
+ "anode_list": [],
+ "ampl_multiplier": 2,
  "proposed_EES_1": "0.3818753659725189 Hz, -1017.7264404296875 uA",
  "proposed_EES_2": "2.120065450668335 Hz, -1004.9097290039062 uA",
  "proposed_EES_3": "0.9313361048698425 Hz, -1012.9877319335938 uA",
