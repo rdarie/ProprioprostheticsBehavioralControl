@@ -54,7 +54,7 @@ args = parser.parse_args()
 
 DEBUGGING = True
 if DEBUGGING:
-    args.volume = '0.2'
+    args.volume = '0.1'
     args.playWhiteNoise = 'False'
 
 argTrialLength = args.interTrialInterval
@@ -101,13 +101,15 @@ if playWhiteNoise:
 arbiter = Arbiter()
 SM = State_Machine()
 
-motor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB0',debugging = DEBUGGING, velocity = 2,
-    acceleration = 250, deceleration = 250, useEncoder = True)
+motor = ifaces.motorInterface(
+    serialPortName = '/dev/ttyUSB0',debugging = DEBUGGING, velocity = 2,
+    acceleration = 250, deceleration = 250, useEncoder = True, dummy=DEBUGGING)
 
 SM.motor = motor
 
-dummyMotor = ifaces.motorInterface(serialPortName = '/dev/ttyUSB1',debugging = DEBUGGING, velocity = 2,
-    acceleration = 250, deceleration = 250, useEncoder = True)
+dummyMotor = ifaces.motorInterface(
+    serialPortName = '/dev/ttyUSB1',debugging = DEBUGGING, velocity = 2,
+    acceleration = 250, deceleration = 250, useEncoder = True, dummy=DEBUGGING)
 
 SM.dummyMotor = dummyMotor
 
@@ -118,12 +120,14 @@ speaker = ifaces.speakerInterface(soundPaths = soundPaths,
 State Machine
 """
 # Setup IO Pins
-butPin = GPIO_Input(pins = [4, 17], labels = ['left', 'right'],
-    triggers = [GPIO.FALLING, GPIO.FALLING],
+butPin = GPIO_Input(pins = [12, 16], labels = ['left', 'right'],
+    triggers = [GPIO.RISING, GPIO.RISING],
     levels = [GPIO.HIGH, GPIO.HIGH], bouncetime = 200)
 timestamper = Event_Timestamper()
 
-juicePin = GPIO_Output(pins=[13,6,26,25], labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
+juicePin = GPIO_Output(
+    pins=[13,6,26,25],
+    labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
     instructions=['flip', 'flip', 'flip', ('pulse', .5)])
 
@@ -229,6 +233,7 @@ SM.initBlocType = {
     'direction' : 'forward'
     }
 SM.correctButton = 'left'
+
 #set up web logging
 logToWeb = True if args.logToWeb == 'True' else False
 if logToWeb:
@@ -245,28 +250,34 @@ if logToWeb:
 
     print(logEntryLocation)
 
-debugging = True
 # connect state machine states
 SM.add_state(strict_fixation(['turnPedalCompound',  'fixation'], SM, 'fixation',
-    thisLog, printStatements = debugging))
+    thisLog, printStatements = DEBUGGING, timePenalty=2))
+#
 SM.add_state(turnPedalCompoundWithStim(['chooseNextTrial'], SM, 'turnPedalCompound',
-    logFile = thisLog, printStatements = debugging))
+    logFile = thisLog, printStatements = DEBUGGING))
+#
 SM.add_state(chooseNextTrial(['waitEasy', 'waitHard'], SM, 'chooseNextTrial',
     logFile = None))
-
+#
 SM.add_state(wait_for_correct_button_timed_uncued(['good', 'bad',
-    'waitHard'], SM, 'waitHard', logFile = thisLog, printStatements = debugging))
+    'waitHard'], SM, 'waitHard', logFile = thisLog, printStatements = DEBUGGING))
+#
 SM.add_state(wait_for_correct_button_timed(['good', 'good',
-    'waitEasy'], SM, 'waitEasy', logFile = thisLog, printStatements = debugging))
-
-SM.add_state(variableGood(['post_trial'], SM, 'good', logFile = thisLog, printStatements = debugging))
-SM.add_state(bad(['post_trial'], SM, 'bad', logFile = thisLog, printStatements = debugging))
+    'waitEasy'], SM, 'waitEasy', logFile = thisLog, printStatements = DEBUGGING))
+#
+SM.add_state(variableGood(['post_trial'], SM, 'good', logFile = thisLog, printStatements = DEBUGGING))
+#
+SM.add_state(bad(['post_trial'], SM, 'bad', logFile = thisLog, printStatements = DEBUGGING))
+#
 SM.add_state(post_trial(['clear_input_queue_2'], SM, 'post_trial',
-    logFile = thisLog, printStatements = debugging))
+    logFile = thisLog, printStatements = DEBUGGING))
+#
 SM.add_state(clear_input_queue(['fixation'], SM, 'clear_input_queue_2',
-    logFile = thisLog, printStatements = debugging))
+    logFile = thisLog, printStatements = DEBUGGING))
+#
 SM.add_state(end([False], SM, 'end', logFile = thisLog))
-
+#
 SM.set_init('fixation')
 time.sleep(1)
 # connect reward
@@ -340,7 +351,7 @@ finally:
             '--outputFileName \"' + SM.logFileName.split('/')[-1].split('.')[0] + '\" ',
             shell=True)
 
-    print('Ending Execution of Training_step_13.py')
+    print('Ending Execution of Training_step_14.py')
 
     GPIO.output(5,False) ## Turn off GPIO pin 5
     GPIO.cleanup() # cleanup all GPIO

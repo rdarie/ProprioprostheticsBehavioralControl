@@ -1,4 +1,4 @@
-import pygame, pdb, lirc, serial, os, os.path
+import pygame, pdb, lirc, serial, os, os.path, pty
 import logging, time, uuid, pdb, Adafruit_BluefruitLE
 from helperFunctions import serial_ports
 
@@ -77,11 +77,12 @@ class pedalBLEInterface(object):
 
 class speakerInterface(object):
     def __init__(self, soundPaths, volume = 1,
-        debugging = False, enableSound = True):
-
+        debugging = False, enableSound = True, maxtime=None):
+        pygame.mixer.pre_init(44100, -16, 2, 2048)
         pygame.mixer.init()
         self.volume = volume
         self.enableSound = enableSound
+        self.maxtime = maxtime
 
         # audio, Pygame implementation
         self.sounds = {key : pygame.mixer.Sound(value)
@@ -94,7 +95,7 @@ class speakerInterface(object):
 
     def play_tone(self, key):
         if self.enableSound:
-            self.sounds[key].play()
+            self.sounds[key].play(maxtime=self.maxtime)
 
         if self.debugging:
             print('Played the '+ key + ' tone')
@@ -106,42 +107,34 @@ class speakerInterface(object):
         return tone_playerDummyMethod
 
 class sparkfunRemoteInterface(object):
-    def __init__(self, mapping, default):
+    def __init__(self, mapping, default, confPath, remoteProgram):
         self.default = default
         self.mapping = mapping
+        self.confPath = confPath
+        self.remoteProgram = remoteProgram
 
     def run(self):
-        #configure and initialize IR remote communication
-        blocking = False
-        code = "start"
-
-        if(lirc.init("training", wavePath + "/confAdafruit", blocking = blocking)):
-
-            while(code != "quit"):
-                # Read next code
-                ir_message = lirc.nextcode()
-
-                # Loop as long as there are more on the queue
-                while(ir_message):
-                    # Run through commands
-                    for code in ir_message:
-                        #pdb.set_trace()
-                        #run the function returned by interpret_command
-                        funcToRun = self.mapping.get(code, self.default)
-                        ir_message.remove(code)
-                        funcToRun()
-                        if code == "quit":
-                            break
-                        #TODO: make this not break the state machine execution
-                    ir_message = lirc.nextcode()
+        code = 'start'
+        with lirc.LircdConnection(self.remoteProgram, self.confPath, None) as conn:
+            while (code != "quit"):
+                code = conn.readline()
+                print(code)
+                funcToRun = self.mapping.get(code, self.default)
+                funcToRun()
+                
 
 class motorInterface(object):
     # Configure the serial port connection the the Si3540 motor driver
-    def __init__(self, serialPortName = '/dev/ttyUSB0',
-        debugging = False, velocity = 1, acceleration = 30,
-        deceleration = 30, useEncoder = False):
-
+    def __init__(
+            self, serialPortName='/dev/ttyUSB0',
+            debugging=False,
+            velocity=1, acceleration=30, deceleration=30,
+            jogVelocity=1, jogAcceleration=30,
+            useEncoder=False, dummy=False):
+        self.dummy = dummy
         try:
+            if self.dummy:
+                raise('motor Interface set up as dummy')
             ser = serial.Serial(
                 port= serialPortName,
                 baudrate = 9600,
@@ -152,12 +145,15 @@ class motorInterface(object):
                 )
         except:
             print('Unable to connect to ' + serialPortName)
-            availablePorts = serial_ports()
-            print('defaulting to: ' + availablePorts[-1])
-            serialPortName = availablePorts[-1]
-
+            print('Creating dummy serial port')
+            # availablePorts = serial_ports()
+            # print('defaulting to: ' + availablePorts[-1])
+            # serialPortName = availablePorts[-1]
+            self.dummy = True
+            master, slave = pty.openpty() #open the pseudoterminal
+            serialPortName = os.ttyname(slave) #translate the slave fd to a filename
             ser = serial.Serial(
-                port=availablePorts[-1],
+                port=serialPortName,
                 baudrate = 9600,
                 parity=serial.PARITY_NONE,
                 stopbits=serial.STOPBITS_ONE,
@@ -165,15 +161,16 @@ class motorInterface(object):
                 timeout=1
                 )
 
+        self.nowJogging = False
         self.current_position = 0
         self.step_size = 5e2
         self.serialPortName = serialPortName
         self.serial = ser
 
-        self.current = 5
+        self.current = 8
         serial_message = "CC" + str(self.current) + "\r"
         self.serial.write(serial_message.encode())
-        self.idle_current = 4
+        self.idle_current = 7
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
         serial_message = "EG7364\r"
@@ -213,6 +210,17 @@ class motorInterface(object):
         self.deceleration = deceleration #move speed in rev/sec^2.
         serial_message = "DE" + str(self.deceleration) + "\r"
         self.serial.write(serial_message.encode())
+        
+        serial_message = "JE\r"
+        self.serial.write(serial_message.encode())
+        
+        self.jogVelocity = jogVelocity
+        serial_message = "JS" + str(self.jogVelocity) + "\r"
+        self.serial.write(serial_message.encode())
+
+        self.jogAcceleration = jogAcceleration #move speed in rev/sec^2.
+        serial_message = "JA" + str(self.jogAcceleration) + "\r"
+        self.serial.write(serial_message.encode())
 
         serial_message = "SA\r"
         self.serial.write(serial_message.encode())
@@ -220,7 +228,6 @@ class motorInterface(object):
         # is useful for setting up the drive configuration with the desired
         # defaults at power-up. (See which commands are non-volatile in the
         #CommandSummary section.)
-
 
         # Initialize motor
 
@@ -264,14 +271,28 @@ class motorInterface(object):
             print("Currently at %d steps" % self.current_position)
 
     def shorten(self):
-        self.step_size -= 100
+        self.step_size -= 500
         if self.debugging:
             print("Shortened step size to: %d steps" % self.step_size)
 
     def lengthen(self):
-        self.step_size += 100
+        self.step_size += 500
         if self.debugging:
             print("Lengthened step size to: %d steps" % self.step_size)
+    
+    def release_holding(self):
+        self.idle_current = 0.1
+        serial_message = "CI" + str(self.idle_current) + "\r"
+        self.serial.write(serial_message.encode())
+        if self.debugging:
+            print("Disabled holding torque")
+    
+    def enable_holding(self):
+        self.idle_current = 7
+        serial_message = "CI" + str(self.idle_current) + "\r"
+        self.serial.write(serial_message.encode())
+        if self.debugging:
+            print("Enabled holding torque")
 
     def default(self):
         print("Default ")
@@ -292,18 +313,21 @@ class motorInterface(object):
             self.step_size = hold_step_size
 
     def get_encoder_position(self):
-        self.serial.write("EP\r".encode())
-        epStr = self.serial.read(100)
-        #print(epStr)
-        epValueStr = epStr.decode().split("=")[-1]
-        try:
-            ep = float(epValueStr.encode()) / 4
-        except:
-            ep = None
-        #Note: the Si™ drive electronics use “X4” decoding, so a 1000 line encoder such as the U.S. Digital
-        #E2-1000-250-H produces 4000 counts/revolution.
-        #therefore, divide by 4
-        return ep
+        if not self.dummy:
+            self.serial.write("EP\r".encode())
+            epStr = self.serial.read(100)
+            #print(epStr)
+            epValueStr = epStr.decode().split("=")[-1]
+            try:
+                ep = float(epValueStr.encode()) / 4
+            except:
+                ep = None
+            #  Note: the Si™ drive electronics use “X4” decoding, so a 1000 line encoder such as the U.S. Digital
+            #  E2-1000-250-H produces 4000 counts/revolution.
+            #  therefore, divide by 4
+            return ep
+        else:
+            return self.current_position
 
 
     def get_status(self):
@@ -316,11 +340,14 @@ class motorInterface(object):
         """
         stStr = b'0'
         self.serial.write("RS\r".encode())
-        while stStr.decode() != '=':
+        if not self.dummy:
+            while stStr.decode() != '=':
+                stStr = self.serial.read()
             stStr = self.serial.read()
-        stStr = self.serial.read()
-        #print("Status returned was: {}".format(stStr))
-        return stStr.decode().split("RS=")[-1].split('/r')[0]
+            #print("Status returned was: {}".format(stStr))
+            return stStr.decode().split("RS=")[-1].split('/r')[0]
+        else:
+            return 'R'
 
     def stop_all(self):
         serial_message = "SK\r"
@@ -328,23 +355,43 @@ class motorInterface(object):
         if self.debugging:
             print("Stopped all and exiting!")
 
+    def toggle_jogging(self):
+        if self.nowJogging:
+            serial_message = "SJ\r"
+            self.serial.write(serial_message.encode())
+            self.nowJogging = False
+            if self.debugging:
+                print("Ending jog!")
+        elif not self.nowJogging:
+            serial_message = "CJ\r"
+            self.serial.write(serial_message.encode())
+            self.nowJogging = True
+            if self.debugging:
+                print("Starting to jog!")
+
 import zmq, json
 class summitInterface(object):
-    def __init__(self, transmissionDelay = 50e-3):
-        # Initialize the ZeroMQ context
-        self.context = zmq.Context()
-        # Configure ZeroMQ to send messages
-        self.zmqSend = self.context.socket(zmq.PUB)
-        # The communication is made on socket 12345
-        self.zmqSend.bind("tcp://eth0:12345")
+    def __init__(
+            self, transmissionDelay = 50e-3,
+            dummy=False, verbose=False):
+        self.dummy = dummy
+        self.verbose = verbose
+        if not self.dummy:
+            # Initialize the ZeroMQ context
+            self.context = zmq.Context()
+            # Configure ZeroMQ to send messages
+            self.zmqSend = self.context.socket(zmq.PUB)
+            # The communication is made on socket 12345
+            self.zmqSend.bind("tcp://eth0:12345")
         self.transmissionDelay = transmissionDelay
 
-    def messageTrans(self, paramDict, verbose = False):
+    def messageTrans(self, paramDict):
         paramStr = json.dumps(paramDict)
-        if verbose:
+        if self.verbose:
             print("Sending %s" % paramStr)
-        self.zmqSend.send(paramStr.encode(encoding = 'UTF-8'))
-        if verbose:
+        if not self.dummy:
+            self.zmqSend.send(paramStr.encode(encoding = 'UTF-8'))
+        if self.verbose:
             print("Sent transmission...")
         return
 
@@ -361,8 +408,9 @@ class summitInterface(object):
 
         self.messageTrans(stimParams)
 
-    def stimOneMovement(self, amplitudes, duration,
-        frequency, pws = [250 for i in range(4)]):
+    def stimOneMovement(
+            self, amplitudes, duration,
+            frequency, pws = [250 for i in range(4)]):
         durationInMsec = int(1000 * duration)
         stimParams = {
             'Group' : 0,
@@ -373,5 +421,4 @@ class summitInterface(object):
             'ForceQuit' : False,
             'AddReverse' : False
             }
-
-        self.messageTrans(stimParams, verbose = False)
+        self.messageTrans(stimParams)

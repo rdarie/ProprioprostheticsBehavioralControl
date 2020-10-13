@@ -1,29 +1,106 @@
 begin
   remote = *
-  button = KEY_BACK
+  button = KEY_PLAYPAUSE
+  prog = training
+  config = play
+end
+
+begin
+  remote = *
+  button = KEY_STOP
   prog = training
   config = quit
 end
 
 begin
   remote = *
-  button = KEY_1
+  button = KEY_BACK
+  prog = training
+  config = back
+end
+
+begin
+  remote = *
+  button = KEY_VOLUMEUP
+  prog = training
+  config = volumeup
+end
+
+begin
+  remote = *
+  button = KEY_VOLUMEDOWN
+  prog = training
+  config = volumedown
+end
+
+begin
+  remote = *
+  button = KEY_KP0
+  prog = training
+  config = 0
+end
+
+begin
+  remote = *
+  button = KEY_KP1
   prog = training
   config = 1
 end
 
 begin
   remote = *
-  button = KEY_2
+  button = KEY_KP2
   prog = training
   config = 2
 end
 
 begin
   remote = *
-  button = KEY_3
+  button = KEY_KP3
   prog = training
   config = 3
+end
+
+begin
+  remote = *
+  button = KEY_KP4
+  prog = training
+  config = 4
+end
+
+begin
+  remote = *
+  button = KEY_KP5
+  prog = training
+  config = 5
+end
+
+begin
+  remote = *
+  button = KEY_KP6
+  prog = training
+  config = 6
+end
+
+begin
+  remote = *
+  button = KEY_KP7
+  prog = training
+  config = 7
+end
+
+begin
+  remote = *
+  button = KEY_KP8
+  prog = training
+  config = 8
+end
+
+begin
+  remote = *
+  button = KEY_KP9
+  prog = training
+  config = 9
 end
 
 begin
@@ -35,28 +112,35 @@ end
 
 begin
   remote = *
-  button = KEY_PREV
+  button = KEY_UP
   prog = training
-  config = prev
+  config = up
 end
 
 begin
   remote = *
-  button = KEY_NEXT
+  button = KEY_DOWN
   prog = training
-  config = next
+  config = down
 end
 
 begin
   remote = *
-  button = KEY_CHANNELDOWN
+  button = KEY_LEFT
   prog = training
   config = left
 end
 
 begin
   remote = *
-  button = KEY_CHANNELUP
+  button = KEY_RIGHT
+  prog = training
+  config = right
+end
+
+begin
+  remote = *
+  button = KEY_SETUP
   prog = training
   config = right
 end

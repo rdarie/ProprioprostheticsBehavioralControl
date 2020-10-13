@@ -492,3 +492,7 @@ API
 Training
 Blog
 About
+*.asv
+
+.vscode*
+RippleMatlabControl/202004241200-Peep/Block001_autoStimLog.json
