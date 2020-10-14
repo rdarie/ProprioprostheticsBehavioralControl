@@ -12,10 +12,6 @@ if ~isfolder(subFolderPath)
     mkdir(subFolderPath)
 end
 stimResLookup = [1, 2, 5, 10, 20];
-% Manually set stimRes to the index of the current active stim resolution,
-% from Trellis
-% TODO: automate based on amplitude bounds
-stimRes = 5;
 
 % set to true if ripple system is disconnected, to dry run code
 disableErrors = 0;
@@ -64,7 +60,11 @@ end
 %% Change Ripple indices to Paddle 24 indices
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CHANGE ME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-blockID = 3
+blockID = 2
+% Manually set stimRes to the index of the current active stim resolution,
+% from Trellis
+% TODO: automate based on amplitude bounds
+stimRes = 5;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % which bank is connected to which headstage determines to what channels
 % correspond each electrode, please set this here :
@@ -77,7 +77,8 @@ C = 'z';
 % z assigned to C bank [electrodes 17-24 above 1.5mA]
 if A == 'x' && B == 'y'&& C == 'z'
     Chans_paddle = [1, 2, 3, 4, 5 ,6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
-    Chans_paddle_to_ripple = {1, 3, 5, 7, 2, 4, 6, 8,    9, 11, 13, 15, 10, 12, 14, 16,    [17; 25], [19; 27], [21; 29], [23; 31], [18; 26], [20; 28], [22; 30], [24; 32]};
+    Chans_paddle_to_ripple = {1, 3, 5, 7, 2, 4, 6, 8,    9, 11, 13, 15, 10, 12, 14, 16,    17, 19, 21, 23, 18, 20, 22, 24};
+    % Chans_paddle_to_ripple = {1, 3, 5, 7, 2, 4, 6, 8,    9, 11, 13, 15, 10, 12, 14, 16,    [17; 25], [19; 27], [21; 29], [23; 31], [18; 26], [20; 28], [22; 30], [24; 32]};
     % y assigned to C bank [electrodes 9-16 above 1.5 mA]
 elseif A == 'z' && B == 'x' && C == 'y'
     Chans_paddle = [1, 2, 3, 4, 5 ,6, 7, 8,    9, 10, 11, 12, 13, 14, 15, 16,   17, 18, 19, 20, 21, 22, 23, 24];
@@ -119,14 +120,15 @@ if m=='N'
 end
 % Cathode/Anode setting
 
-whichNano = 2; % 1 caudal 2 rostral
+whichNano = 1; % 1 caudal 2 rostral
 
-cathode_list = [2];
+cathode_list = [21];
 anode_list = [];
+jsonRowIdx = 7;
 
 % stimProtocol = 'manual';
-% stimProtocol = 'diagnostic';
-stimProtocol = 'sweep';
+stimProtocol = 'diagnostic';
+% stimProtocol = 'sweep';
 % stimProtocol = 'continuous';
 % % % % % % %
 minAmp = 480;
@@ -136,13 +138,12 @@ ampStepSizeUA = 120;
 % Sweep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(stimProtocol, 'sweep')
-    frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
-    nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 7);
+    parameter_list = [10.2, 960];
     % nominalAmplitudeSteps_uA = minAmp:ampStepSizeUA:maxAmp;
     % How many times to repeat the train
-    repetition = 2;
+    repetition = 10;
     % Number of combination array's copy
-    comb_copies = 5;
+    comb_copies = 1;
     % phase raatio is the aspect ratio of biphasic pulses, where 1 is the
     % phaseDuration (in msec) of the first phase, and the second phase is
     % phaseRatio times longer.
@@ -154,48 +155,32 @@ if strcmp(stimProtocol, 'sweep')
     % Train interval between successive pulse trains (sec)
     TI = 0.7 + trainLength_ms / 1000;
     CI = 0;
-elseif strcmp(stimProtocol, 'continuous')
-    % frequencies_Hz = [50, 100, 1000, 10000];
-    frequencies_Hz = [50, 1000];
-    % frequencies_Hz = [1000];
-    % frequencies_Hz = [100.2];
-    nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 5);
-    % How many times to repeat the train
-    repetition = 30;
-    % Number of combination array's copy
-    comb_copies = 1;
-    phaseRatio = 1;
-    % TODO: use "allcyc" to queue up these things
-    trainLength_ms = 300;
-    phaseDuration_ms = 0.150;
-    % Train interval (s)
-    TI = 0.1 + trainLength_ms / 1000;
-    % Combination interval (s) - extra pause between combinations
-    CI = 120;
-    % Single
 elseif strcmp(stimProtocol, 'diagnostic')
     % frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
-    jsonData = jsondecode(fileread('emg_parameters.json'));
+    jsonData = jsondecode(fileread('emg_parameters2.json'));
+    parameter_list = [];
     for i = 1:5
         columnName = sprintf('proposed_EES_%d', i);
-        for j = 1:4
-            stringsToSearch = jsonData(j).(columnName);
-            [expr,res] = regexp(stringsToSearch, ' Hz, ', 'match', 'split');
-            freq = str2double(res{1});
-            amp = str2double(res{2}(1: end-3));
+        stringsToSearch = jsonData(jsonRowIdx).(columnName);
+        [expr,res] = regexp(stringsToSearch, ' Hz, ', 'match', 'split');
+        freq = str2double(res{1});
+        if freq<3
+            freq=3;
         end
+        amp = str2double(res{2}(1: end-3));
+        parameter_list = [parameter_list; [freq, -2 * amp]];
     end
-    frequencies_Hz = [100.2];
-    nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 3);
+    % frequencies_Hz = [100.2];
+    % nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 3);
     % How many times to repeat the train
     repetition = 10;
     % Number of combination array's copy
-    comb_copies = 3;
+    comb_copies = 1;
     phaseRatio = 3;
     trainLength_ms = 300;
     phaseDuration_ms = 0.150;
     % Train interval (s)
-    TI = 2.7 + trainLength_ms / 1000;
+    TI = 0.7 + trainLength_ms / 1000;
     CI = 0;
     % Single
 elseif strcmp(stimProtocol, 'manual')
@@ -215,8 +200,8 @@ elseif strcmp(stimProtocol, 'manual')
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[Freq, Amp] = meshgrid(frequencies_Hz, nominalAmplitudeSteps_uA);
-c = cat(2, Freq', Amp');
+% [Freq, Amp] = meshgrid(frequencies_Hz, nominalAmplitudeSteps_uA);
+% c = cat(2, Freq', Amp');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % To reach 50 repetition per combination, one way is to :
@@ -250,7 +235,7 @@ logFileID = fopen(logFileName, 'a');
 % end
 try
     for i=1:comb_copies
-        comb_array = reshape(c, [], 2);
+        comb_array = parameter_list;
         comb_array_length = size(comb_array, 1);
         tic;
         % Iterate over each combination inside the i-th combination array
@@ -317,7 +302,7 @@ try
         end
         toc;
     end
-catch
+catch ME
 %     try
 %         xippmex('stim', 'enable', 0);
 %         xippmex('stim', 'res', Chans, [stimRes]);
