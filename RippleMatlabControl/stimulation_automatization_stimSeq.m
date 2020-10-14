@@ -1,10 +1,13 @@
 %% Initializations
 % Clean the world
 close all; fclose('all'); clc; clear all;
-folderPath = 'C:\Users\Peep Sheep\Trellis\dataFiles\';
+% folderPath = 'C:\Users\Peep Sheep\Trellis\dataFiles\';
+folderPath = 'F:\Trellis\raw\';
 % folderPath = 'C:\Users\Radu\Documents\GitHub\matlabController\';
 dateStr = datestr(now, 'yyyymmdd');
-subFolderPath = sprintf('%s%s1300-Peep', folderPath, dateStr);
+% CHANGE ME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subFolderPath = sprintf('%s%s1400-Peep', folderPath, dateStr);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if ~isfolder(subFolderPath)
     mkdir(subFolderPath)
 end
@@ -60,7 +63,9 @@ end
 
 %% Change Ripple indices to Paddle 24 indices
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CHANGE ME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 blockID = 3
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % which bank is connected to which headstage determines to what channels
 % correspond each electrode, please set this here :
 A = 'x';
@@ -113,26 +118,29 @@ if m=='N'
 	error('Trial aborted')
 end
 % Cathode/Anode setting
-whichNano = 2;
-% 1 caudal 2 rostral
-cathode_list = [10, 14];
-anode_list = [6, 17];
+
+whichNano = 2; % 1 caudal 2 rostral
+
+cathode_list = [2];
+anode_list = [];
 
 % stimProtocol = 'manual';
 % stimProtocol = 'diagnostic';
 stimProtocol = 'sweep';
 % stimProtocol = 'continuous';
 % % % % % % %
-minAmp = 240;
-maxAmp = 900;
+minAmp = 480;
+maxAmp = 1500;
+ampStepSizeUA = 120;
 % % % % % % %
 % Sweep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if strcmp(stimProtocol, 'sweep')
     frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
     nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 7);
+    % nominalAmplitudeSteps_uA = minAmp:ampStepSizeUA:maxAmp;
     % How many times to repeat the train
-    repetition = 3;
+    repetition = 2;
     % Number of combination array's copy
     comb_copies = 5;
     % phase raatio is the aspect ratio of biphasic pulses, where 1 is the
@@ -158,8 +166,8 @@ elseif strcmp(stimProtocol, 'continuous')
     comb_copies = 1;
     phaseRatio = 1;
     % TODO: use "allcyc" to queue up these things
-    trainLength_ms = 4000;
-    phaseDuration_ms = 0.033;
+    trainLength_ms = 300;
+    phaseDuration_ms = 0.150;
     % Train interval (s)
     TI = 0.1 + trainLength_ms / 1000;
     % Combination interval (s) - extra pause between combinations
@@ -167,10 +175,20 @@ elseif strcmp(stimProtocol, 'continuous')
     % Single
 elseif strcmp(stimProtocol, 'diagnostic')
     % frequencies_Hz = [10.2, 25.2, 50.2, 100.2];
+    jsonData = jsondecode(fileread('emg_parameters.json'));
+    for i = 1:5
+        columnName = sprintf('proposed_EES_%d', i);
+        for j = 1:4
+            stringsToSearch = jsonData(j).(columnName);
+            [expr,res] = regexp(stringsToSearch, ' Hz, ', 'match', 'split');
+            freq = str2double(res{1});
+            amp = str2double(res{2}(1: end-3));
+        end
+    end
     frequencies_Hz = [100.2];
     nominalAmplitudeSteps_uA = linspace(minAmp, maxAmp, 3);
     % How many times to repeat the train
-    repetition = 1;
+    repetition = 10;
     % Number of combination array's copy
     comb_copies = 3;
     phaseRatio = 3;
@@ -188,7 +206,7 @@ elseif strcmp(stimProtocol, 'manual')
     % Number of combination array's copy
     comb_copies = 1;
     %
-    phaseRatio = 3;
+    phaseRatio = 1;
     trainLength_ms = 300;
     phaseDuration_ms = 0.150;
     % Train interval (s)
@@ -256,7 +274,7 @@ try
                 %%%%% RD 04-24-2020 Don't think this is necessary
                 % Enable stimulation for cathodes and anodes selected previously
                 try
-                    xippmex('stim', 'enable', 0);
+                    % xippmex('stim', 'enable', 0);
                     % xippmex('stim', 'res', stimElectrodes, [3]);
                     % xippmex('stim', 'enable', stimElectrodes);
                     % m = input(sprintf('Writing to log %d Do you want to continue, Y/N [Y]:', blockID),'s');

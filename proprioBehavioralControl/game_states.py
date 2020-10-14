@@ -202,11 +202,6 @@ class turnPedalCompoundWithStim(gameState):
             frequency = random.choice(parent.stimFreqs)
             parent.summit.freqChange(frequency)
             time.sleep(0.5)
-            # choose a leading electrode for this trial
-            progSetName = random.choices(parent.progNames, weights=parent.progWeights)[0]
-            progIdx = parent.progLookup[progSetName]
-            # choose an amplitude
-            amplitudeMultiplier = random.choice(parent.stimAmpMultipliers)
 
         def executeMovement(
                 stepSize):
@@ -214,16 +209,24 @@ class turnPedalCompoundWithStim(gameState):
             print('Set movement magnitude to : %4.2f' % parent.motor.step_size)
             if parent.dummyMotor:
                 parent.dummyMotor.step_size = max(parent.movementMagnitudes) - stepSize
+            # 9/44 is the gearing ratio
+            expectedMovementDuration = (
+            parent.motor.step_size / (100 * 360) /
+            (parent.motor.velocity * (9/44)) + self.waitAtPeak / 2)
             if parent.summit:
+                # choose an electrode for this stim
+                progSetName = random.choices(parent.progNames, weights=parent.progWeights)[0]
+                progIdx = parent.progLookup[progSetName]
+                # choose an amplitude
+                amplitudeMultiplier = random.choice(parent.stimAmpMultipliers)
                 amplitudes = [0,0,0,0]
                 amplitudes[progIdx] = amplitudeMultiplier * parent.stimMotorThreshold[progIdx]
-            # 9/44 is the gearing ratio
-            expectedMovementDuration = parent.motor.step_size / (100 * 360) / (parent.motor.velocity * (9/44)) + self.waitAtPeak / 2
-            if progSetName == 'midline':
-                expectedMovementDuration = expectedMovementDuration * 2
-            parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
-            if parent.summit.transmissionDelay > 0:
-                time.sleep(parent.summit.transmissionDelay + 1 / frequency)
+                # if progSetName == 'midline':
+                #     expectedMovementDuration = expectedMovementDuration * 2
+                parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+                sleepFor = parent.summit.transmissionDelay + 1 / frequency
+                if sleepFor > 0:
+                    time.sleep(sleepFor)
             if not parent.phantomMotor:
                 if direction == 'forward':
                     parent.motor.forward()
@@ -238,16 +241,25 @@ class turnPedalCompoundWithStim(gameState):
                 if expectedMovementDuration > 0:
                     time.sleep(expectedMovementDuration)
             print('Sleeping until return')
-            time.sleep(self.waitAtPeak)
+            if self.waitAtPeak - sleepFor > 0:
+                time.sleep(self.waitAtPeak - sleepFor)
             # return phase of first movement
-            if parent.summit and progSetName in ['rostral', 'caudal']:
+            # if parent.summit and progSetName in ['rostral', 'caudal']:
+            #     amplitudes = [0,0,0,0]
+            #     altProgSetName = 'rostral' if progSetName == 'caudal' else 'caudal'
+            #     altProgIdx = parent.progLookup[altProgSetName]
+            #     amplitudes[altProgIdx] = amplitudeMultiplier * parent.stimMotorThreshold[altProgIdx]
+            if parent.summit:
+                # choose an electrode for this stim
+                progSetName = random.choices(parent.progNames, weights=parent.progWeights)[0]
+                progIdx = parent.progLookup[progSetName]
+                # choose an amplitude
+                amplitudeMultiplier = random.choice(parent.stimAmpMultipliers)
                 amplitudes = [0,0,0,0]
-                altProgSetName = 'rostral' if progSetName == 'caudal' else 'caudal'
-                altProgIdx = parent.progLookup[altProgSetName]
-                amplitudes[altProgIdx] = amplitudeMultiplier * parent.stimMotorThreshold[altProgIdx]
-            parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
-            if parent.summit.transmissionDelay > 0:
-                time.sleep(parent.summit.transmissionDelay + 1 / frequency)
+                amplitudes[progIdx] = amplitudeMultiplier * parent.stimMotorThreshold[progIdx]
+                parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+                if parent.summit.transmissionDelay > 0:
+                    time.sleep(parent.summit.transmissionDelay + 1 / frequency)
             if not parent.phantomMotor:
                 parent.motor.go_home()
                 if parent.dummyMotor:
@@ -258,7 +270,8 @@ class turnPedalCompoundWithStim(gameState):
                     time.sleep(expectedMovementDuration)
             return
 
-        self.payload = {"Stimulus ID Pair": magnitudeIndex,
+        self.payload = {
+            "Stimulus ID Pair": magnitudeIndex,
             'firstThrow': random.gauss(
                 parent.movementMagnitudes[magnitudeIndex[0]], self.angleJitter),
             'secondThrow' : random.gauss(

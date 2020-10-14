@@ -6,7 +6,7 @@ folderPath = 'F:\Trellis\';
 
 % folderPath = 'C:\Users\Radu\Desktop\';
 dateStr = datestr(now, 'yyyymmdd');
-subFolderPath = sprintf('%s%s1300-Peep', folderPath, dateStr);
+subFolderPath = sprintf('%s%s1300-Benchtop', folderPath, dateStr);
 if ~isfolder(subFolderPath)
     mkdir(subFolderPath)
 end
@@ -45,21 +45,6 @@ catch ME
         rethrow(ME);
     end
 end
-
-% Get NIP clock time right before turning streams on (30 kHz sampling) recChans
-% set stimulation resolution:
-% try
-%     xippmex('stim', 'enable', 0);
-%     xippmex('stim', 'res', Chans, [stimRes]);
-%     xippmex('stim', 'enable', Chans);
-% catch ME
-%     if disableErrors
-%         disp(ME.message);
-%     else
-%         rethrow(ME);
-%     end
-% end
-
 %% Change Ripple indices to Paddle 24 indices
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 blockID = 1
@@ -128,13 +113,13 @@ anode_list = [];
 whichNanoBlock = 2;
 block_cathode_list = [1, 9, 13, 20];
 block_anode_list = [];
-block_FR = 50;
+block_FR = 1000;
 block_amp = 900;
 block_TL = 2000;
 block_PD = 0.033;
 block_PR = 1;
 block_params = [block_FR, block_amp, block_TL, block_PD, block_PR];
-blockFreqMultiplier = 1;
+blockFreqMultiplier = 10;
 nBlockBurnIn = 60;
 % 
 % stimProtocol = 'manual';
@@ -142,6 +127,7 @@ stimProtocol = 'sweep';
 % % % % % % %
 minAmp = 60;
 maxAmp = 900;
+
 % % % % % % %
 % Sweep
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -179,6 +165,20 @@ elseif strcmp(stimProtocol, 'manual')
     CI = 0;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Filter timeseries 'data' using PARRM
+% Assume 'data' has a 200Hz sampling rate and 150Hz stimulation frequency
+guessPeriod=30000/(block_FR * blockFreqMultiplier); % Theoretical stimulation period
+span=[2000,12000]; % Span of samples in 'data' where artifact is regular
+windowSize=200; % Width of window in sample space to be used for removal
+skipSize=20; % Number of samples to ignore in sample space
+windowDirection='both'; % Remove using information from the past and future
+
+%Period=FindPeriodLFP(data,span,guessPeriod); % Find the period of stimulation in 'data'
+Period=guessPeriod;
+periodDist=Period/700; % Window in period space for which samples will be averaged
+
+PARRM=PeriodicFilter(Period,windowSize,periodDist,skipSize,windowDirection); % Create the linear filter
 
 [Freq, Amp] = meshgrid(frequencies_Hz, nominalAmplitudeSteps_uA);
 c = cat(2, Freq', Amp');
@@ -243,6 +243,13 @@ for co=1:nBlockBurnIn
         end
       end
     pause(TI);
+    % data = xippmex('cont', 1, 200, 'raw', stimNIPTime)';
+    data = xippmex('cont', 1, TI * 1000, 'raw', stimNIPTime - 500*30)';
+    Filtered=((filter2(PARRM.',data,'same')-data)./(1-filter2(PARRM.',ones(size(data)),'same'))+data)';
+    plot(data);
+    hold on
+    plot(Filtered);
+    legend('original', 'filtered')
 %     % Train Interval
 %     refT = tic;
 %     elapsedT = toc(refT);
