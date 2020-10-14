@@ -14,6 +14,6 @@ namespace SummitPythonInterface
         public IList<double> Amplitude { get; set; }
         public double Frequency { get; set; }
         public bool ForceQuit { get; set; }
-        public bool AddReverse { get; set; }
+        // public bool AddReverse { get; set; }
     }
 }
