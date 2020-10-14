@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 using System.Threading;
-using System.Threading.Tasks;
-
 // Summit API DLLs
 using Medtronic.SummitAPI.Classes;
 using Medtronic.SummitAPI.Events;
@@ -30,7 +25,7 @@ namespace SummitPythonInterface
         // Create a manager
         static SummitManager theSummitManager = new SummitManager("SummitTest", qSize);
         static bool theSummitManagerIsDisposed = false;
-        static bool disableORCA = false;
+        static bool disableORCA = true;
         static SummitSystem theSummit;
         static SubscriberSocket stimSocket = new SubscriberSocket();
 
@@ -65,9 +60,9 @@ namespace SummitPythonInterface
             // Tell user this code is not for human use
             Console.WriteLine("Starting Summit Stimulation Adjustment Training Project");
             Console.WriteLine("Before running this training project, the RLP should be used to configure a device to have two groups - A and B - with at least one program defined.");
-            Console.WriteLine("This code is not for human use, either close program window or proceed by pressing a key");
-            Console.ReadKey();
-            Console.WriteLine("");
+            Console.WriteLine("WARNING!  This code is not for human use.");
+            // Console.ReadKey();
+            Console.WriteLine("Proceeding");
 
             // Initialize the Summit Interface
             Console.WriteLine("Creating Summit Interface...");
@@ -80,7 +75,6 @@ namespace SummitPythonInterface
             {
                 Console.WriteLine("Failed to connect, disponsing and closing.");
                 //Console.ReadKey();
-
                 // Dispose SummitManager, disposing all SummitSystem objects
                 theSummitManager.Dispose();
                 return;
@@ -118,7 +112,7 @@ namespace SummitPythonInterface
             // Sample rate must be consistent across all TD channels or disabled for individuals.
             // Channel differentially senses from contact 0 to contact 1
             // Evoked response mode disabled, standard operation
-            // Low pass filter of 100Hz applied. 
+            // Low pass filter of 100Hz applied.
             // Second low pass filter also at 100Hz applied
             // High pass filter at 8.6Hz applied.
             TimeDomainChannels.Add(new TimeDomainChannel(
@@ -129,14 +123,6 @@ namespace SummitPythonInterface
                 TdLpfStage1.Lpf450Hz,
                 TdLpfStage2.Lpf350Hz,
                 TdHpfs.Hpf1_2Hz));
-
-            // Second Channel Specific configuration: Channels 0 and 1 are Bore 0.
-            // Sample rate must be consistent across all TD channels or disabled for individuals.
-            // Channel differentially senses from contact 2 to contact 3
-            // Evoked response mode disabled, standard operation
-            // Low pass filter of 100Hz applied. 
-            // Second low pass filter also at 100Hz applied
-            // High pass filter at 8.6Hz applied.
             TimeDomainChannels.Add(new TimeDomainChannel(
                 TdSampleRates.Disabled,
                 TdMuxInputs.Mux4,
@@ -145,14 +131,6 @@ namespace SummitPythonInterface
                 TdLpfStage1.Lpf450Hz,
                 TdLpfStage2.Lpf350Hz,
                 TdHpfs.Hpf1_2Hz));
-
-            // Third Channel Specific configuration: Channels 2 and 3 are Bore 1.
-            // Sample rate must be consistent across all TD channels or disabled for individuals.
-            // Channel differentially senses from contact 8 to contact 9 (Mux values indexed per bore)
-            // Evoked response mode disabled, standard operation
-            // Low pass filter of 100Hz applied. 
-            // Second low pass filter also at 100Hz applied
-            // High pass filter at 8.6Hz applied.
             TimeDomainChannels.Add(new TimeDomainChannel(
                 the_sample_rate,
                 TdMuxInputs.Mux0,
@@ -161,14 +139,6 @@ namespace SummitPythonInterface
                 TdLpfStage1.Lpf450Hz,
                 TdLpfStage2.Lpf350Hz,
                 TdHpfs.Hpf1_2Hz));
-
-            // Fourth Channel Specific configuration: Channels 2 and 3 are Bore 1.
-            // Sample rate must be consistent across all TD channels or disabled for individuals.
-            // Channel differentially senses from contact 10 to contact 11 (Mux values indexed per bore)
-            // Evoked response mode disabled, standard operation
-            // Low pass filter of 450Hz applied. 
-            // Second low pass filter also at 350Hz applied
-            // High pass filter at 1.2Hz applied.
             TimeDomainChannels.Add(new TimeDomainChannel(
                 TdSampleRates.Disabled,
                 TdMuxInputs.Mux5,
@@ -224,16 +194,17 @@ namespace SummitPythonInterface
             Console.WriteLine("Write Misc Config Status: " + returnInfoBuffer.Descriptor);
             returnInfoBuffer = theSummit.WriteSensingAccelSettings(AccelSampleRate.Sample64);
             Console.WriteLine("Write Accel Config Status: " + returnInfoBuffer.Descriptor);
-
-            // ******************* Turn on LFP, FFT, and Power Sensing Components *******************
+            // ******************* Turn on LFP, turn off FFT, and Power Sensing Components *******************
             //returnInfoBuffer = theSummit.WriteSensingState(SenseStates.LfpSense | SenseStates.Fft | SenseStates.Power, 0x00);
             returnInfoBuffer = theSummit.WriteSensingState(SenseStates.LfpSense | 0 | 0, 0x00);
             Console.WriteLine("Write Sensing Config Status: " + returnInfoBuffer.Descriptor);
 
             // ******************* Register the data listeners *******************
             theSummit.DataReceivedTDHandler += theSummit_DataReceived_TD;
+            // TODO: decide whether to keep these
             theSummit.DataReceivedPowerHandler += theSummit_DataReceived_Power;
             theSummit.DataReceivedFFTHandler += theSummit_DataReceived_FFT;
+            //
             theSummit.DataReceivedAccelHandler += theSummit_DataReceived_Accel;
 
             // ******************* Start streaming *******************
@@ -242,7 +213,7 @@ namespace SummitPythonInterface
             returnInfoBuffer = theSummit.WriteSensingEnableStreams(true, false, false, false, false, true, true, false);
             Console.WriteLine("Write Stream Config Status: " + returnInfoBuffer.Descriptor);
 
-            stimSocket.Connect("tcp://192.168.4.2:12345");
+            stimSocket.Connect("tcp://169.254.186.210:12345");
             stimSocket.SubscribeToAnyTopic();
             // Create some standard buffers for the output values form the various inc/dec functions. 
             APIReturnInfo bufferInfo = new APIReturnInfo();
@@ -294,7 +265,7 @@ namespace SummitPythonInterface
             //Thread.CurrentThread.Join(500);
             Thread.Sleep(500);
 
-            int waitPeriod = 5; // wait this much after each command is sent
+            int waitPeriod = 50; // wait this much after each command is sent
             int bToothDelay = 50; // add this much wait to account for transmission delay
 
             bool verbose = false;
@@ -307,13 +278,12 @@ namespace SummitPythonInterface
                     // Set amplitudes to 0
                     bufferInfo = theSummit.StimChangeStepAmp(programIndexes[i], -insStateGroupA.Programs[i].AmplitudeInMilliamps, out currentAmp[i]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
-                    Thread.Sleep(2 * waitPeriod);
+                    Thread.Sleep(waitPeriod);
 
                     // Set pw's to 250
                     bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 250 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
-                    //Thread.CurrentThread.Join(waitPeriod);
-                    Thread.Sleep(2 * waitPeriod);
+                    Thread.Sleep(waitPeriod);
 
                 }
 
@@ -325,12 +295,13 @@ namespace SummitPythonInterface
                     bufferInfo = theSummit.StimChangeStepFrequency(freqDelta, true, out currentFreq);
                     if (verbose) { Console.WriteLine(" Command Status:" + bufferInfo.Descriptor); }
                     Thread.Sleep(waitPeriod);
-                    //Thread.CurrentThread.Join(waitPeriod);
                 }
 
                 string gotMessage;
 
                 bool breakFlag = false;
+                Console.WriteLine("ZMQ Starting to wait for a message.");
+                bool messageDots = false;
                 while (!breakFlag)
                 {
 
@@ -348,7 +319,16 @@ namespace SummitPythonInterface
                             recalcLatency = false;
                             Console.WriteLine("Average Latency = " + theAverageLatency.ToString());
                         }
-                        Console.WriteLine(" Waiting for a message.");
+                        if (messageDots)
+                        {
+                            Console.Write("ZMQ  Waiting for a message   \r");
+                            messageDots = false;
+                        }
+                        else
+                        {
+                            Console.Write("ZMQ  Waiting for a message...\r");
+                            messageDots = true;
+                        }
 
                         if (theSummitManagerIsDisposed)
                         {
@@ -362,7 +342,8 @@ namespace SummitPythonInterface
 
                     //recalcLatency = true;
                     StimParams stimParams = JsonConvert.DeserializeObject<StimParams>(gotMessage);
-
+                    Console.WriteLine("Received message: " + stimParams.ToString());
+                    //
                     double newAmplitude = 0;
                     byte whichProgram = 0;
                     int index = 0;
@@ -379,7 +360,7 @@ namespace SummitPythonInterface
                     }
 
                     // Set the Stimulation Frequency, keep to sense friendly values
-                    freqDelta = stimParams.Frequency - (double)currentFreq;
+                    // freqDelta = stimParams.Frequency - (double)currentFreq;
                     if (freqDelta != 0)
                     {
                         bufferInfo = theSummit.StimChangeStepFrequency(freqDelta, true, out currentFreq);
@@ -608,8 +589,8 @@ namespace SummitPythonInterface
                 ConnectReturn theWarnings;
                 APIReturnInfo connectReturn;
                 DiscoveredDevice? rfDevice = null;
-                connectReturn = tempSummit.StartInsSession(rfDevice, out theWarnings, disableORCA);
                 Console.WriteLine("Attempting RF Connection to last connected INS");
+                connectReturn = tempSummit.StartInsSession(rfDevice, out theWarnings, disableORCA);
 
                 if (!theWarnings.HasFlag(ConnectReturn.InitializationError))
                 {
@@ -630,6 +611,7 @@ namespace SummitPythonInterface
                 List<DiscoveredDevice> discoveredDevices;
                 do
                 {
+                    Console.WriteLine("RF Connect failed. Discovering devices... ");
                     tempSummit.OlympusDiscovery(out discoveredDevices);
                 } while (discoveredDevices.Count == 0);
 
