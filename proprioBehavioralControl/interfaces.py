@@ -403,7 +403,6 @@ class summitInterface(object):
             'Amplitude' : [0,0,0,0],
             'PW' : [250,250,250,250],
             'ForceQuit' : False,
-            'AddReverse' : False
             }
 
         self.messageTrans(stimParams)
@@ -419,6 +418,5 @@ class summitInterface(object):
             'Amplitude' : amplitudes,
             'PW' : pws,
             'ForceQuit' : False,
-            'AddReverse' : False
             }
         self.messageTrans(stimParams)
