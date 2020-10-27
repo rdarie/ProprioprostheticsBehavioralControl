@@ -106,7 +106,7 @@ namespace SummitPythonInterface
 
             // ******************* Create a sensing configuration for Time Domain channels *******************
             List<TimeDomainChannel> TimeDomainChannels = new List<TimeDomainChannel>(4);
-            TdSampleRates the_sample_rate = TdSampleRates.Sample0500Hz;
+            TdSampleRates the_sample_rate = TdSampleRates.Sample1000Hz;
 
             // First Channel Specific configuration: Channels 0 and 1 are Bore 0.
             // Sample rate must be consistent across all TD channels or disabled for individuals.
@@ -117,14 +117,14 @@ namespace SummitPythonInterface
             // High pass filter at 8.6Hz applied.
             TimeDomainChannels.Add(new TimeDomainChannel(
                 the_sample_rate,
-                TdMuxInputs.Mux0,
-                TdMuxInputs.Mux3,
+                TdMuxInputs.Mux5,
+                TdMuxInputs.Mux6,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
                 TdLpfStage2.Lpf350Hz,
                 TdHpfs.Hpf1_2Hz));
             TimeDomainChannels.Add(new TimeDomainChannel(
-                the_sample_rate,
+                TdSampleRates.Disabled,
                 TdMuxInputs.Mux3,
                 TdMuxInputs.Mux7,
                 TdEvokedResponseEnable.Standard,
@@ -132,9 +132,9 @@ namespace SummitPythonInterface
                 TdLpfStage2.Lpf350Hz,
                 TdHpfs.Hpf1_2Hz));
             TimeDomainChannels.Add(new TimeDomainChannel(
-                TdSampleRates.Disabled,
-                TdMuxInputs.Mux0,
+                the_sample_rate,
                 TdMuxInputs.Mux1,
+                TdMuxInputs.Mux4,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
                 TdLpfStage2.Lpf350Hz,
@@ -265,8 +265,8 @@ namespace SummitPythonInterface
             //Thread.CurrentThread.Join(500);
             Thread.Sleep(500);
 
-            int waitPeriod = 50; // wait this much after each command is sent
-            int bToothDelay = 50; // add this much wait to account for transmission delay
+            int waitPeriod = 20; // wait this much after each command is sent
+            int bToothDelay = 30; // add this much wait to account for transmission delay
 
             bool verbose = false;
             TimeSpan? theAverageLatency = TimeSpan.FromMilliseconds(0);
@@ -290,7 +290,7 @@ namespace SummitPythonInterface
                 double freqDelta = 100 - insStateGroupA.RateInHz;
                 if (freqDelta != 0)
                 {
-                    bufferInfo = theSummit.StimChangeStepFrequency(freqDelta, true, out currentFreq);
+                    bufferInfo = theSummit.StimChangeStepFrequency(freqDelta, false, out currentFreq);
                     if (verbose) { Console.WriteLine(" Command Status:" + bufferInfo.Descriptor); }
                     Thread.Sleep(waitPeriod);
                 }
@@ -361,7 +361,7 @@ namespace SummitPythonInterface
                     // freqDelta = stimParams.Frequency - (double)currentFreq;
                     if (freqDelta != 0)
                     {
-                        bufferInfo = theSummit.StimChangeStepFrequency(freqDelta, true, out currentFreq);
+                        bufferInfo = theSummit.StimChangeStepFrequency(freqDelta, false, out currentFreq);
                         Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                         //Thread.CurrentThread.Join(waitPeriod);
                         Thread.Sleep(waitPeriod);
