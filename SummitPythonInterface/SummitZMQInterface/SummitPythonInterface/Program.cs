@@ -106,7 +106,7 @@ namespace SummitPythonInterface
 
             // ******************* Create a sensing configuration for Time Domain channels *******************
             List<TimeDomainChannel> TimeDomainChannels = new List<TimeDomainChannel>(4);
-            TdSampleRates the_sample_rate = TdSampleRates.Sample1000Hz;
+            TdSampleRates the_sample_rate = TdSampleRates.Sample0500Hz;
 
             // First Channel Specific configuration: Channels 0 and 1 are Bore 0.
             // Sample rate must be consistent across all TD channels or disabled for individuals.
@@ -222,7 +222,7 @@ namespace SummitPythonInterface
 
             double? currentFreq = 100;
             double?[] currentAmp = new double?[] { 0, 0, 0, 0 };
-            int?[] currentPW = new int?[] { 250, 250, 250, 250 };
+            int?[] currentPW = new int?[] { 125, 125, 125, 125 };
             byte[] programIndexes = new byte[] { 0, 1, 2, 3 };
 
             // Turn off therapy, no ramp
@@ -279,8 +279,9 @@ namespace SummitPythonInterface
                     bufferInfo = theSummit.StimChangeStepAmp(programIndexes[i], -insStateGroupA.Programs[i].AmplitudeInMilliamps, out currentAmp[i]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                     Thread.Sleep(waitPeriod);
-                    // Set pw's to 250
-                    bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 250 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
+                    // Set pw's to 125
+                    Console.WriteLine(" Setting PWs to 125");
+                    bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 125 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                     Thread.Sleep(waitPeriod);
                 }
@@ -435,8 +436,8 @@ namespace SummitPythonInterface
                         bufferInfo = theSummit.StimChangeStepAmp(programIndexes[i], -insStateGroupA.Programs[i].AmplitudeInMilliamps, out currentAmp[i]);
                         Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                         Thread.Sleep(waitPeriod);
-                        // Set pw's to 250
-                        bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 250 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
+                        // Set pw's to 125
+                        bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 125 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
                         Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                         Thread.Sleep(waitPeriod);
                     }
