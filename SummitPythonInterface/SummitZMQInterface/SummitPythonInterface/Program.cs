@@ -116,43 +116,43 @@ namespace SummitPythonInterface
             // Second low pass filter also at 100Hz applied
             // High pass filter at 8.6Hz applied.
             TimeDomainChannels.Add(new TimeDomainChannel(
-                the_sample_rate,
+                the_sample_rate, //
                 TdMuxInputs.Mux5,
                 TdMuxInputs.Mux6,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
-                TdLpfStage2.Lpf350Hz,
-                TdHpfs.Hpf1_2Hz));
+                TdLpfStage2.Lpf1700Hz,
+                TdHpfs.Hpf0_85Hz));
             TimeDomainChannels.Add(new TimeDomainChannel(
                 TdSampleRates.Disabled,
                 TdMuxInputs.Mux3,
                 TdMuxInputs.Mux7,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
-                TdLpfStage2.Lpf350Hz,
-                TdHpfs.Hpf1_2Hz));
+                TdLpfStage2.Lpf1700Hz,
+                TdHpfs.Hpf0_85Hz));
             TimeDomainChannels.Add(new TimeDomainChannel(
-                the_sample_rate,
-                TdMuxInputs.Mux3,
-                TdMuxInputs.Mux7,
+                the_sample_rate, //
+                TdMuxInputs.Mux1,
+                TdMuxInputs.Mux4,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
-                TdLpfStage2.Lpf350Hz,
-                TdHpfs.Hpf1_2Hz));
+                TdLpfStage2.Lpf1700Hz,
+                TdHpfs.Hpf0_85Hz));
             TimeDomainChannels.Add(new TimeDomainChannel(
                 TdSampleRates.Disabled,
                 TdMuxInputs.Mux5,
                 TdMuxInputs.Mux6,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
-                TdLpfStage2.Lpf350Hz,
-                TdHpfs.Hpf1_2Hz));
+                TdLpfStage2.Lpf1700Hz,
+                TdHpfs.Hpf0_85Hz));
 
             // ******************* Set up the FFT *******************
             // Create a 256-element FFT that triggers every half second. Use a Hann window and stream all of the bins (if FFT streaming is enabled in later command).
             FftConfiguration fftChannel = new FftConfiguration();
             fftChannel.Size = FftSizes.Size0256;
-            fftChannel.Interval = 500;
+            fftChannel.Interval = 2000;
             fftChannel.WindowEnabled = true;
             fftChannel.WindowLoad = FftWindowAutoLoads.Hann100;
             fftChannel.StreamSizeBins = 0;
