@@ -239,8 +239,9 @@ class turnPedalCompoundWithStim(gameState):
                 waitUntilDoneMoving(parent.motor)
             else:
                 if expectedMovementDuration > 0:
+                    print('Phantom motor; sleeping for {} sec'.format(expectedMovementDuration))
                     time.sleep(expectedMovementDuration)
-            print('Sleeping until return')
+            print('Sleeping until return ')
             if self.waitAtPeak - sleepFor > 0:
                 time.sleep(self.waitAtPeak - sleepFor)
             # return phase of first movement
@@ -267,6 +268,7 @@ class turnPedalCompoundWithStim(gameState):
                 waitUntilDoneMoving(parent.motor)
             else:
                 if expectedMovementDuration > 0:
+                    print('Phantom motor; sleeping for {} sec'.format(expectedMovementDuration))
                     time.sleep(expectedMovementDuration)
             return
 

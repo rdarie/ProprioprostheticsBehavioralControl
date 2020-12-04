@@ -167,10 +167,10 @@ class motorInterface(object):
         self.serialPortName = serialPortName
         self.serial = ser
 
-        self.current = 8
+        self.current = 8.1
         serial_message = "CC" + str(self.current) + "\r"
         self.serial.write(serial_message.encode())
-        self.idle_current = 7
+        self.idle_current = 8.1
         serial_message = "CI" + str(self.idle_current) + "\r"
         self.serial.write(serial_message.encode())
         serial_message = "EG7364\r"

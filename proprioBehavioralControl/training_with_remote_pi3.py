@@ -21,7 +21,7 @@ from helperFunctions import serial_ports
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--enableSound', default = 'True')
-parser.add_argument('--playWelcomeTone', default = 'False')
+parser.add_argument('--playWelcomeTone', default = 'True')
 parser.add_argument('--playWhiteNoise', default = 'False')
 parser.add_argument('--logLocally', default = 'False')
 parser.add_argument('--logToWeb', default = 'False')
@@ -58,12 +58,14 @@ soundPaths = {
     'Wait' : wavePath + "/wait_tone.wav",
     'Divider' : wavePath + "/divider_tone.wav"
     }
-
+    
+speaker = ifaces.speakerInterface(soundPaths = soundPaths,
+    volume = argVolume, debugging = DEBUGGING, enableSound = argEnableSound, maxtime=250)
+    
 playWelcomeTone = True if args.playWelcomeTone == 'True' else False
 if playWelcomeTone:
-    pygame.mixer.init()
     welcomeChime = pygame.mixer.Sound(wavePath + "/violin_C5.wav")
-    welcomeChime.set_volume(argVolume)
+    welcomeChime.set_volume(2 * argVolume)
     welcomeChime.play()
 
 playWhiteNoise = True if args.playWhiteNoise == 'True' else False
@@ -71,12 +73,11 @@ if playWhiteNoise:
     whiteNoise = pygame.mixer.Sound(wavePath + "/whitenoisegaussian.wav")
     whiteNoise.set_volume(argVolume/2)
     whiteNoise.play(-1)
+
 motor = ifaces.motorInterface(
     serialPortName = '/dev/ttyUSB0',debugging = DEBUGGING, velocity = 1.5,
     jogVelocity=2, jogAcceleration=50, acceleration = 7, deceleration = 7, useEncoder = True,
     dummy=DEBUGGING)
-speaker = ifaces.speakerInterface(soundPaths = soundPaths,
-    volume = argVolume, debugging = DEBUGGING, enableSound = argEnableSound, maxtime=250)
 
 motor.step_size = 2000
 # Setup IO Pins
@@ -87,7 +88,7 @@ timestamper = Event_Timestamper()
 
 juicePin = GPIO_Output(pins=[13,6,26,25], labels=['leftLED', 'rightLED', 'bothLED', 'Reward'],
     levels = [GPIO.HIGH, GPIO.HIGH, GPIO.HIGH, GPIO.HIGH],
-    instructions=['flip', 'flip', 'flip', ('pulse', .5)])
+    instructions=['flip', 'flip', 'flip', ('pulse', 1)])
 
 arbiter = Arbiter()
 # Dummy state machine
