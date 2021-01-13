@@ -34,35 +34,54 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Medtronic.NeuroStim.Olympus">
-      <HintPath>..\..\..\..\SummitRDK_1_6_0\DLLs\AnyCPU\Medtronic.NeuroStim.Olympus.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\SummitRDK_1_6_0\DLLs\AnyCPU\Medtronic.NeuroStim.Olympus.dll</HintPath>
     </Reference>
     <Reference Include="Medtronic.SummitAPI">
-      <HintPath>..\..\..\..\SummitRDK_1_6_0\DLLs\AnyCPU\Medtronic.SummitAPI.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\SummitRDK_1_6_0\DLLs\AnyCPU\Medtronic.SummitAPI.dll</HintPath>
     </Reference>
     <Reference Include="Medtronic.TelemetryM">
-      <HintPath>..\..\..\..\SummitRDK_1_6_0\DLLs\AnyCPU\Medtronic.TelemetryM.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\SummitRDK_1_6_0\DLLs\AnyCPU\Medtronic.TelemetryM.dll</HintPath>
     </Reference>
     <Reference Include="NLog">
-      <HintPath>..\..\..\..\SummitRDK_1_6_0\DLLs\AnyCPU\NLog.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\SummitRDK_1_6_0\DLLs\AnyCPU\NLog.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="wclBluetoothFramework">
-      <HintPath>..\..\..\..\SummitRDK_1_6_0\DLLs\AnyCPU\wclBluetoothFramework.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\SummitRDK_1_6_0\DLLs\AnyCPU\wclBluetoothFramework.dll</HintPath>
     </Reference>
     <Reference Include="wclCommon">
-      <HintPath>..\..\..\..\SummitRDK_1_6_0\DLLs\AnyCPU\wclCommon.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\SummitRDK_1_6_0\DLLs\AnyCPU\wclCommon.dll</HintPath>
     </Reference>
     <Reference Include="wclCommunication">
-      <HintPath>..\..\..\..\SummitRDK_1_6_0\DLLs\AnyCPU\wclCommunication.dll</HintPath>
+      <HintPath>..\..\..\..\..\Desktop\SummitRDK_1_6_0\DLLs\AnyCPU\wclCommunication.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

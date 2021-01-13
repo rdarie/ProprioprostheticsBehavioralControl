@@ -29,8 +29,13 @@ namespace SummitPythonInterface
         static SummitSystem theSummit;
         static SubscriberSocket stimSocket = new SubscriberSocket();
 
+
         static void Main(string[] args)
         {
+            // Initialize the Summit Interface
+            Console.WriteLine("Creating Summit Interface...");
+            stimSocket.Connect("tcp://169.254.102.206:12345");
+            stimSocket.SubscribeToAnyTopic();
 
             APIReturnInfo returnInfoBuffer;
             Console.CancelKeyPress += delegate
@@ -71,8 +76,6 @@ namespace SummitPythonInterface
             // Console.ReadKey();
             Console.WriteLine("Proceeding");
 
-            // Initialize the Summit Interface
-            Console.WriteLine("Creating Summit Interface...");
 
             // Connect to the INS using a function based on the Summit Connect training code.
             theSummit = SummitConnect(theSummitManager);
@@ -126,7 +129,7 @@ namespace SummitPythonInterface
             TimeDomainChannels.Add(new TimeDomainChannel(
                 the_sample_rate, //
                 TdMuxInputs.Mux5,
-                TdMuxInputs.Mux6,
+                TdMuxInputs.Mux7,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
                 TdLpfStage2.Lpf1700Hz,
@@ -150,7 +153,7 @@ namespace SummitPythonInterface
             TimeDomainChannels.Add(new TimeDomainChannel(
                 TdSampleRates.Disabled,
                 TdMuxInputs.Mux5,
-                TdMuxInputs.Mux6,
+                TdMuxInputs.Mux7,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
                 TdLpfStage2.Lpf1700Hz,
@@ -225,7 +228,7 @@ namespace SummitPythonInterface
 
             double? currentFreq = 100;
             double?[] currentAmp = new double?[] { 0, 0, 0, 0 };
-            int?[] currentPW = new int?[] { 120, 120, 120, 120 };
+            int?[] currentPW = new int?[] { 70, 70, 70, 70 };
             byte[] programIndexes = new byte[] { 0, 1, 2, 3 };
 
             // Turn on therapy, if a POR reject is returned, attempt to reset it
@@ -280,9 +283,9 @@ namespace SummitPythonInterface
                     bufferInfo = theSummit.StimChangeStepAmp(programIndexes[i], -insStateGroupA.Programs[i].AmplitudeInMilliamps, out currentAmp[i]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                     Thread.Sleep(waitPeriod);
-                    // Set pw's to 120
-                    Console.WriteLine(" Setting PWs to 120");
-                    bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 120 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
+                    // Set pw's to 70
+                    Console.WriteLine(" Setting PWs to 70");
+                    bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 70 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                     Console.WriteLine(" Wrote PW: " + currentPW[i].ToString());
                     Thread.Sleep(waitPeriod);
@@ -304,13 +307,9 @@ namespace SummitPythonInterface
                 Console.WriteLine("This code is not for human use, either close program window or proceed by pressing a key");
                 Console.ReadKey();
                 Console.WriteLine("");
-
-                stimSocket.Connect("tcp://169.254.102.206:12345");
-                stimSocket.SubscribeToAnyTopic();
                 // Turn on therapy, if a POR reject is returned, attempt to reset it
                 bufferInfo = theSummit.StimChangeTherapyOn();
                 Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
-
                 // Reset POR if set
                 if (bufferInfo.RejectCodeType == typeof(MasterRejectCode)
                     && (MasterRejectCode)bufferInfo.RejectCode == MasterRejectCode.ChangeTherapyPor)
@@ -389,7 +388,7 @@ namespace SummitPythonInterface
                     }
 
                     // Set the Stimulation Frequency, keep to sense friendly values
-                    // freqDelta = stimParams.Frequency - (double)currentFreq;
+                    freqDelta = stimParams.Frequency - (double)currentFreq;
                     if (freqDelta != 0)
                     {
                         bufferInfo = theSummit.StimChangeStepFrequency(freqDelta, false, out currentFreq);
@@ -470,8 +469,8 @@ namespace SummitPythonInterface
                         bufferInfo = theSummit.StimChangeStepAmp(programIndexes[i], -insStateGroupA.Programs[i].AmplitudeInMilliamps, out currentAmp[i]);
                         Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                         Thread.Sleep(waitPeriod);
-                        // Set pw's to 120
-                        bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 120 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
+                        // Set pw's to 70
+                        bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 70 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
                         Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                         Console.WriteLine(" Wrote PW :" + currentPW[i].ToString());
                         Thread.Sleep(waitPeriod);
