@@ -18,7 +18,7 @@ namespace SummitStimulation
             Console.WriteLine("Starting Summit Stimulation Adjustment Training Project");
             Console.WriteLine("Before running this training project, the RLP should be used to configure a device to have two groups - A and B - with at least one program defined.");
             Console.WriteLine("This code is not for human use, either close program window or proceed by pressing a key");
-            Console.ReadKey();
+            //Console.ReadKey();
             Console.WriteLine("");
 
             // Initialize the Summit Interface
@@ -53,10 +53,12 @@ namespace SummitStimulation
             TherapyGroup insStateGroupB = new TherapyGroup();
             TherapyProgram stimProgramA = new TherapyProgram();
             byte changeProgramIndex = 0;
-            List<APIReturnInfo> stimBufferInfo = new List<APIReturnInfo>();
+            List<APIReturnInfo> progClearBufferInfo = new List<APIReturnInfo>();
+            List<APIReturnInfo> progModBufferInfo = new List<APIReturnInfo>();
             // Loop functionality until the "q"uit character is entered
             while (thekey.KeyChar != 'q')
             {
+                bool changedStimConfig = false;
                 switch (thekey.KeyChar)
                 {
                     case 'i':
@@ -93,6 +95,7 @@ namespace SummitStimulation
                         break;
                     case 'n':
                         // Turn on therapy, if a POR reject is returned, attempt to reset it
+                        Console.WriteLine("Turning therapy on...");
                         bufferInfo = theSummit.StimChangeTherapyOn();
                         // Reset POR if set
                         if (bufferInfo.RejectCodeType == typeof(MasterRejectCode)
@@ -106,69 +109,54 @@ namespace SummitStimulation
                         break;
                     case 'm':
                         // Turn off therapy
+                        Console.WriteLine("Turning therapy off...");
                         bufferInfo = theSummit.StimChangeTherapyOff(false);
                         break;
                     case 'x':
                         // Modify program settings
                         // Turn off therapy
+                        Console.WriteLine("Turning therapy off...");
                         bufferInfo = theSummit.StimChangeTherapyOff(false);
                         // Read the stimulation settings from the device
                         bufferInfo = theSummit.ReadStimGroup(GroupNumber.Group0, out insStateGroupA);
                         // Copy all parameters from the current group0.program0
                         changeProgramIndex = 0;
-                        stimProgramA.Clone(insStateGroupA.Programs[changeProgramIndex]);
+                        TherapyProgram currentProgram = insStateGroupA.Programs[changeProgramIndex];
+                        Console.WriteLine("");
+                        Console.WriteLine("INS current program:");
+                        Console.WriteLine(currentProgram.ToString());
+                        Console.WriteLine("");
+                        stimProgramA.Clone(currentProgram);
                         for (int eIdx = 0; eIdx < 17; eIdx++)
                         {
-                            stimProgramA.Electrodes[eIdx].Value = 63;
                             switch (eIdx)
                             {
                                 case 1:
+                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
                                     stimProgramA.Electrodes[eIdx].IsOff = false;
-                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
                                     break;
                                 case 16:
-                                    stimProgramA.Electrodes[eIdx].IsOff = false;
-                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
-                                    break;
-                                default:
-                                    stimProgramA.Electrodes[eIdx].IsOff = true;
-                                    break;
-                            };
-                        }
-                        // Write this program
-                        stimBufferInfo = theSummit.zAuthStimWriteProgram(
-                            GroupNumber.Group0, changeProgramIndex, stimProgramA);
-                        break;
-                    case 'y':
-                        // Modify program settings
-                        // Turn off therapy
-                        bufferInfo = theSummit.StimChangeTherapyOff(false);
-                        // Read the stimulation settings from the device
-                        bufferInfo = theSummit.ReadStimGroup(GroupNumber.Group0, out insStateGroupA);
-                        // Copy all parameters from the current group0.program0
-                        changeProgramIndex = 0;
-                        stimProgramA.Clone(insStateGroupA.Programs[changeProgramIndex]);
-                        for (int eIdx = 0; eIdx < 17; eIdx++)
-                        {
-                            stimProgramA.Electrodes[eIdx].Value = 63;
-                            switch (eIdx)
-                            {
-                                case 1:
-                                    stimProgramA.Electrodes[eIdx].IsOff = false;
                                     stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
-                                    break;
-                                case 7:
                                     stimProgramA.Electrodes[eIdx].IsOff = false;
-                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
                                     break;
                                 default:
                                     stimProgramA.Electrodes[eIdx].IsOff = true;
                                     break;
                             };
+                            stimProgramA.Electrodes[eIdx].Reserved1 = 0;
+                            stimProgramA.Electrodes[eIdx].Value = 63;
+                            Console.WriteLine(stimProgramA.Electrodes[eIdx].ToString());
                         }
+                        Console.WriteLine("");
+                        Console.WriteLine("Writing new program:");
+                        Console.WriteLine(stimProgramA.ToString());
+                        // clear existing program
+                        progClearBufferInfo = theSummit.zAuthStimModifyClearProgram(
+                            GroupNumber.Group0, changeProgramIndex);
                         // Write this program
-                        stimBufferInfo = theSummit.zAuthStimWriteProgram(
+                        progModBufferInfo = theSummit.zAuthStimWriteProgram(
                             GroupNumber.Group0, changeProgramIndex, stimProgramA);
+                        changedStimConfig = true;
                         break;
                     case 'c':
                         // Query device for the active group.
@@ -208,6 +196,17 @@ namespace SummitStimulation
 
                 // Print out the command's status
                 Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
+                if (changedStimConfig)
+                {
+                    // Print out the command's status
+                    Console.WriteLine("   ClearProgram Status:" + progClearBufferInfo[0].Descriptor);
+                    Console.WriteLine("   ClearVersion Status:" + progClearBufferInfo[1].Descriptor);
+                    // Print out the command's status
+                    Console.WriteLine("   WriteSlotParameters Status:" + progModBufferInfo[0].Descriptor);
+                    Console.WriteLine("   WriteVersionParameters Status:" + progModBufferInfo[1].Descriptor);
+                    Console.WriteLine("   ReadStimGroup Status:" + progModBufferInfo[2].Descriptor);
+
+                }
 
                 // Ask for another key
                 thekey = Console.ReadKey();
