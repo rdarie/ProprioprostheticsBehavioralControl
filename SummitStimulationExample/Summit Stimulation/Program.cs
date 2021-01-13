@@ -12,6 +12,7 @@ namespace SummitStimulation
 {
     class Program
     {
+        static bool disableORCA = true;
         static void Main(string[] args)
         {
             // Tell user this code is not for human use
@@ -20,16 +21,12 @@ namespace SummitStimulation
             Console.WriteLine("This code is not for human use, either close program window or proceed by pressing a key");
             //Console.ReadKey();
             Console.WriteLine("");
-
             // Initialize the Summit Interface
             Console.WriteLine("Creating Summit Interface...");
-            
             // Create a manager
             SummitManager theSummitManager = new SummitManager("SummitTest", verboseTraceLogging: true);
-
             // Connect to the INS using a function based on the Summit Connect training code.
             SummitSystem theSummit = SummitConnect(theSummitManager);
-
             // Check if the connection attempt was successful
             if (theSummit == null)
             { 
@@ -40,19 +37,14 @@ namespace SummitStimulation
                 theSummitManager.Dispose();
                 return;
             }
-
-            // ***** Loop to adjust stim, PW, and frequency
+            // ***** Loop to read keyboard inputs
             printCommandList();
             ConsoleKeyInfo thekey = Console.ReadKey();
-
-            // Create some standard buffers for the output values form the various inc/dec functions. 
-            double? outBufferDouble;
-            int? outBuffer;
+            // Create some standard buffers for the output values form the various inc/dec functions.
             APIReturnInfo bufferInfo = new APIReturnInfo();
             TherapyGroup insStateGroupA = new TherapyGroup();
             TherapyGroup insStateGroupB = new TherapyGroup();
             TherapyProgram stimProgramA = new TherapyProgram();
-            byte changeProgramIndex = 0;
             List<APIReturnInfo> progClearBufferInfo = new List<APIReturnInfo>();
             List<APIReturnInfo> progModBufferInfo = new List<APIReturnInfo>();
             // Loop functionality until the "q"uit character is entered
@@ -61,57 +53,6 @@ namespace SummitStimulation
                 bool changedStimConfig = false;
                 switch (thekey.KeyChar)
                 {
-                    case 'i':
-                        // Increment the Amplitude by 0.1mA
-                        bufferInfo = theSummit.StimChangeStepAmp(0, 0.1, out outBufferDouble);
-                        break;
-                    case 'o':
-                        // Increment the Pulse Width by 50uS
-                        bufferInfo = theSummit.StimChangeStepPW(0, 50, out outBuffer);
-                        break;
-                    case 'p':
-                        // Increment the Stimulation Frequency by 5Hz, keep to sense friendly values
-                        bufferInfo = theSummit.StimChangeStepFrequency(5, true, out outBufferDouble);
-                        break;
-                    case 'k':
-                        // Decrement the Amplitude by 0.1mA
-                        bufferInfo = theSummit.StimChangeStepAmp(0, -0.1, out outBufferDouble);
-                        break;
-                    case 'l':
-                        // Decrement the PulseWidth by 50uS
-                        bufferInfo = theSummit.StimChangeStepPW(0, -50, out outBuffer);
-                        break;
-                    case ';':
-                        // Decrement the Stimulation Frequency by 5Hz, keep to sense friendly values
-                        bufferInfo = theSummit.StimChangeStepFrequency(-5, true, out outBufferDouble);
-                        break;
-                    case '1':
-                        // Change active group to 0
-                        bufferInfo = theSummit.StimChangeActiveGroup(ActiveGroup.Group0);
-                        break;
-                    case '2':
-                        // Change active group to 1
-                        bufferInfo = theSummit.StimChangeActiveGroup(ActiveGroup.Group1);
-                        break;
-                    case 'n':
-                        // Turn on therapy, if a POR reject is returned, attempt to reset it
-                        Console.WriteLine("Turning therapy on...");
-                        bufferInfo = theSummit.StimChangeTherapyOn();
-                        // Reset POR if set
-                        if (bufferInfo.RejectCodeType == typeof(MasterRejectCode)
-                            && (MasterRejectCode)bufferInfo.RejectCode == MasterRejectCode.ChangeTherapyPor)
-                        {
-                            // Inform user
-                            Console.WriteLine("POR set, resetting...");
-                            // Reset POR
-                            bufferInfo = resetPOR(theSummit);
-                        }
-                        break;
-                    case 'm':
-                        // Turn off therapy
-                        Console.WriteLine("Turning therapy off...");
-                        bufferInfo = theSummit.StimChangeTherapyOff(false);
-                        break;
                     case 'x':
                         // Modify program settings
                         // Turn off therapy
@@ -120,43 +61,100 @@ namespace SummitStimulation
                         // Read the stimulation settings from the device
                         bufferInfo = theSummit.ReadStimGroup(GroupNumber.Group0, out insStateGroupA);
                         // Copy all parameters from the current group0.program0
-                        changeProgramIndex = 0;
-                        TherapyProgram currentProgram = insStateGroupA.Programs[changeProgramIndex];
-                        Console.WriteLine("");
-                        Console.WriteLine("INS current program:");
-                        Console.WriteLine(currentProgram.ToString());
-                        Console.WriteLine("");
-                        stimProgramA.Clone(currentProgram);
-                        for (int eIdx = 0; eIdx < 17; eIdx++)
+                        for (byte changeProgramIndex = 0; changeProgramIndex < 4; changeProgramIndex++)
                         {
-                            switch (eIdx)
+                            TherapyProgram currentProgram = insStateGroupA.Programs[changeProgramIndex];
+                            Console.WriteLine("");
+                            Console.WriteLine("INS current program:");
+                            Console.WriteLine(currentProgram.ToString());
+                            Console.WriteLine("");
+                            stimProgramA.Clone(currentProgram);
+                            for (int eIdx = 0; eIdx < 17; eIdx++)
                             {
-                                case 1:
-                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
-                                    stimProgramA.Electrodes[eIdx].IsOff = false;
-                                    break;
-                                case 16:
-                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
-                                    stimProgramA.Electrodes[eIdx].IsOff = false;
-                                    break;
-                                default:
-                                    stimProgramA.Electrodes[eIdx].IsOff = true;
-                                    break;
-                            };
-                            stimProgramA.Electrodes[eIdx].Reserved1 = 0;
-                            stimProgramA.Electrodes[eIdx].Value = 63;
-                            Console.WriteLine(stimProgramA.Electrodes[eIdx].ToString());
-                        }
-                        Console.WriteLine("");
-                        Console.WriteLine("Writing new program:");
-                        Console.WriteLine(stimProgramA.ToString());
-                        // clear existing program
-                        progClearBufferInfo = theSummit.zAuthStimModifyClearProgram(
-                            GroupNumber.Group0, changeProgramIndex);
-                        // Write this program
-                        progModBufferInfo = theSummit.zAuthStimWriteProgram(
-                            GroupNumber.Group0, changeProgramIndex, stimProgramA);
-                        changedStimConfig = true;
+                                switch (changeProgramIndex)
+                                {
+                                    case 0:
+                                        switch (eIdx)
+                                        {
+                                            case 12:
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
+                                                stimProgramA.Electrodes[eIdx].IsOff = false;
+                                                break;
+                                            case 16:
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
+                                                stimProgramA.Electrodes[eIdx].IsOff = false;
+                                                break;
+                                            default:
+                                                stimProgramA.Electrodes[eIdx].IsOff = true;
+                                                break;
+                                        };
+                                        break;
+                                    case 1:
+                                        switch (eIdx)
+                                        {
+                                            case 1:
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
+                                                stimProgramA.Electrodes[eIdx].IsOff = false;
+                                                break;
+                                            case 7:
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
+                                                stimProgramA.Electrodes[eIdx].IsOff = false;
+                                                break;
+                                            default:
+                                                stimProgramA.Electrodes[eIdx].IsOff = true;
+                                                break;
+                                        };
+                                        break;
+                                    case 2:
+                                        switch (eIdx)
+                                        {
+                                            case 1:
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
+                                                stimProgramA.Electrodes[eIdx].IsOff = false;
+                                                break;
+                                            case 7:
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
+                                                stimProgramA.Electrodes[eIdx].IsOff = false;
+                                                break;
+                                            default:
+                                                stimProgramA.Electrodes[eIdx].IsOff = true;
+                                                break;
+                                        };
+                                        break;
+                                    case 3:
+                                        switch (eIdx)
+                                        {
+                                            case 1:
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
+                                                stimProgramA.Electrodes[eIdx].IsOff = false;
+                                                break;
+                                            case 7:
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
+                                                stimProgramA.Electrodes[eIdx].IsOff = false;
+                                                break;
+                                            default:
+                                                stimProgramA.Electrodes[eIdx].IsOff = true;
+                                                break;
+                                        };
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                stimProgramA.Electrodes[eIdx].Reserved1 = 0;
+                                stimProgramA.Electrodes[eIdx].Value = 63;
+                                Console.WriteLine(stimProgramA.Electrodes[eIdx].ToString());
+                            }
+                            Console.WriteLine("");
+                            Console.WriteLine("Writing new program:");
+                            Console.WriteLine(stimProgramA.ToString());
+                            // clear existing program
+                            progClearBufferInfo = theSummit.zAuthStimModifyClearProgram(
+                                GroupNumber.Group0, changeProgramIndex);
+                            // Write this program
+                            progModBufferInfo = theSummit.zAuthStimWriteProgram(
+                                GroupNumber.Group0, changeProgramIndex, stimProgramA);
+                            changedStimConfig = true;
+                            }
                         break;
                     case 'c':
                         // Query device for the active group.
@@ -188,12 +186,10 @@ namespace SummitStimulation
                         Console.WriteLine("");
                         Console.Write(" Unrecognized command, ");
                         printCommandList();
-
                         // Loop will print out the previous command status, inform user
                         Console.Write(" Previous ");
                         break;
                 }
-
                 // Print out the command's status
                 Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                 if (changedStimConfig)
@@ -205,13 +201,10 @@ namespace SummitStimulation
                     Console.WriteLine("   WriteSlotParameters Status:" + progModBufferInfo[0].Descriptor);
                     Console.WriteLine("   WriteVersionParameters Status:" + progModBufferInfo[1].Descriptor);
                     Console.WriteLine("   ReadStimGroup Status:" + progModBufferInfo[2].Descriptor);
-
                 }
-
                 // Ask for another key
                 thekey = Console.ReadKey();
             }
-
             // ***** Object Disposal
             Console.WriteLine("");
             Console.WriteLine("Shutting down stim...");
@@ -234,8 +227,7 @@ namespace SummitStimulation
         static void printCommandList()
         {
             Console.WriteLine("Command List:");
-            Console.WriteLine("i for increment amp, o for increment pw, p for increment freq; k for decrement amp, l for decrement pw, ; for decrement freq ");
-            Console.WriteLine("1 for group 0, 2 for group 1, n for stim on, m for stim off");
+            Console.WriteLine("x to modify program settings (zAuth)");
             Console.WriteLine("b to check active group program 0 values, c to check which group is active");
             Console.WriteLine("q quits loop");
         }
@@ -304,11 +296,14 @@ namespace SummitStimulation
             }
 
             // Connect to the first CTM available, then try others if it fails
-            SummitSystem tempSummit = null; ;
+            SummitSystem tempSummit = null;
+            InstrumentPhysicalLayers typeOfConnection = InstrumentPhysicalLayers.Any;
+
             for (int i = 0; i < theSummitManager.GetKnownTelemetry().Count; i++)
             {
                 // Perform the connection
-                ManagerConnectStatus connectReturn = theSummitManager.CreateSummit(out tempSummit, theSummitManager.GetKnownTelemetry()[i]);
+                ManagerConnectStatus connectReturn = theSummitManager.CreateSummit(out tempSummit,
+                    theSummitManager.GetKnownTelemetry()[i], typeOfConnection, 3);
 
                 // Write out the result
                 Console.WriteLine("Create Summit Result: " + connectReturn.ToString());
@@ -332,10 +327,32 @@ namespace SummitStimulation
                 // inform user that CTM was successfully connected to
                 Console.WriteLine("CTM Connection Successful!");
 
+                ConnectReturn theWarnings;
+                APIReturnInfo connectReturn;
+                DiscoveredDevice? rfDevice = null;
+                Console.WriteLine("Attempting RF Connection to last connected INS");
+                connectReturn = tempSummit.StartInsSession(rfDevice, out theWarnings, disableORCA);
+
+                if (!theWarnings.HasFlag(ConnectReturn.InitializationError))
+                {
+                    // Write out the warnings if they exist
+                    Console.WriteLine("Summit Initialization: INS connected, warnings: " + theWarnings.ToString());
+                    return tempSummit;
+                }
+                else
+                {
+                    //Medtronic.TelemetryM.InstrumentReturnCode
+                    if (typeOfConnection == InstrumentPhysicalLayers.Any) { Thread.CurrentThread.Join(20000); }
+                    Console.WriteLine("StartInsSession: Reject Code: " + Convert.ToString(connectReturn.RejectCode, 2).PadLeft(8, '0'));
+                    Console.WriteLine("StartInsSession: Reject CodeType: " + connectReturn.RejectCodeType.ToString());
+                    Console.WriteLine("StartInsSession: Descriptor: " + connectReturn.Descriptor);
+                    Console.WriteLine("StartInsSession: Warnings: " + theWarnings.ToString());
+                }
                 // Discovery INS with the connected CTM, loop until a device has been discovered
                 List<DiscoveredDevice> discoveredDevices;
                 do
                 {
+                    Console.WriteLine("RF Connect failed. Discovering devices... ");
                     tempSummit.OlympusDiscovery(out discoveredDevices);
                 } while (discoveredDevices.Count == 0);
 
@@ -352,30 +369,47 @@ namespace SummitStimulation
                 // We can disable ORCA annotations because this is a non-human use INS (see disclaimer)
                 // Human-use INS devices ignore the OlympusConnect disableAnnotation flag and always enable annotations.
                 // Connect to a device
-                ConnectReturn theWarnings;
-                APIReturnInfo connectReturn;
                 int i = 0;
-                do
+                try
                 {
-                    connectReturn = tempSummit.StartInsSession(discoveredDevices[0], out theWarnings, true);
-                    i++;
-                } while (theWarnings.HasFlag(ConnectReturn.InitializationError));
+                    do
+                    {
+                        connectReturn = tempSummit.StartInsSession(discoveredDevices[0], out theWarnings, disableORCA);
+                        //Medtronic.TelemetryM.InstrumentReturnCode
+                        i++;
+                        if (theWarnings.HasFlag(ConnectReturn.InitializationError))
+                        {
+                            //Medtronic.TelemetryM.InstrumentReturnCode
+                            if (typeOfConnection == InstrumentPhysicalLayers.Any) { Thread.CurrentThread.Join(20000); }
+                            Console.WriteLine("StartInsSession: Reject Code: " + Convert.ToString(connectReturn.RejectCode, 2).PadLeft(8, '0'));
+                            Console.WriteLine("StartInsSession: Reject CodeType: " + connectReturn.RejectCodeType.ToString());
+                            Console.WriteLine("StartInsSession: Descriptor: " + connectReturn.Descriptor);
+                            Console.WriteLine("StartInsSession: Warnings: " + theWarnings.ToString());
+                        }
+                    } while (theWarnings.HasFlag(ConnectReturn.InitializationError) & i < 10);
 
-                // Write out the number of times a StartInsSession was attempted with initialization errors
-                Console.WriteLine("Initialization Error Count: " + i.ToString());
+                    // Write out the number of times a StartInsSession was attempted with initialization errors
+                    Console.WriteLine("Initialization Error Count: " + i.ToString());
 
-                // Write out the final result of the example
-                if (connectReturn.RejectCode != 0)
+                    // Write out the final result of the example
+                    if (connectReturn.RejectCode != 0)
+                    {
+                        Console.WriteLine("Summit Initialization: INS failed to connect");
+                        theSummitManager.DisposeSummit(tempSummit);
+                        return null;
+                    }
+                    else
+                    {
+                        // Write out the warnings if they exist
+                        Console.WriteLine("Summit Initialization: INS connected, warnings: " + theWarnings.ToString());
+                        return tempSummit;
+                    }
+                }
+                catch
                 {
                     Console.WriteLine("Summit Initialization: INS failed to connect");
                     theSummitManager.DisposeSummit(tempSummit);
                     return null;
-                }
-                else
-                {
-                    // Write out the warnings if they exist
-                    Console.WriteLine("Summit Initialization: INS connected, warnings: " + theWarnings.ToString());
-                    return tempSummit;
                 }
             }
         }
