@@ -76,12 +76,12 @@ namespace SummitStimulation
                                     case 0:
                                         switch (eIdx)
                                         {
-                                            case 12:
-                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
+                                            case 2:
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
                                                 stimProgramA.Electrodes[eIdx].IsOff = false;
                                                 break;
                                             case 16:
-                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
+                                                stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
                                                 stimProgramA.Electrodes[eIdx].IsOff = false;
                                                 break;
                                             default:
@@ -92,7 +92,7 @@ namespace SummitStimulation
                                     case 1:
                                         switch (eIdx)
                                         {
-                                            case 1:
+                                            case 4:
                                                 stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
                                                 stimProgramA.Electrodes[eIdx].IsOff = false;
                                                 break;
@@ -108,11 +108,11 @@ namespace SummitStimulation
                                     case 2:
                                         switch (eIdx)
                                         {
-                                            case 1:
+                                            case 8:
                                                 stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
                                                 stimProgramA.Electrodes[eIdx].IsOff = false;
                                                 break;
-                                            case 7:
+                                            case 11:
                                                 stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
                                                 stimProgramA.Electrodes[eIdx].IsOff = false;
                                                 break;
@@ -124,11 +124,11 @@ namespace SummitStimulation
                                     case 3:
                                         switch (eIdx)
                                         {
-                                            case 1:
+                                            case 13:
                                                 stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
                                                 stimProgramA.Electrodes[eIdx].IsOff = false;
                                                 break;
-                                            case 7:
+                                            case 15:
                                                 stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
                                                 stimProgramA.Electrodes[eIdx].IsOff = false;
                                                 break;
