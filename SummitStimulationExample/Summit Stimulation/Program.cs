@@ -12,6 +12,7 @@ namespace SummitStimulation
 {
     class Program
     {
+        static bool disableORCA = true;
         static void Main(string[] args)
         {
             // Tell user this code is not for human use
@@ -131,12 +132,12 @@ namespace SummitStimulation
                         {
                             switch (eIdx)
                             {
-                                case 1:
-                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
+                                case 2:
+                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
                                     stimProgramA.Electrodes[eIdx].IsOff = false;
                                     break;
                                 case 16:
-                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Cathode;
+                                    stimProgramA.Electrodes[eIdx].ElectrodeType = ElectrodeTypes.Anode;
                                     stimProgramA.Electrodes[eIdx].IsOff = false;
                                     break;
                                 default:
@@ -304,11 +305,14 @@ namespace SummitStimulation
             }
 
             // Connect to the first CTM available, then try others if it fails
-            SummitSystem tempSummit = null; ;
+            SummitSystem tempSummit = null;
+            InstrumentPhysicalLayers typeOfConnection = InstrumentPhysicalLayers.Any;
+
             for (int i = 0; i < theSummitManager.GetKnownTelemetry().Count; i++)
             {
                 // Perform the connection
-                ManagerConnectStatus connectReturn = theSummitManager.CreateSummit(out tempSummit, theSummitManager.GetKnownTelemetry()[i]);
+                ManagerConnectStatus connectReturn = theSummitManager.CreateSummit(out tempSummit,
+                    theSummitManager.GetKnownTelemetry()[i], typeOfConnection, 3);
 
                 // Write out the result
                 Console.WriteLine("Create Summit Result: " + connectReturn.ToString());
@@ -332,10 +336,32 @@ namespace SummitStimulation
                 // inform user that CTM was successfully connected to
                 Console.WriteLine("CTM Connection Successful!");
 
+                ConnectReturn theWarnings;
+                APIReturnInfo connectReturn;
+                DiscoveredDevice? rfDevice = null;
+                Console.WriteLine("Attempting RF Connection to last connected INS");
+                connectReturn = tempSummit.StartInsSession(rfDevice, out theWarnings, disableORCA);
+
+                if (!theWarnings.HasFlag(ConnectReturn.InitializationError))
+                {
+                    // Write out the warnings if they exist
+                    Console.WriteLine("Summit Initialization: INS connected, warnings: " + theWarnings.ToString());
+                    return tempSummit;
+                }
+                else
+                {
+                    //Medtronic.TelemetryM.InstrumentReturnCode
+                    if (typeOfConnection == InstrumentPhysicalLayers.Any) { Thread.CurrentThread.Join(20000); }
+                    Console.WriteLine("StartInsSession: Reject Code: " + Convert.ToString(connectReturn.RejectCode, 2).PadLeft(8, '0'));
+                    Console.WriteLine("StartInsSession: Reject CodeType: " + connectReturn.RejectCodeType.ToString());
+                    Console.WriteLine("StartInsSession: Descriptor: " + connectReturn.Descriptor);
+                    Console.WriteLine("StartInsSession: Warnings: " + theWarnings.ToString());
+                }
                 // Discovery INS with the connected CTM, loop until a device has been discovered
                 List<DiscoveredDevice> discoveredDevices;
                 do
                 {
+                    Console.WriteLine("RF Connect failed. Discovering devices... ");
                     tempSummit.OlympusDiscovery(out discoveredDevices);
                 } while (discoveredDevices.Count == 0);
 
@@ -352,30 +378,47 @@ namespace SummitStimulation
                 // We can disable ORCA annotations because this is a non-human use INS (see disclaimer)
                 // Human-use INS devices ignore the OlympusConnect disableAnnotation flag and always enable annotations.
                 // Connect to a device
-                ConnectReturn theWarnings;
-                APIReturnInfo connectReturn;
                 int i = 0;
-                do
+                try
                 {
-                    connectReturn = tempSummit.StartInsSession(discoveredDevices[0], out theWarnings, true);
-                    i++;
-                } while (theWarnings.HasFlag(ConnectReturn.InitializationError));
+                    do
+                    {
+                        connectReturn = tempSummit.StartInsSession(discoveredDevices[0], out theWarnings, disableORCA);
+                        //Medtronic.TelemetryM.InstrumentReturnCode
+                        i++;
+                        if (theWarnings.HasFlag(ConnectReturn.InitializationError))
+                        {
+                            //Medtronic.TelemetryM.InstrumentReturnCode
+                            if (typeOfConnection == InstrumentPhysicalLayers.Any) { Thread.CurrentThread.Join(20000); }
+                            Console.WriteLine("StartInsSession: Reject Code: " + Convert.ToString(connectReturn.RejectCode, 2).PadLeft(8, '0'));
+                            Console.WriteLine("StartInsSession: Reject CodeType: " + connectReturn.RejectCodeType.ToString());
+                            Console.WriteLine("StartInsSession: Descriptor: " + connectReturn.Descriptor);
+                            Console.WriteLine("StartInsSession: Warnings: " + theWarnings.ToString());
+                        }
+                    } while (theWarnings.HasFlag(ConnectReturn.InitializationError) & i < 10);
 
-                // Write out the number of times a StartInsSession was attempted with initialization errors
-                Console.WriteLine("Initialization Error Count: " + i.ToString());
+                    // Write out the number of times a StartInsSession was attempted with initialization errors
+                    Console.WriteLine("Initialization Error Count: " + i.ToString());
 
-                // Write out the final result of the example
-                if (connectReturn.RejectCode != 0)
+                    // Write out the final result of the example
+                    if (connectReturn.RejectCode != 0)
+                    {
+                        Console.WriteLine("Summit Initialization: INS failed to connect");
+                        theSummitManager.DisposeSummit(tempSummit);
+                        return null;
+                    }
+                    else
+                    {
+                        // Write out the warnings if they exist
+                        Console.WriteLine("Summit Initialization: INS connected, warnings: " + theWarnings.ToString());
+                        return tempSummit;
+                    }
+                }
+                catch
                 {
                     Console.WriteLine("Summit Initialization: INS failed to connect");
                     theSummitManager.DisposeSummit(tempSummit);
                     return null;
-                }
-                else
-                {
-                    // Write out the warnings if they exist
-                    Console.WriteLine("Summit Initialization: INS connected, warnings: " + theWarnings.ToString());
-                    return tempSummit;
                 }
             }
         }

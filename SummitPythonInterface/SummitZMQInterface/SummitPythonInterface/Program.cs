@@ -127,9 +127,9 @@ namespace SummitPythonInterface
             // Second low pass filter also at 100Hz applied
             // High pass filter at 8.6Hz applied.
             TimeDomainChannels.Add(new TimeDomainChannel(
-                the_sample_rate, //
+                the_sample_rate, /////////////////////////
                 TdMuxInputs.Mux5,
-                TdMuxInputs.Mux7,
+                TdMuxInputs.Mux6,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
                 TdLpfStage2.Lpf1700Hz,
@@ -143,7 +143,7 @@ namespace SummitPythonInterface
                 TdLpfStage2.Lpf1700Hz,
                 TdHpfs.Hpf0_85Hz));
             TimeDomainChannels.Add(new TimeDomainChannel(
-                the_sample_rate, //
+                the_sample_rate, ////////////////////////////
                 TdMuxInputs.Mux1,
                 TdMuxInputs.Mux4,
                 TdEvokedResponseEnable.Standard,
@@ -153,7 +153,7 @@ namespace SummitPythonInterface
             TimeDomainChannels.Add(new TimeDomainChannel(
                 TdSampleRates.Disabled,
                 TdMuxInputs.Mux5,
-                TdMuxInputs.Mux7,
+                TdMuxInputs.Mux6,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
                 TdLpfStage2.Lpf1700Hz,
@@ -370,7 +370,7 @@ namespace SummitPythonInterface
 
                     //recalcLatency = true;
                     StimParams stimParams = JsonConvert.DeserializeObject<StimParams>(gotMessage);
-                    Console.WriteLine("Received message: " + stimParams.ToString());
+                    // Console.WriteLine("Received message: " + stimParams.ToString());
                     //
                     double newAmplitude = 0;
                     byte whichProgram = 0;
@@ -418,6 +418,7 @@ namespace SummitPythonInterface
                     double deltaAmp = newAmplitude - (double)currentAmp[index];
                     bufferInfo = theSummit.StimChangeStepAmp(whichProgram, deltaAmp, out currentAmp[index]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
+                    Console.WriteLine("    Wrote Amplitude:" + currentAmp[index].ToString());
                     //Thread.CurrentThread.Join(waitPeriod);
                     Thread.Sleep(waitPeriod);
 
@@ -435,6 +436,7 @@ namespace SummitPythonInterface
                     if (verbose)
                     {
                         Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
+                        Console.WriteLine("    Reverting Amplitude:" + currentAmp[index].ToString());
                     }
                     //Thread.CurrentThread.Join(waitPeriod);
                     Thread.Sleep(waitPeriod);
