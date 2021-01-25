@@ -28,20 +28,32 @@ namespace SummitPythonInterface
         static bool disableORCA = true;
         static SummitSystem theSummit;
         static SubscriberSocket stimSocket = new SubscriberSocket();
-
+        
         static void Main(string[] args)
         {
+            // Initialize the Summit Interface
+            Console.WriteLine("Creating Summit Interface...");
+            stimSocket.Connect("tcp://169.254.102.206:12345");
+            stimSocket.SubscribeToAnyTopic();
+
+            APIReturnInfo returnInfoBuffer;
             Console.CancelKeyPress += delegate
             {
                 // call methods to clean up
                 Console.WriteLine("Shutting down stim...");
                 try
                 {
+                    // turn off sense
+                    returnInfoBuffer = theSummit.WriteSensingEnableStreams(false, false, false, false, false, false, false, false);
+                    theSummit.WriteSensingState(SenseStates.None, 0x00);
+                    // turn off stim
                     theSummit.StimChangeTherapyOff(false);
                 }
                 catch
                 {
-                    Console.WriteLine("Shutting down stim FAILED");
+                    Console.WriteLine("Shutting down stim Failed");
+                    Console.WriteLine("Press any key to continue.");
+                    Console.ReadKey();
                 }
                 finally
                 {
@@ -56,7 +68,6 @@ namespace SummitPythonInterface
                     Console.WriteLine("CLOSED by Ctrl-C");
                 }
             };
-
             // Tell user this code is not for human use
             Console.WriteLine("Starting Summit Stimulation Adjustment Training Project");
             Console.WriteLine("Before running this training project, the RLP should be used to configure a device to have two groups - A and B - with at least one program defined.");
@@ -64,8 +75,6 @@ namespace SummitPythonInterface
             // Console.ReadKey();
             Console.WriteLine("Proceeding");
 
-            // Initialize the Summit Interface
-            Console.WriteLine("Creating Summit Interface...");
 
             // Connect to the INS using a function based on the Summit Connect training code.
             theSummit = SummitConnect(theSummitManager);
@@ -102,11 +111,12 @@ namespace SummitPythonInterface
             }
             Console.WriteLine();
             // Turn off sensing so we can config sensing
+            returnInfoBuffer = theSummit.WriteSensingEnableStreams(false, false, false, false, false, false, false, false);
             theSummit.WriteSensingState(SenseStates.None, 0x00);
 
             // ******************* Create a sensing configuration for Time Domain channels *******************
             List<TimeDomainChannel> TimeDomainChannels = new List<TimeDomainChannel>(4);
-            TdSampleRates the_sample_rate = TdSampleRates.Sample1000Hz;
+            TdSampleRates the_sample_rate = TdSampleRates.Sample0500Hz;
 
             // First Channel Specific configuration: Channels 0 and 1 are Bore 0.
             // Sample rate must be consistent across all TD channels or disabled for individuals.
@@ -116,48 +126,46 @@ namespace SummitPythonInterface
             // Second low pass filter also at 100Hz applied
             // High pass filter at 8.6Hz applied.
             TimeDomainChannels.Add(new TimeDomainChannel(
-                the_sample_rate,
+                the_sample_rate, /////////////////////////
                 TdMuxInputs.Mux5,
                 TdMuxInputs.Mux6,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
-                TdLpfStage2.Lpf350Hz,
-                TdHpfs.Hpf1_2Hz));
+                TdLpfStage2.Lpf1700Hz,
+                TdHpfs.Hpf0_85Hz));
             TimeDomainChannels.Add(new TimeDomainChannel(
                 TdSampleRates.Disabled,
-                TdMuxInputs.Mux3,
-                TdMuxInputs.Mux7,
-                TdEvokedResponseEnable.Standard,
-                TdLpfStage1.Lpf450Hz,
-                TdLpfStage2.Lpf350Hz,
-                TdHpfs.Hpf1_2Hz));
-            TimeDomainChannels.Add(new TimeDomainChannel(
-                the_sample_rate,
                 TdMuxInputs.Mux1,
                 TdMuxInputs.Mux4,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
-                TdLpfStage2.Lpf350Hz,
-                TdHpfs.Hpf1_2Hz));
+                TdLpfStage2.Lpf1700Hz,
+                TdHpfs.Hpf0_85Hz));
+            TimeDomainChannels.Add(new TimeDomainChannel(
+                the_sample_rate, ////////////////////////////
+                TdMuxInputs.Mux1,
+                TdMuxInputs.Mux4,
+                TdEvokedResponseEnable.Standard,
+                TdLpfStage1.Lpf450Hz,
+                TdLpfStage2.Lpf1700Hz,
+                TdHpfs.Hpf0_85Hz));
             TimeDomainChannels.Add(new TimeDomainChannel(
                 TdSampleRates.Disabled,
                 TdMuxInputs.Mux5,
                 TdMuxInputs.Mux6,
                 TdEvokedResponseEnable.Standard,
                 TdLpfStage1.Lpf450Hz,
-                TdLpfStage2.Lpf350Hz,
-                TdHpfs.Hpf1_2Hz));
-
+                TdLpfStage2.Lpf1700Hz,
+                TdHpfs.Hpf0_85Hz));
             // ******************* Set up the FFT *******************
             // Create a 256-element FFT that triggers every half second. Use a Hann window and stream all of the bins (if FFT streaming is enabled in later command).
             FftConfiguration fftChannel = new FftConfiguration();
             fftChannel.Size = FftSizes.Size0256;
-            fftChannel.Interval = 500;
+            fftChannel.Interval = 1000;
             fftChannel.WindowEnabled = true;
             fftChannel.WindowLoad = FftWindowAutoLoads.Hann100;
             fftChannel.StreamSizeBins = 0;
             fftChannel.StreamOffsetBins = 0;
-
             // ******************* Set up the Power channels *******************
             // Set up two power summation channels per time domain channel, use various bands for each.
             List<PowerChannel> powerChannels = new List<PowerChannel>();
@@ -183,7 +191,6 @@ namespace SummitPythonInterface
             // Miscellaneous settings need to be configured last (excluding accelerometer)
             // Accelerometer settings can be set at any time.
             Console.WriteLine("Writing sense configuration...");
-            APIReturnInfo returnInfoBuffer;
             returnInfoBuffer = theSummit.WriteSensingTimeDomainChannels(TimeDomainChannels);
             Console.WriteLine("Write TD Config Status: " + returnInfoBuffer.Descriptor);
             returnInfoBuffer = theSummit.WriteSensingFftSettings(fftChannel);
@@ -198,7 +205,6 @@ namespace SummitPythonInterface
             //returnInfoBuffer = theSummit.WriteSensingState(SenseStates.LfpSense | SenseStates.Fft | SenseStates.Power, 0x00);
             returnInfoBuffer = theSummit.WriteSensingState(SenseStates.LfpSense | 0 | 0, 0x00);
             Console.WriteLine("Write Sensing Config Status: " + returnInfoBuffer.Descriptor);
-
             // ******************* Register the data listeners *******************
             theSummit.DataReceivedTDHandler += theSummit_DataReceived_TD;
             // TODO: decide whether to keep these
@@ -206,27 +212,36 @@ namespace SummitPythonInterface
             theSummit.DataReceivedFFTHandler += theSummit_DataReceived_FFT;
             //
             theSummit.DataReceivedAccelHandler += theSummit_DataReceived_Accel;
-
             // ******************* Start streaming *******************
             // Start streaming for time domain, FFT, power, accelerometer, and time-synchronization.
             // Leave streaming of detector events, adaptive stim, and markers disabled
             returnInfoBuffer = theSummit.WriteSensingEnableStreams(true, false, false, false, false, true, true, false);
             Console.WriteLine("Write Stream Config Status: " + returnInfoBuffer.Descriptor);
-
-            stimSocket.Connect("tcp://169.254.102.206:12345");
-            stimSocket.SubscribeToAnyTopic();
             // Create some standard buffers for the output values form the various inc/dec functions. 
             APIReturnInfo bufferInfo = new APIReturnInfo();
 
             // TODO: allow group changes
-
             double? currentFreq = 100;
-            double?[] currentAmp = new double?[] { 0, 0, 0, 0 };
-            int?[] currentPW = new int?[] { 250, 250, 250, 250 };
-            byte[] programIndexes = new byte[] { 0, 1, 2, 3 };
-
-            // Turn off therapy, no ramp
-            bufferInfo = theSummit.StimChangeTherapyOff(false);
+            double?[] currentAmp = new double?[] {0, 0, 0, 0};
+            int?[] currentPW = new int?[] {70, 70, 70, 70};
+            byte[] programIndexes = new byte[] {0, 1, 2, 3};
+            // Turn on therapy, if a POR reject is returned, attempt to reset it
+            bufferInfo = theSummit.StimChangeTherapyOn();
+            Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
+            // Reset POR if set
+            if (bufferInfo.RejectCodeType == typeof(MasterRejectCode)
+                && (MasterRejectCode)bufferInfo.RejectCode == MasterRejectCode.ChangeTherapyPor)
+            {
+                // Inform user
+                Console.WriteLine("POR set, resetting...");
+                // Reset POR
+                bufferInfo = resetPOR(theSummit);
+                bufferInfo = theSummit.StimChangeTherapyOn();
+            }
+            if (bufferInfo.RejectCode != 0)
+            {
+                Console.WriteLine("Error during stim init, may not function properly. Error descriptor:" + bufferInfo.Descriptor);
+            }
             // Read the stimulation settings from the device
             TherapyGroup insStateGroupA;
             bufferInfo = theSummit.ReadStimGroup(GroupNumber.Group0, out insStateGroupA);
@@ -238,36 +253,13 @@ namespace SummitPythonInterface
                     + ", PW = " + insStateGroupA.Programs[i].PulseWidthInMicroseconds.ToString());
             }
             Console.WriteLine("Group Rate = " + insStateGroupA.RateInHz.ToString());
-
             // Change active group to 0
             bufferInfo = theSummit.StimChangeActiveGroup(ActiveGroup.Group0);
             Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
-
-            // Turn on therapy, if a POR reject is returned, attempt to reset it
-            bufferInfo = theSummit.StimChangeTherapyOn();
-            Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
-
-            // Reset POR if set
-            if (bufferInfo.RejectCodeType == typeof(MasterRejectCode)
-                && (MasterRejectCode)bufferInfo.RejectCode == MasterRejectCode.ChangeTherapyPor)
-            {
-                // Inform user
-                Console.WriteLine("POR set, resetting...");
-                // Reset POR
-                bufferInfo = resetPOR(theSummit);
-                bufferInfo = theSummit.StimChangeTherapyOn();
-            }
-
-            if (bufferInfo.RejectCode != 0)
-            {
-                Console.WriteLine("Error during stim init, may not function properly. Error descriptor:" + bufferInfo.Descriptor);
-            }
             //Thread.CurrentThread.Join(500);
             Thread.Sleep(500);
-
             int waitPeriod = 20; // wait this much after each command is sent
             int bToothDelay = 30; // add this much wait to account for transmission delay
-
             bool verbose = false;
             TimeSpan? theAverageLatency = TimeSpan.FromMilliseconds(0);
             bool recalcLatency = true;
@@ -279,12 +271,13 @@ namespace SummitPythonInterface
                     bufferInfo = theSummit.StimChangeStepAmp(programIndexes[i], -insStateGroupA.Programs[i].AmplitudeInMilliamps, out currentAmp[i]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                     Thread.Sleep(waitPeriod);
-                    // Set pw's to 250
-                    bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 250 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
+                    // Set pw's to 70
+                    Console.WriteLine(" Setting PWs to 70");
+                    bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 70 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
+                    Console.WriteLine(" Wrote PW: " + currentPW[i].ToString());
                     Thread.Sleep(waitPeriod);
                 }
-
                 // Set the Stimulation Frequency to 100Hz, keep to sense friendly values
                 //bufferInfo = theSummit.StimChangeStepFrequency(100 - insStateGroupA.RateInHz, true, out currentFreq);
                 double freqDelta = 100 - insStateGroupA.RateInHz;
@@ -294,12 +287,33 @@ namespace SummitPythonInterface
                     if (verbose) { Console.WriteLine(" Command Status:" + bufferInfo.Descriptor); }
                     Thread.Sleep(waitPeriod);
                 }
-
+                theSummit.StimChangeTherapyOff(false);
+                // Tell user this code is not for human use
+                Console.WriteLine("Starting Summit Connection Training Project");
+                Console.WriteLine("This code is not for human use, either close program window or proceed by pressing a key");
+                Console.ReadKey();
+                Console.WriteLine("");
+                // Turn on therapy, if a POR reject is returned, attempt to reset it
+                bufferInfo = theSummit.StimChangeTherapyOn();
+                Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
+                // Reset POR if set
+                if (bufferInfo.RejectCodeType == typeof(MasterRejectCode)
+                    && (MasterRejectCode)bufferInfo.RejectCode == MasterRejectCode.ChangeTherapyPor)
+                {
+                    // Inform user
+                    Console.WriteLine("POR set, resetting...");
+                    // Reset POR
+                    bufferInfo = resetPOR(theSummit);
+                    bufferInfo = theSummit.StimChangeTherapyOn();
+                }
+                if (bufferInfo.RejectCode != 0)
+                {
+                    Console.WriteLine("Error during stim init, may not function properly. Error descriptor:" + bufferInfo.Descriptor);
+                }
+                bool messageDots = false;
                 string gotMessage;
-
                 bool breakFlag = false;
                 Console.WriteLine("ZMQ Starting to wait for a message.");
-                bool messageDots = false;
                 while (!breakFlag)
                 {
 
@@ -337,15 +351,13 @@ namespace SummitPythonInterface
                             continue;
                         }
                     }
-
                     //recalcLatency = true;
                     StimParams stimParams = JsonConvert.DeserializeObject<StimParams>(gotMessage);
-                    Console.WriteLine("Received message: " + stimParams.ToString());
+                    // Console.WriteLine("Received message: " + stimParams.ToString());
                     //
                     double newAmplitude = 0;
                     byte whichProgram = 0;
                     int index = 0;
-
                     for (int i = 0; i < 4; i++)
                     {
                         if (stimParams.Amplitude[i] > 0)
@@ -356,9 +368,8 @@ namespace SummitPythonInterface
                             break;
                         }
                     }
-
                     // Set the Stimulation Frequency, keep to sense friendly values
-                    // freqDelta = stimParams.Frequency - (double)currentFreq;
+                    freqDelta = stimParams.Frequency - (double)currentFreq;
                     if (freqDelta != 0)
                     {
                         bufferInfo = theSummit.StimChangeStepFrequency(freqDelta, false, out currentFreq);
@@ -374,30 +385,25 @@ namespace SummitPythonInterface
                         }
                     }
                     if (breakFlag) { break; }
-
                     // Turn on Stim
-
                     //int adjustedWait = stimParams.DurationInMilliseconds - bToothDelay + (int)(1.5 * 1000 / currentFreq);
                     //int adjustedWait = stimParams.DurationInMilliseconds - bToothDelay;
                     TimeSpan aveLate = (TimeSpan)theAverageLatency;
                     int adjustedWait = stimParams.DurationInMilliseconds - bToothDelay - (int)aveLate.TotalMilliseconds + (int)(1 * 1000 / currentFreq);
-
                     if (adjustedWait < 0) { adjustedWait = 10; }
                     if (verbose) { Console.WriteLine("Adjusted wait time between trains is {0}", adjustedWait); }
-
                     double deltaAmp = newAmplitude - (double)currentAmp[index];
                     bufferInfo = theSummit.StimChangeStepAmp(whichProgram, deltaAmp, out currentAmp[index]);
                     Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
+                    Console.WriteLine("    Wrote Amplitude:" + currentAmp[index].ToString());
                     //Thread.CurrentThread.Join(waitPeriod);
                     Thread.Sleep(waitPeriod);
-
                     if (bufferInfo.RejectCode != 0)
                     {
                         Console.WriteLine("Error during stim, may not function properly. Error descriptor:" + bufferInfo.Descriptor);
                         breakFlag = true;
                     }
                     if (breakFlag) { break; }
-
                     // Let it run for the requested duration (subtract effect of having to wait for 2 pulses)
                     //Thread.CurrentThread.Join(adjustedWait);
                     Thread.Sleep(adjustedWait);
@@ -405,6 +411,7 @@ namespace SummitPythonInterface
                     if (verbose)
                     {
                         Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
+                        Console.WriteLine("    Reverting Amplitude:" + currentAmp[index].ToString());
                     }
                     //Thread.CurrentThread.Join(waitPeriod);
                     Thread.Sleep(waitPeriod);
@@ -413,14 +420,8 @@ namespace SummitPythonInterface
                         Console.WriteLine("Error during stim, may not function properly. Error descriptor:" + bufferInfo.Descriptor);
                         breakFlag = true;
                     }
-
-                    if (breakFlag) { break; }
-
-                    if (stimParams.ForceQuit)
-                    {
-                        break;
-                    }
-
+                    if (breakFlag) {break;}
+                    if (stimParams.ForceQuit) {break;}
                 }
             }
             finally
@@ -429,24 +430,29 @@ namespace SummitPythonInterface
                 Console.WriteLine("Shutting down stim...");
                 try
                 {
+                    // turn off sense
+                    returnInfoBuffer = theSummit.WriteSensingEnableStreams(false, false, false, false, false, false, false, false);
+                    theSummit.WriteSensingState(SenseStates.None, 0x00);
+                    // turn off stim
                     for (int i = 0; i < 4; i++)
                     {
                         // Set amplitudes to 0
                         bufferInfo = theSummit.StimChangeStepAmp(programIndexes[i], -insStateGroupA.Programs[i].AmplitudeInMilliamps, out currentAmp[i]);
                         Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
                         Thread.Sleep(waitPeriod);
-                        // Set pw's to 250
-                        bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 250 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
+                        // Set pw's to 70
+                        bufferInfo = theSummit.StimChangeStepPW(programIndexes[i], 70 - insStateGroupA.Programs[i].PulseWidthInMicroseconds, out currentPW[i]);
                         Console.WriteLine(" Command Status:" + bufferInfo.Descriptor);
+                        Console.WriteLine(" Wrote PW :" + currentPW[i].ToString());
                         Thread.Sleep(waitPeriod);
                     }
-                    // turn off stim
                     theSummit.StimChangeTherapyOff(false);
-                    // turn off sense
-                    theSummit.WriteSensingState(0 | 0 | 0, 0x00);
                 }
-                catch { Console.WriteLine("Shutting down stim Failed"); }
-
+                catch {
+                    Console.WriteLine("Shutting down stim Failed");
+                    Console.WriteLine("Press any key to continue.");
+                    Console.ReadKey();
+                }
                 // ***** Object Disposal
                 Console.WriteLine("Stim stopped, disposing Summit");
                 // Dispose SummitManager, disposing all SummitSystem objects
