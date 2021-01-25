@@ -223,7 +223,7 @@ class turnPedalCompoundWithStim(gameState):
                 amplitudes[progIdx] = amplitudeMultiplier * parent.stimMotorThreshold[progIdx]
                 # if progSetName == 'midline':
                 #     expectedMovementDuration = expectedMovementDuration * 2
-                parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+                parent.summit.stimOneMovement(amplitudes, expectedMovementDuration - self.waitAtPeak / 2, frequency)
                 sleepFor = parent.summit.transmissionDelay + 1 / frequency
                 if sleepFor > 0:
                     time.sleep(sleepFor)
@@ -258,7 +258,7 @@ class turnPedalCompoundWithStim(gameState):
                 amplitudeMultiplier = random.choice(parent.stimAmpMultipliers)
                 amplitudes = [0,0,0,0]
                 amplitudes[progIdx] = amplitudeMultiplier * parent.stimMotorThreshold[progIdx]
-                parent.summit.stimOneMovement(amplitudes, expectedMovementDuration, frequency)
+                parent.summit.stimOneMovement(amplitudes, expectedMovementDuration - self.waitAtPeak / 2, frequency)
                 if parent.summit.transmissionDelay > 0:
                     time.sleep(parent.summit.transmissionDelay + 1 / frequency)
             if not parent.phantomMotor:

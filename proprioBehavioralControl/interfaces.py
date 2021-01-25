@@ -376,6 +376,7 @@ class summitInterface(object):
             dummy=False, verbose=False):
         self.dummy = dummy
         self.verbose = verbose
+        self.tallyOfTrains = 0
         if not self.dummy:
             # Initialize the ZeroMQ context
             self.context = zmq.Context()
@@ -401,7 +402,7 @@ class summitInterface(object):
             'Frequency' : int(frequency),
             'DurationInMilliseconds' : 300,
             'Amplitude' : [0,0,0,0],
-            'PW' : [250,250,250,250],
+            'PW' : [120,120,120,120],
             'ForceQuit' : False,
             }
 
@@ -409,7 +410,7 @@ class summitInterface(object):
 
     def stimOneMovement(
             self, amplitudes, duration,
-            frequency, pws = [250 for i in range(4)]):
+            frequency, pws = [120 for i in range(4)]):
         durationInMsec = int(1000 * duration)
         stimParams = {
             'Group' : 0,
@@ -420,3 +421,5 @@ class summitInterface(object):
             'ForceQuit' : False,
             }
         self.messageTrans(stimParams)
+        self.tallyOfTrains += 1
+        print('Delivered {} stim trains since last param set change'.format(self.tallyOfTrains))
